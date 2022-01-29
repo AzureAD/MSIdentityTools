@@ -1,0 +1,9 @@
+<samlp:AuthnRequest xmlns="urn:oasis:names:tc:SAML:2.0:metadata" ID="" Version="2.0" IssueInstant=""
+    xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion">Issuer</Issuer>
+    <samlp:NameIDPolicy />
+    <samlp:RequestedAuthnContext>
+        <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Unspecified</saml:AuthnContextClassRef>
+    </samlp:RequestedAuthnContext>
+</samlp:AuthnRequest>

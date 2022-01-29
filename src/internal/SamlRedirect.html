@@ -1,0 +1,23 @@
+<html>
+
+<head>
+    <script type="text/javascript">
+        const urlParameters = new URLSearchParams(window.location.hash.substring(1));
+
+        window.onload = function () {
+            if (urlParameters.get('ReplyURL')) { document.forms['Application'].action = urlParameters.get('ReplyURL') };
+            if (urlParameters.get('SAMLResponse')) { document.forms['Application'].elements['SAMLResponse'].value = urlParameters.get('SAMLResponse') };
+            document.forms["Application"].submit();
+        }
+    </script>
+</head>
+
+<body>
+    <form name="Application" method="post" action="https://adfshelp.microsoft.com/ClaimsXray/TokenResponse">
+        <!-- <input type="text" name="SAMLResponse" style="width: 100%;" readonly /> -->
+        <textarea name="SAMLResponse" style="width: 100%; height: 90%;" readonly></textarea>
+        <!-- <input type="submit"> -->
+    </form>
+</body>
+
+</html>
