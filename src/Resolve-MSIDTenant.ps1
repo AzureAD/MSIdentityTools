@@ -14,7 +14,8 @@
     $DomainList = get-content .\DomainList.txt
     Resolve-MSIDTenant -Tenant $DomainList
 .NOTES
-    https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
+    -  Azure AD OIDC Metadata endpoint - https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
+    - A Result of NotFound does not mean that the tenant does not exist at all, but it might be in a different cloud environment.   Additional queries to other environments may result in it being found.
 
 #>
 function Resolve-MSIDTenant {
@@ -106,6 +107,7 @@ function Resolve-MSIDTenant {
                     $Resolve = Invoke-MgGraphRequest -Method Get -Uri $ResolveUri -ErrorAction Stop | Select-Object tenantId, displayName, defaultDomainName, federationBrandName
 
                     $ResolvedTenant.Result = "Resolved"
+                    $ResolvedTenant.ResultMessage = "Resolved Tenant"
                     $ResolvedTenant.TenantId = $Resolve.TenantId
                     $ResolvedTenant.DisplayName = $Resolve.DisplayName
                     $ResolvedTenant.DefaultDomainName = $Resolve.defaultDomainName
@@ -113,7 +115,17 @@ function Resolve-MSIDTenant {
                 }
                 catch {
 
-                    $ResolvedTenant.Result = "NotFound"
+                    if ($_.Exception.Message -eq 'Response status code does not indicate success: NotFound (Not Found).') {
+                        $ResolvedTenant.Result = "NotFound"
+                        $ResolvedTenant.ResultMessage = "NotFound (Not Found)"
+                    }
+                    else {
+                        
+                        $ResolvedTenant.Result = "Error"
+                        $ResolvedTenant.ResultMessage = $_.Exception.Message
+
+                    }
+                    
                     $ResolvedTenant.TenantId = $null
                     $ResolvedTenant.DisplayName = $null
                     $ResolvedTenant.DefaultDomainName = $null
