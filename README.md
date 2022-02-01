@@ -1,15 +1,16 @@
-# Project
+# Microsoft Identity Tools PowerShell Module
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+[![PSGallery Version](https://img.shields.io/powershellgallery/v/MSIdentityTools)](https://www.powershellgallery.com/packages/MSIdentityTools) 
+[![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/MSIdentityTools)](https://www.powershellgallery.com/packages/MSIdentityTools)
 
-As the maintainer of this project, please make a few updates:
+The Microsoft Identity Tools PowerShell module provides various tools for performing ehnaced Identity administration activities.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
-
+## How do I install the module?
+ 
+The module can be found here:
+ 
+  https://www.powershellgallery.com/packages/MSIdentityTools
+  
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
