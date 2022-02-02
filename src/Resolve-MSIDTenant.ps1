@@ -52,7 +52,7 @@ function Resolve-MSIDTenant {
         $Environment = "Global",
         # Include resolving the value to an Azure AD tenant by the OIDC Metadata endpoint
         [switch]
-        $SkipeOidcMetadataEndPoint
+        $SkipOidcMetadataEndPoint
 
 
         
