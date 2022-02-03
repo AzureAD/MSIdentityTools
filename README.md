@@ -3,7 +3,7 @@
 [![PSGallery Version](https://img.shields.io/powershellgallery/v/MSIdentityTools)](https://www.powershellgallery.com/packages/MSIdentityTools) 
 [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/MSIdentityTools)](https://www.powershellgallery.com/packages/MSIdentityTools)
 
-The Microsoft Identity Tools PowerShell module provides various tools for performing ehnaced Identity administration activities.
+The Microsoft Identity Tools PowerShell module provides various tools for performing enhanced Identity administration activities.
 
 ## How do I install the module?
  
