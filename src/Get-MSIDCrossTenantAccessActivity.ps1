@@ -1,3 +1,4 @@
+#Requires -Modules @{ ModuleName="Microsoft.Graph.Authentication"; ModuleVersion="1.9.2" }
 <#
 .SYNOPSIS
     Gets cross tenant user sign-in activity
