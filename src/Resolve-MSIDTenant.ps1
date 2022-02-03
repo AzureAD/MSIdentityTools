@@ -52,7 +52,7 @@ function Resolve-MSIDTenant {
         $Environment = "Global",
         # Include resolving the value to an Azure AD tenant by the OIDC Metadata endpoint
         [switch]
-        $SkipeOidcMetadataEndPoint
+        $SkipOidcMetadataEndPoint
 
 
         
@@ -61,14 +61,14 @@ function Resolve-MSIDTenant {
     begin {
 
         if ($null -eq (Get-MgContext)) {
-            Write-Error "Please Connect to MS Graph API with the Connect-MgGraph cmdlet from the Microsoft.Graph.Authentication module first before calling functions!" -ErrorAction Stop
+            Write-Error "$(Get-Date -f T) - Please Connect to MS Graph API with the Connect-MgGraph cmdlet from the Microsoft.Graph.Authentication module first before calling functions!" -ErrorAction Stop
         }
 
         $GraphEndPoint = (Get-MgEnvironment -Name $Environment).GraphEndpoint
         $AzureADEndpoint = (Get-MgEnvironment -Name $Environment).AzureADEndpoint
 
-        Write-Verbose ("Using $Environment login endpoint of $AzureADEndpoint")
-        Write-Verbose ("Using $Environment Graph endpoint of $GraphEndPoint")
+        Write-Verbose ("$(Get-Date -f T) - Using $Environment login endpoint of $AzureADEndpoint")
+        Write-Verbose ("$(Get-Date -f T) - Using $Environment Graph endpoint of $GraphEndPoint")
     }
     
     process {
@@ -76,7 +76,7 @@ function Resolve-MSIDTenant {
         foreach ($value in $TenantValue) {
 
             $i++
-            Write-Verbose ("Checking Value {0} of {1} - Value: {2}" -f $i, ($($TenantValue).count), $value) 
+            Write-Verbose ("$(Get-Date -f T) - Checking Value {0} of {1} - Value: {2}" -f $i, ($($TenantValue | Measure-Object).count), $value) 
 
             $ResolveUri = $null
             $ResolvedTenant = [ordered]@{}
@@ -84,14 +84,14 @@ function Resolve-MSIDTenant {
             $ResolvedTenant.ValueToResolve = $value
 
             if (Test-IsGuid -StringGuid $value) {
-                Write-Verbose ("Attempting to resolve AzureAD Tenant by TenantID {0}" -f $value)
+                Write-Verbose ("$(Get-Date -f T) - Attempting to resolve AzureAD Tenant by TenantID {0}" -f $value)
                 $ResolveUri = ("{0}/beta/tenantRelationships/findTenantInformationByTenantId(tenantId='{1}')" -f $GraphEndPoint, $Value)
                 $ResolvedTenant.ValueFormat = "TenantId"
             }
             else {
 
                 if (Test-IsDnsDomainName -StringDomainName $value) {
-                    Write-Verbose ("Attempting to resolve AzureAD Tenant by DomainName {0}" -f $value)
+                    Write-Verbose ("$(Get-Date -f T) - Attempting to resolve AzureAD Tenant by DomainName {0}" -f $value)
                     $ResolveUri = ("{0}/beta/tenantRelationships/findTenantInformationByDomainNAme(domainName='{1}')" -f $GraphEndPoint, $Value)
                     $ResolvedTenant.ValueFormat = "DomainName"
 
@@ -103,7 +103,7 @@ function Resolve-MSIDTenant {
             if ($null -ne $ResolveUri) {
                 try {
 
-                    Write-Verbose ("Resolving Tenant Information using MS Graph API")
+                    Write-Verbose ("$(Get-Date -f T) - Resolving Tenant Information using MS Graph API")
                     $Resolve = Invoke-MgGraphRequest -Method Get -Uri $ResolveUri -ErrorAction Stop | Select-Object tenantId, displayName, defaultDomainName, federationBrandName
 
                     $ResolvedTenant.Result = "Resolved"
@@ -136,7 +136,7 @@ function Resolve-MSIDTenant {
             else {
                 
                 $ResolvedTenant.ValueFormat = "Unknown"
-                Write-Warning ("{0} value to resolve was not in GUID or DNS Name format, and will be skipped!" -f $value)
+                Write-Warning ("$(Get-Date -f T) - {0} value to resolve was not in GUID or DNS Name format, and will be skipped!" -f $value)
                 $ResolvedTenant.Status = "Skipped"
             }
            
@@ -205,7 +205,7 @@ function Test-IsDnsDomainName {
     )
     $isDnsDomainName = $false
     $DnsHostNameRegex = "\A([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\Z"
-    Write-Verbose ("Checking if DomainName {0} is a valid Dns formatted Uri" -f $StringDomainName)
+    Write-Verbose ("$(Get-Date -f T) - Checking if DomainName {0} is a valid Dns formatted Uri" -f $StringDomainName)
     if ($StringDomainName -match $DnsHostNameRegex) {
         If ("Dns" -eq [System.Uri]::CheckHostName($StringDomainName)) {
             $isDnsDomainName = $true
