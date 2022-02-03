@@ -32,7 +32,7 @@ function Resolve-MSIDTenant {
             Position = 0,
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false, 
+            ValueFromRemainingArguments = $false,
             ParameterSetName = 'Parameter Set 1')]
         [ValidateNotNull()]
         [ValidateNotNullOrEmpty()]
@@ -45,7 +45,7 @@ function Resolve-MSIDTenant {
             Position = 1,
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false, 
+            ValueFromRemainingArguments = $false,
             ParameterSetName = 'Parameter Set 1')]
         [ValidateSet("Global", "USGov", "China", "USGovDoD", "Germany")]
         [string]
@@ -55,9 +55,9 @@ function Resolve-MSIDTenant {
         $SkipOidcMetadataEndPoint
 
 
-        
+
     )
-    
+
     begin {
 
         if ($null -eq (Get-MgContext)) {
@@ -70,13 +70,13 @@ function Resolve-MSIDTenant {
         Write-Verbose ("$(Get-Date -f T) - Using $Environment login endpoint of $AzureADEndpoint")
         Write-Verbose ("$(Get-Date -f T) - Using $Environment Graph endpoint of $GraphEndPoint")
     }
-    
+
     process {
         $i = 0
         foreach ($value in $TenantValue) {
 
             $i++
-            Write-Verbose ("$(Get-Date -f T) - Checking Value {0} of {1} - Value: {2}" -f $i, ($($TenantValue | Measure-Object).count), $value) 
+            Write-Verbose ("$(Get-Date -f T) - Checking Value {0} of {1} - Value: {2}" -f $i, ($($TenantValue | Measure-Object).count), $value)
 
             $ResolveUri = $null
             $ResolvedTenant = [ordered]@{}
@@ -92,12 +92,10 @@ function Resolve-MSIDTenant {
 
                 if (Test-IsDnsDomainName -StringDomainName $value) {
                     Write-Verbose ("$(Get-Date -f T) - Attempting to resolve AzureAD Tenant by DomainName {0}" -f $value)
-                    $ResolveUri = ("{0}/beta/tenantRelationships/findTenantInformationByDomainNAme(domainName='{1}')" -f $GraphEndPoint, $Value)
+                    $ResolveUri = ("{0}/beta/tenantRelationships/findTenantInformationByDomainName(domainName='{1}')" -f $GraphEndPoint, $Value)
                     $ResolvedTenant.ValueFormat = "DomainName"
 
                 }
-                
-
             }
 
             if ($null -ne $ResolveUri) {
@@ -120,12 +118,12 @@ function Resolve-MSIDTenant {
                         $ResolvedTenant.ResultMessage = "NotFound (Not Found)"
                     }
                     else {
-                        
+
                         $ResolvedTenant.Result = "Error"
                         $ResolvedTenant.ResultMessage = $_.Exception.Message
 
                     }
-                    
+
                     $ResolvedTenant.TenantId = $null
                     $ResolvedTenant.DisplayName = $null
                     $ResolvedTenant.DefaultDomainName = $null
@@ -134,51 +132,42 @@ function Resolve-MSIDTenant {
                 }
             }
             else {
-                
+
                 $ResolvedTenant.ValueFormat = "Unknown"
                 Write-Warning ("$(Get-Date -f T) - {0} value to resolve was not in GUID or DNS Name format, and will be skipped!" -f $value)
                 $ResolvedTenant.Status = "Skipped"
             }
-           
+
 
             if ($true -ne $SkipOidcMetadataEndPoint) {
                 $oidcMetadataUri = ("{0}/{1}/v2.0/.well-known/openid-configuration" -f $AzureADEndpoint, $value)
 
                 try {
-                
+
                     $oidcMetadata = Invoke-RestMethod -Method Get -Uri $oidcMetadataUri -ErrorAction Stop
-                    $resolvedTenant.oidcMetadataResult = "Resolved"
-                    $resolvedTenant.oidcMetadataTenantId = $oidcMetadata.issuer.split("/")[3]
-                    $resolvedTenant.oidcMetadataTenantRegionScope = $oidcMetadata.tenant_region_scope
+                    $resolvedTenant.OidcMetadataResult = "Resolved"
+                    $resolvedTenant.OidcMetadataTenantId = $oidcMetadata.issuer.split("/")[3]
+                    $resolvedTenant.OidcMetadataTenantRegionScope = $oidcMetadata.tenant_region_scope
 
                 }
                 catch {
-                
-                    $resolvedTenant.oidcMetadataResult = "NotFound"
-                    $resolvedTenant.oidcMetadataTenantId = $null
-                    $resolvedTenant.oidcMetadataTenantRegionScope = $null
+
+                    $resolvedTenant.OidcMetadataResult = "NotFound"
+                    $resolvedTenant.OidcMetadataTenantId = $null
+                    $resolvedTenant.OidcMetadataTenantRegionScope = $null
 
                 }
             }
             else {
-                $resolvedTenant.oidcMetadataResult = "Skipped"
-                $resolvedTenant.oidcMetadataTenantId = $null
-                $resolvedTenant.oidcMetadataTenantRegionScope = $null
+                $resolvedTenant.OidcMetadataResult = "Skipped"
+                $resolvedTenant.OidcMetadataTenantId = $null
+                $resolvedTenant.OidcMetadataTenantRegionScope = $null
             }
-
-            
-
             Write-Output ([pscustomobject]$ResolvedTenant)
-
-            
         }
 
-
-
-        
-        
     }
-    
+
     end {
     }
 }
@@ -191,11 +180,11 @@ function Test-IsGuid {
         [Parameter(Mandatory = $true)]
         [string]$StringGuid
     )
- 
+
     $ObjectGuid = [System.Guid]::empty
     return [System.Guid]::TryParse($StringGuid, [System.Management.Automation.PSReference]$ObjectGuid) # Returns True if successfully parsed
 }
- 
+
 function Test-IsDnsDomainName {
     [OutputType([bool])]
     param
