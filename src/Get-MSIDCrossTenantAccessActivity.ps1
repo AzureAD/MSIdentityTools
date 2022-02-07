@@ -318,8 +318,15 @@ function Get-MSIDCrossTenantAccessActivity {
 
                     Write-Verbose -Message "$(Get-Date -f T) - Attempting to resolve external tenant - $($TenantId.Name)"
 
+                    #Nullify $ResolvedTenant value
+
+                    $ResolvedTenant = $null
+
+
+                    #Attempt to resolve tenant ID
+
                     try {$ResolvedTenant = Resolve-MSIDTenant -TenantId $TenantId.Name -ErrorAction SilentlyContinue}
-                    catch{Write-Warning -Message "$(Get-Date -f T) - Issue resolving external tenant - $($TenantId.Name)"}
+                    catch{Write-Verbose -Message "$(Get-Date -f T) - Issue resolving external tenant - $($TenantId.Name)"}
 
                     if ($ResolvedTenant) {
 
