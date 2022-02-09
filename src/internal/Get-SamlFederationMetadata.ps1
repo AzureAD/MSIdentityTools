@@ -2,10 +2,10 @@
 .SYNOPSIS
     Parse Federation Metadata
 .EXAMPLE
-    PS C:\>Get-MsftIdpAuthority -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-SamlFederationMetadata
+    PS C:\>Get-MSIDAuthorityUri -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-SamlFederationMetadata
     Get SAML or WS-Fed Federation Metadata for a specific Microsoft tenant.
 .EXAMPLE
-    PS C:\>Get-MsftIdpAuthority -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-SamlFederationMetadata -AppId 00000000-0000-0000-0000-000000000000
+    PS C:\>Get-MSIDAuthorityUri -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-SamlFederationMetadata -AppId 00000000-0000-0000-0000-000000000000
     Get SAML or WS-Fed Federation Metadata for a specific application within a specific Microsoft tenant.
 .EXAMPLE
     PS C:\>Get-SamlFederationMetadata 'https://adfs.contoso.com'

@@ -49,7 +49,9 @@
     #ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+    RequiredModules = @(
+        @{ ModuleName = 'Microsoft.Graph.Authentication'; Guid = '883916f2-9184-46ee-b1f8-b6a2fb784cee'; ModuleVersion = '1.9.2' }
+    )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -95,6 +97,8 @@
         '.\Get-MSIDCrossTenantAccessActivity.ps1'
         '.\Get-MSIDMsftIdentityAssociation.ps1'
         '.\Get-MSIDO365Endpoints.ps1'
+        '.\Get-MSIDOpenIdProviderConfiguration.ps1'
+        '.\Get-MSIDSamlFederationMetadata.ps1'
         '.\Invoke-MSIDAzureAdSamlRequest.ps1'
         '.\New-MSIDClientSecret.ps1'
         '.\New-MSIDSamlRequest.ps1'
@@ -118,6 +122,8 @@
         'Get-MSIDCrossTenantAccessActivity'
         'Get-MSIDMsftIdentityAssociation'
         'Get-MSIDO365Endpoints'
+        'Get-MSIDOpenIdProviderConfiguration'
+        'Get-MSIDSamlFederationMetadata'
         'Invoke-MSIDAzureAdSamlRequest'
         'New-MSIDClientSecret'
         'New-MSIDSamlRequest'
@@ -138,6 +144,7 @@
     # Aliases to export from this module
     AliasesToExport      = @(
         'ConvertFrom-MSIDAzureAdImmutableId'
+        'Get-MSIDWsFedFederationMetadata'
     )
 
     # DSC resources to export from this module
