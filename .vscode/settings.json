@@ -9,7 +9,7 @@
     "powershell.codeFormatting.pipelineIndentationStyle": "NoIndentation",
     "powershell.codeFormatting.preset": "Stroustrup",
     "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
-    "powershell.codeFormatting.useConstantStrings": true,
+    //"powershell.codeFormatting.useConstantStrings": true,
     "powershell.codeFormatting.useCorrectCasing": true,
     "powershell.codeFormatting.whitespaceAfterSeparator": true,
     "powershell.codeFormatting.whitespaceAroundOperator": true,
