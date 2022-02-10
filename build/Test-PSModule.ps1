@@ -5,10 +5,10 @@ param
     [string] $BaseDirectory = ".\",
     #
     [Parameter(Mandatory = $false)]
-    [string] $ModuleDirectory = ".\src",
+    [string] $ModuleManifestPath = ".\src\*.psd1",
     #
     [Parameter(Mandatory = $false)]
-    [string] $ModuleManifestPath,
+    [string] $PesterConfigurationPath = ".\build\PesterConfiguration.psd1",
     #
     [Parameter(Mandatory = $false)]
     [string] $ModuleTestsDirectory = ".\tests",
@@ -16,7 +16,7 @@ param
     [Parameter(Mandatory = $false)]
     [string[]] $PowerShellPaths = @(
         'pwsh'
-        #'powershell'
+        'powershell'
     ),
     #
     [Parameter(Mandatory = $false)]
@@ -27,33 +27,25 @@ param
 Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction SilentlyContinue -ErrorAction Stop
 
 [System.IO.DirectoryInfo] $BaseDirectoryInfo = Get-PathInfo $BaseDirectory -InputPathType Directory -ErrorAction Stop
-[System.IO.DirectoryInfo] $ModuleDirectoryInfo = Get-PathInfo $ModuleDirectory -InputPathType Directory -DefaultDirectory $BaseDirectoryInfo.FullName -ErrorAction SilentlyContinue
-[System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultDirectory $ModuleDirectoryInfo.FullName -DefaultFilename "*.psd1" -ErrorAction SilentlyContinue
+[System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultDirectory $BaseDirectoryInfo.FullName -DefaultFilename '*.psd1' -ErrorAction Stop
 [System.IO.DirectoryInfo] $ModuleTestsDirectoryInfo = Get-PathInfo $ModuleTestsDirectory -InputPathType Directory -DefaultDirectory $BaseDirectoryInfo.FullName -ErrorAction SilentlyContinue
+[System.IO.FileInfo] $PesterConfigurationFileInfo = Get-PathInfo $PesterConfigurationPath -DefaultDirectory $BaseDirectoryInfo.FullName -DefaultFilename 'PesterConfiguration.psd1' -ErrorAction SilentlyContinue
 
-##
-if ($ModuleManifestFileInfo.Exists) {
-    [string] $ModulePath = $ModuleManifestFileInfo.FullName
-}
-else {
-    [string] $ModulePath = $ModuleDirectoryInfo.FullName
-}
-
-$strScriptBlockTest = 'Import-Module {0};' -f $ModulePath
-
-$ScriptBlockTest = {
-    param ([string]$ModulePath, [string]$TestsDirectory)
+[scriptblock] $ScriptBlockTest = {
+    param ([string]$ModulePath, [string]$TestsDirectory, [string]$PesterConfigurationPath)
     ## Force WindowsPowerShell to load correct version of built-in modules when launched from PowerShell 6+
     if ($PSVersionTable.PSEdition -eq 'Desktop') { Import-Module 'Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility', 'CimCmdlets' -MaximumVersion 5.9.9.9 }
-    Import-Module Pester
-    $PSModule = Import-Module $ModulePath -PassThru
+    Import-Module Pester -MinimumVersion 5.0.0
+    #$PSModule = Import-Module $ModulePath -PassThru -Force
 
-    $PesterConfiguration = New-PesterConfiguration (Import-PowerShellDataFile '.\build\PesterConfiguration.psd1')
-    $PesterConfiguration.Run.Container = New-PesterContainer -Path (Join-Path $TestsDirectory '*') -Data @{ ModulePath = $ModulePath }
-    $PesterConfiguration.CodeCoverage.Path = $PSModule.ModuleBase
+    $PesterConfiguration = New-PesterConfiguration (Import-PowerShellDataFile $PesterConfigurationPath)
+    $PesterConfiguration.Run.Container = New-PesterContainer -Path $TestsDirectory -Data @{ ModulePath = $ModulePath }
+    $PesterConfiguration.CodeCoverage.Path = Split-Path $ModulePath -Parent
+    $PesterConfiguration.CodeCoverage.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.CodeCoverage.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
+    $PesterConfiguration.TestResult.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.TestResult.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
     Invoke-Pester -Configuration $PesterConfiguration
 }
-$strScriptBlockTest = 'Invoke-Command -ScriptBlock {{ {0} }} -ArgumentList {1}' -f $ScriptBlockTest, (($ModulePath, $ModuleTestsDirectoryInfo.FullName | ConvertTo-PsString -Compact) -join ',')
+$strScriptBlockTest = 'Invoke-Command -ScriptBlock {{ {0} }} -ArgumentList {1}, {2}, {3}' -f $ScriptBlockTest, $ModuleManifestFileInfo.FullName, $ModuleTestsDirectoryInfo.FullName, $PesterConfigurationFileInfo.FullName
 
 [string[]] $ArgumentList = ('-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlockTest)))
 if (!$NoNewWindow) { $ArgumentList += '-NoExit' }

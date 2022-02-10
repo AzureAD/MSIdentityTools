@@ -29,6 +29,19 @@
             ]
         },
         {
+            "name": "PowerShell Test Module in External Console",
+            "type": "PowerShell",
+            "request": "launch",
+            "preLaunchTask": "",
+            "script": "${workspaceFolder}/build/Test-PSModule.ps1",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-ModuleManifestPath './src/*.psd1'",
+                "-PowerShellPaths ${input:pickPowerShellExecutable}",
+                "-NoNewWindow:$false"
+            ]
+        },
+        {
             "name": "PowerShell Launch Module in External Console",
             "type": "PowerShell",
             "request": "launch",
