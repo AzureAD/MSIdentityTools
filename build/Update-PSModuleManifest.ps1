@@ -36,7 +36,7 @@ $paramUpdateModuleManifest['AliasesToExport'] = $ModuleManifest.AliasesToExport
 
 ## Get Module Output FileList
 $ModuleFileListFileInfo = Get-ChildItem $ModuleOutputDirectoryInfo.FullName -Recurse -File
-$ModuleRequiredAssembliesFileInfo = $ModuleFileListFileInfo | Where-Object Extension -eq '.dll'
+$ModuleRequiredAssembliesFileInfo = $ModuleFileListFileInfo | Where-Object Extension -EQ '.dll'
 
 ## Get Paths Relative to Module Base Directory
 $ModuleFileList = Get-RelativePath $ModuleFileListFileInfo.FullName -WorkingDirectory $ModuleOutputDirectoryInfo.FullName -ErrorAction Stop

@@ -1,22 +1,22 @@
 param
 (
-	# Directory used to base all relative paths
-    [Parameter(Mandatory=$false)]
+    # Directory used to base all relative paths
+    [Parameter(Mandatory = $false)]
     [string] $BaseDirectory = "..\",
     #
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $PackagesConfigPath = ".\packages.config",
     #
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $NuGetConfigPath,
     #
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $OutputDirectory,
     #
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string] $NuGetPath = ".\build",
     #
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [uri] $NuGetUri = 'https://dist.nuget.org/win-x86-commandline/latest/nuget.exe'
 )
 
@@ -47,10 +47,10 @@ if ($VerbosePreference -eq 'Continue') {
 if ($NuGetConfigFileInfo) {
     $argsNuget.Add('-ConfigFile')
     $argsNuget.Add($NuGetConfigFileInfo.FullName)
- }
+}
 if ($OutputDirectoryInfo) {
     $argsNuget.Add('-OutputDirectory')
     $argsNuget.Add($OutputDirectoryInfo.FullName)
- }
+}
 
- Use-StartProcess $NuGetFileInfo.FullName -ArgumentList $argsNuget
+Use-StartProcess $NuGetFileInfo.FullName -ArgumentList $argsNuget
