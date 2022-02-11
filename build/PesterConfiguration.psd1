@@ -14,6 +14,6 @@
         OutputPath   = '.\build\TestResults\TestResults.xml'
     }
     Output       = @{
-        #Verbosity = 'Detailed'
+        Verbosity = 'Detailed'
     }
 }
