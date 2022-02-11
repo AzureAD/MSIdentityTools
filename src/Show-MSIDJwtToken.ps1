@@ -9,16 +9,16 @@
 #>
 function Show-MSIDJwtToken {
     [CmdletBinding()]
-    [Alias('Show-Jwt')]
+    #[Alias('Show-Jwt')]
     param (
-        # JSON Web Signature (JWS)
-        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-        [string[]] $InputObjects
+        # JSON Web Token (JWT)
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [string[]] $Tokens
     )
 
     process {
-        foreach ($InputObject in $InputObjects) {
-            Start-Process "https://jwt.ms/#id_token=$InputObject"
+        foreach ($Token in $Tokens) {
+            Start-Process "https://jwt.ms/#id_token=$Token"
         }
     }
 }
