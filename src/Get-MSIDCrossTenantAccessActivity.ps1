@@ -1,4 +1,3 @@
-#Requires -Modules @{ ModuleName="Microsoft.Graph.Authentication"; ModuleVersion="1.9.2" }
 <#
 .SYNOPSIS
     Gets cross tenant user sign-in activity
@@ -173,7 +172,15 @@ function Get-MSIDCrossTenantAccessActivity {
         )
     
     begin {
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        try {
+            Import-Module Microsoft.Graph.Reports -ErrorAction Stop
+            #Import-Module Microsoft.Graph.Reports -MinimumVersion 1.9.1 -ErrorAction Stop
+        }
+        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
         
+
         #Connection and profile check
 
         Write-Verbose -Message "$(Get-Date -f T) - Checking connection..."
@@ -217,6 +224,8 @@ function Get-MSIDCrossTenantAccessActivity {
     }
     
     process {
+        ## Return Immediately On Critical Error
+        if ($CriticalError) { return }
 
         #Get filtered sign-in logs and handle parameters
 
