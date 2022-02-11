@@ -15,7 +15,7 @@ function ConvertFrom-MSIDAadcAadConnectorSpaceDn {
     [OutputType([PSCustomObject])]
     param (
         # Azure AD Connector Space DN from AAD Connect
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 0)]
         [string] $InputObject
     )
 
@@ -33,14 +33,14 @@ function ConvertFrom-MSIDAadcAadConnectorSpaceDn {
         [guid] $CloudGuid = $Matches[2]
         $Result = [PSCustomObject]@{
             cloudAnchor = $DecodedString
-            cloudGuid = $CloudGuid
+            cloudGuid   = $CloudGuid
         }
     }
     else {
         [guid] $SourceGuid = ConvertFrom-Base64String $DecodedString -RawBytes
         $Result = [PSCustomObject]@{
             sourceAnchor = $DecodedString
-            sourceGuid = $SourceGuid
+            sourceGuid   = $SourceGuid
         }
     }
 

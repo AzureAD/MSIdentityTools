@@ -17,15 +17,15 @@ function Resolve-MSIDAzureIpAddress {
     [OutputType([PSCustomObject])]
     param(
         # DNS Name or IP Address
-        [Parameter(Mandatory=$true, ParameterSetName='InputObject', ValueFromPipeline=$true, Position=0)]
+        [Parameter(Mandatory = $true, ParameterSetName = 'InputObject', ValueFromPipeline = $true, Position = 0)]
         [object[]] $InputObjects,
         # IP Address of Azure Service
-        [Parameter(Mandatory=$true, ParameterSetName='IpAddress', Position=1)]
+        [Parameter(Mandatory = $true, ParameterSetName = 'IpAddress', Position = 1)]
         [ipaddress[]] $IpAddresses
     )
 
     begin {
-        [string[]] $Clouds = 'Public','Government','Germany','China'
+        [string[]] $Clouds = 'Public', 'Government', 'Germany', 'China'
         [hashtable] $ServiceTagAndRegions = @{}
         $PreviousProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
@@ -43,13 +43,12 @@ function Resolve-MSIDAzureIpAddress {
                 if ($InputObject -is [ipaddress] -or $InputObject -is [int] -or $InputObject -is [UInt32]) {
                     $listIpAddresses.Add($InputObject)
                 }
-                elseif ($InputObject -is [string])
-                {
+                elseif ($InputObject -is [string]) {
                     if ($InputObject -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$') {
                         $listIpAddresses.Add($InputObject)
                     }
                     else {
-                        $DnsNames = Resolve-DnsName $InputObject -Type A -ErrorAction Stop | Where-Object QueryType -eq A
+                        $DnsNames = Resolve-DnsName $InputObject -Type A -ErrorAction Stop | Where-Object QueryType -EQ A
                         foreach ($DnsName in $DnsNames) {
                             $listIpAddresses.Add($DnsName.IPaddress)
                         }
@@ -71,7 +70,7 @@ function Resolve-MSIDAzureIpAddress {
                     if (Test-IpAddressInSubnet $IpAddress -Subnets $ServiceTagAndRegion.properties.addressPrefixes) {
                         $ServiceTagAndRegion | Add-Member -Name cloud -MemberType NoteProperty -Value $Cloud -Force
                         $ServiceTagAndRegion | Add-Member -Name ipAddress -MemberType NoteProperty -Value $IpAddress -Force
-                        $listResults.Add(($ServiceTagAndRegion | Select-Object ipAddress,cloud,id,properties))
+                        $listResults.Add(($ServiceTagAndRegion | Select-Object ipAddress, cloud, id, properties))
                     }
                 }
             }

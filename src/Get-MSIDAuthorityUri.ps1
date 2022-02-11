@@ -18,40 +18,40 @@
     Get Microsoft IdP authority URI endpoint for a specific organization B2C tenant (Azure AD B2C) using the B2C_1_SignUp policy.
 #>
 function Get-MSIDAuthorityUri {
-    [CmdletBinding(DefaultParameterSetName='Common')]
+    [CmdletBinding(DefaultParameterSetName = 'Common')]
     [OutputType([string])]
     param (
         # Use endpoint for organizational accounts (Azure AD).
-        [Parameter(Mandatory=$true, ParameterSetName='AzureAd')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzureAd')]
         [switch] $AzureAd,
         # Use endpoint for organizational B2C accounts (Azure AD B2C).
-        [Parameter(Mandatory=$true, ParameterSetName='AzureAdB2c')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzureAdB2c')]
         [switch] $AzureAdB2c,
         # Use endpoint for Microsoft consumer accounts (MSA).
-        [Parameter(Mandatory=$true, ParameterSetName='Msa')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'Msa')]
         [switch] $Msa,
         # Name of Azure AD tenant. For example: <TenantName>.onmicrosoft.com
-        [Parameter(Mandatory=$false, ParameterSetName='Common')]
-        [Parameter(Mandatory=$false, ParameterSetName='AzureAd')]
-        [Parameter(Mandatory=$true, ParameterSetName='AzureAdB2c')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'Common')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'AzureAd')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzureAdB2c')]
         [string] $TenantName,
         # Azure AD tenant GUID or verified domain name. For example: contoso.onmicrosoft.com or contoso.com
-        [Parameter(Mandatory=$false, ParameterSetName='Common')]
-        [Parameter(Mandatory=$false, ParameterSetName='AzureAd')]
-        [Parameter(Mandatory=$false, ParameterSetName='AzureAdB2c')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'Common')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'AzureAd')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'AzureAdB2c')]
         [string] $TenantId,
         # Name of B2C Policy defined in Azure AD B2C tenant.
-        [Parameter(Mandatory=$true, ParameterSetName='AzureAdB2c')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'AzureAdB2c')]
         [string] $Policy,
 
         # Type of app integration ('OAuth2','Saml','WsFed'). 'OAuth2' is default.
-        [Parameter(Mandatory=$false)]
-        [ValidateSet('OAuth2','Saml','WsFed')]
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('OAuth2', 'Saml', 'WsFed')]
         [string] $AppType = 'OAuth2',
         # OAuth2 endpoint version ('v1.0','v2.0'). v2.0 is default.
-        [Parameter(Mandatory=$false, ParameterSetName='Common')]
-        [Parameter(Mandatory=$false, ParameterSetName='AzureAd')]
-        [ValidateSet('v1.0','v2.0')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'Common')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'AzureAd')]
+        [ValidateSet('v1.0', 'v2.0')]
         [string] $OAuth2EndpointVersion = 'v2.0'
     )
 

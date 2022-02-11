@@ -17,78 +17,78 @@
     System.String
 #>
 function Get-MSIDAzureIpRange {
-    [CmdletBinding(DefaultParameterSetName='ById')]
-    [OutputType([PSCustomObject],[string[]])]
+    [CmdletBinding(DefaultParameterSetName = 'ById')]
+    [OutputType([PSCustomObject], [string[]])]
     param(
         # Name of Azure Cloud. Valid values are: Public, Government, Germany, China
-        [Parameter(Mandatory=$false, Position=1)]
-        [ValidateSet('Public','Government','Germany','China')]
+        [Parameter(Mandatory = $false, Position = 1)]
+        [ValidateSet('Public', 'Government', 'Germany', 'China')]
         [string] $Cloud = 'Public',
 
         # Name of Region. Use AllServiceTagsAndRegions parameter to see valid regions.
-        [Parameter(Mandatory=$false, Position=2, ParameterSetName='ById')]
+        [Parameter(Mandatory = $false, Position = 2, ParameterSetName = 'ById')]
         [ValidateNotNullOrEmpty()]
         [ArgumentCompleter({
-            param ( $commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters )
-            [string] $Cloud = 'Public'  # Default Cloud parameter value
-            if ($fakeBoundParameters.ContainsKey('Cloud')) { $Cloud = $fakeBoundParameters.Cloud }
-            [string] $ServiceTag = ''  # Default ServiceTag parameter value
-            if ($fakeBoundParameters.ContainsKey('ServiceTag')) { $ServiceTag = $fakeBoundParameters.ServiceTag }
+                param ( $commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters )
+                [string] $Cloud = 'Public'  # Default Cloud parameter value
+                if ($fakeBoundParameters.ContainsKey('Cloud')) { $Cloud = $fakeBoundParameters.Cloud }
+                [string] $ServiceTag = ''  # Default ServiceTag parameter value
+                if ($fakeBoundParameters.ContainsKey('ServiceTag')) { $ServiceTag = $fakeBoundParameters.ServiceTag }
 
-            [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
-            #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
+                [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
+                #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
 
-            $listRegions = New-Object System.Collections.Generic.List[string]
-            foreach ($Item in $AllServiceTagsAndRegions.values.name) {
-                if ($Item -like "$ServiceTag*.$wordToComplete*") {
-                    $Region = $Item.Split('.')[1]
-                    if (!$listRegions.Contains($Region)) { $listRegions.Add($Region) }
+                $listRegions = New-Object System.Collections.Generic.List[string]
+                foreach ($Item in $AllServiceTagsAndRegions.values.name) {
+                    if ($Item -like "$ServiceTag*.$wordToComplete*") {
+                        $Region = $Item.Split('.')[1]
+                        if (!$listRegions.Contains($Region)) { $listRegions.Add($Region) }
+                    }
                 }
-            }
 
-            if ($listRegions) {
-                $listRegions #| ForEach-Object {$_}
-            }
-        })]
+                if ($listRegions) {
+                    $listRegions #| ForEach-Object {$_}
+                }
+            })]
         [string] $Region,
 
         # Name of Service Tag. Use AllServiceTagsAndRegions parameter to see valid service tags.
-        [Parameter(Mandatory=$false, Position=3, ParameterSetName='ById')]
+        [Parameter(Mandatory = $false, Position = 3, ParameterSetName = 'ById')]
         [ValidateNotNullOrEmpty()]
         [ArgumentCompleter({
-            param ( $commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters )
-            [string] $Cloud = 'Public'  # Default Cloud parameter value
-            if ($fakeBoundParameters.ContainsKey('Cloud')) { $Cloud = $fakeBoundParameters.Cloud }
-            [string] $Region = ''  # Default Region parameter value
-            if ($fakeBoundParameters.ContainsKey('Region')) { $Region = $fakeBoundParameters.Region }
+                param ( $commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters )
+                [string] $Cloud = 'Public'  # Default Cloud parameter value
+                if ($fakeBoundParameters.ContainsKey('Cloud')) { $Cloud = $fakeBoundParameters.Cloud }
+                [string] $Region = ''  # Default Region parameter value
+                if ($fakeBoundParameters.ContainsKey('Region')) { $Region = $fakeBoundParameters.Region }
 
-            [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
-            #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
+                [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
+                #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
 
-            $listServiceTags = New-Object System.Collections.Generic.List[string]
-            foreach ($Item in $AllServiceTagsAndRegions.values.name) {
-                if ($Item -like "$wordToComplete*?$Region*") {
-                    $ServiceTag = $Item.Split('.')[0]
-                    if (!$listServiceTags.Contains($ServiceTag)) { $listServiceTags.Add($ServiceTag) }
+                $listServiceTags = New-Object System.Collections.Generic.List[string]
+                foreach ($Item in $AllServiceTagsAndRegions.values.name) {
+                    if ($Item -like "$wordToComplete*?$Region*") {
+                        $ServiceTag = $Item.Split('.')[0]
+                        if (!$listServiceTags.Contains($ServiceTag)) { $listServiceTags.Add($ServiceTag) }
+                    }
                 }
-            }
 
-            if ($listServiceTags) {
-                $listServiceTags #| ForEach-Object {$_}
-            }
-        })]
+                if ($listServiceTags) {
+                    $listServiceTags #| ForEach-Object {$_}
+                }
+            })]
         [string] $ServiceTag,
 
         # List all IP ranges catagorized by Service Tag and Region.
-        [Parameter(Mandatory=$false, ParameterSetName='AllServiceTagsAndRegions')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'AllServiceTagsAndRegions')]
         [switch] $AllServiceTagsAndRegions
     )
 
     [hashtable] $MdcIdCloudMapping = @{
-        Public = 56519
+        Public     = 56519
         Government = 57063
-        Germany = 57064
-        China = 57062
+        Germany    = 57064
+        China      = 57062
     }
 
     [uri] $MdcUri = 'https://www.microsoft.com/en-us/download/confirmation.aspx?id={0}' -f $MdcIdCloudMapping[$Cloud]
@@ -115,7 +115,7 @@ function Get-MSIDAzureIpRange {
             $Id += '.{0}' -f $Region
         }
 
-        $OutputIPs = $AzureIPs.values | Where-Object id -eq $Id
+        $OutputIPs = $AzureIPs.values | Where-Object id -EQ $Id
         if ($OutputIPs) {
             return $OutputIPs.properties.addressPrefixes
         }

@@ -1,4 +1,3 @@
-#Requires -Modules @{ ModuleName="Microsoft.Graph.Authentication"; ModuleVersion="1.9.2" }
 <#
 .SYNOPSIS
     Resolve TenantId or DomainName to an Azure AD Tenant

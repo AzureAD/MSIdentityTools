@@ -20,30 +20,30 @@ function Get-MSIDO365Endpoints {
     [OutputType([PSCustomObject])]
     param(
         # Name of O365 Cloud. Valid values are: 'Worldwide','USGovGCCHigh','USGovDoD','Germany','China'
-        [Parameter(Mandatory=$false, Position=1)]
-        [ValidateSet('Worldwide','USGovGCCHigh','USGovDoD','Germany','China')]
+        [Parameter(Mandatory = $false, Position = 1)]
+        [ValidateSet('Worldwide', 'USGovGCCHigh', 'USGovDoD', 'Germany', 'China')]
         [string] $Cloud = 'Worldwide',
         # Office 365 tenant name.
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string] $TenantName,
         # Exclude IPv6 addresses from the output
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch] $NoIPv6,
         # Name of Service Area.
-        [Parameter(Mandatory=$false)]
-        [ValidateSet('Common','Exchange','SharePoint','Skype')]
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('Common', 'Exchange', 'SharePoint', 'Skype')]
         [string[]] $ServiceAreas,
         # Client Request Id.
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [guid] $ClientRequestId = (New-Guid)
     )
 
     [hashtable] $EndpointsParameters = @{
         clientrequestid = $ClientRequestId
     }
-    if ($TenantName) { $EndpointsParameters.Add('TenantName',$TenantName) }
-    if ($NoIPv6) { $EndpointsParameters.Add('NoIPv6',$NoIPv6) }
-    if ($ServiceAreas) { $EndpointsParameters.Add('ServiceAreas',($ServiceAreas -join ',')) }
+    if ($TenantName) { $EndpointsParameters.Add('TenantName', $TenantName) }
+    if ($NoIPv6) { $EndpointsParameters.Add('NoIPv6', $NoIPv6) }
+    if ($ServiceAreas) { $EndpointsParameters.Add('ServiceAreas', ($ServiceAreas -join ',')) }
 
     [System.UriBuilder] $O365EndpointsUri = 'https://endpoints.office.com/endpoints/{0}' -f $Cloud
     $O365EndpointsUri.Query = ConvertTo-QueryString $EndpointsParameters

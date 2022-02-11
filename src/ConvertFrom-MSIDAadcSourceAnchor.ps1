@@ -13,10 +13,10 @@
 function ConvertFrom-MSIDAadcSourceAnchor {
     [CmdletBinding()]
     [Alias('ConvertFrom-MSIDAzureAdImmutableId')]
-    [OutputType([guid],[string])]
+    [OutputType([guid], [string])]
     param (
         # Azure AD Connect metaverse object sourceAnchor.
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 0)]
         [string] $InputObject
     )
 

@@ -13,7 +13,7 @@ function Show-MSIDSamlSecurityToken {
     param (
         # SAML Security Token
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [string[]] $InputObjects,
+        [string[]] $Tokens,
         # URL Endpoint to send SAML Security Token
         [Parameter(Mandatory = $false)]
         [string] $SamlEndpoint = 'https://adfshelp.microsoft.com/ClaimsXray/TokenResponse'
@@ -73,9 +73,9 @@ function Show-MSIDSamlSecurityToken {
     }
 
     process {
-        foreach ($InputObject in $InputObjects) {
+        foreach ($Token in $Tokens) {
             $uriSamlRedirect.Fragment = ConvertTo-QueryString @{
-                SAMLResponse = $InputObject
+                SAMLResponse = $Token
                 ReplyURL     = $SamlEndpoint
             }
 

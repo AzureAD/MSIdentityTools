@@ -14,19 +14,19 @@ function Invoke-MSIDAzureAdSamlRequest {
     param (
         # SAML Request
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [object[]] $InputObjects,
+        [object[]] $Tokens,
         # Azure AD Tenant Id
         [Parameter(Mandatory = $false)]
         [string] $TenantId = 'common'
     )
 
     process {
-        foreach ($InputObject in $InputObjects) {
-            if ($InputObject -is [string]) {
-                $xmlSamlRequest = ConvertFrom-SamlSecurityToken $InputObjects
+        foreach ($Token in $Tokens) {
+            if ($Token -is [string]) {
+                $xmlSamlRequest = ConvertFrom-SamlSecurityToken $Tokens
             }
             else {
-                $xmlSamlRequest = $InputObject
+                $xmlSamlRequest = $Token
             }
             $EncodedSamlRequest = $xmlSamlRequest.OuterXml | Compress-Data | ConvertTo-Base64String
 

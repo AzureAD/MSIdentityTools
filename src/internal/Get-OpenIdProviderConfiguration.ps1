@@ -21,10 +21,10 @@ function Get-OpenIdProviderConfiguration {
     [OutputType([PsCustomObject[]])]
     param (
         # Identity Provider Authority URI
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=1)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
         [uri] $Issuer,
         # Return configuration keys
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [switch] $Keys
     )
     ## Build common OpenId provider configuration URI

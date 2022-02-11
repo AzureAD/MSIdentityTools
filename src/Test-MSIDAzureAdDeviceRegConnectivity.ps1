@@ -16,7 +16,7 @@ function Test-MSIDAzureAdDeviceRegConnectivity {
     [CmdletBinding()]
     param (
         # ADFS Server
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string] $AdfsHostname
     )
 

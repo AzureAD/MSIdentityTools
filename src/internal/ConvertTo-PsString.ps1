@@ -208,7 +208,7 @@ function ConvertTo-PsString {
                         break
                     }
                     ## Convert objects with object initializers
-                    { $_ -is [object] -and ($_.GetConstructors() | foreach { if ($_.IsPublic -and !$_.GetParameters()) { $true } }) } {
+                    { $_ -is [object] -and ($_.GetConstructors() | ForEach-Object { if ($_.IsPublic -and !$_.GetParameters()) { $true } }) } {
                         [void]$OutputString.Append('@{')
                         $iInput = 0
                         foreach ($Item in ($InputObject | Get-Member -MemberType Property, NoteProperty)) {

@@ -12,7 +12,7 @@ function Get-MSIDMsftIdentityAssociation {
     [OutputType([PsCustomObject[]])]
     param (
         # Publisher Domain. For example: https://contoso.com/
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=1)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
         [uri] $Publisher
     )
     ## Build common OpenId provider configuration URI

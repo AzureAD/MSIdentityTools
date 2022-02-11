@@ -155,12 +155,12 @@ function Get-MSIDCrossTenantAccessActivity {
     param(
 
         #Return events based on external tenant access direction, either 'Inbound', 'Outbound', or 'Both'
-        [Parameter(Position=0)]
-        [ValidateSet('Inbound','Outbound')] 
+        [Parameter(Position = 0)]
+        [ValidateSet('Inbound', 'Outbound')] 
         [string]$AccessDirection,
 
         #Return events for the supplied external tenant ID
-        [Parameter(Position=1)]
+        [Parameter(Position = 1)]
         [guid]$ExternalTenantId,
 
         #Show summary statistics by tenant
@@ -169,14 +169,14 @@ function Get-MSIDCrossTenantAccessActivity {
         #Atemmpt to resolve the external tenant ID
         [switch]$ResolveTenantId
 
-        )
+    )
     
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         try {
-            Import-Module Microsoft.Graph.Reports -ErrorAction Stop
-            #Import-Module Microsoft.Graph.Reports -MinimumVersion 1.9.1 -ErrorAction Stop
+            #Import-Module Microsoft.Graph.Reports -ErrorAction Stop
+            Import-Module Microsoft.Graph.Reports -MinimumVersion 1.9.2 -ErrorAction Stop
         }
         catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
         
@@ -236,7 +236,7 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Outbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting sign-ins for local users accessing external tenant ID - $ExternalTenantId"
             
-                $SignIns = Get-MgAuditLogSignIn -Filter ("ResourceTenantId eq '{0}'" -f $ExternalTenantId) -all:$True | Group-Object ResourceTenantID
+                $SignIns = Get-MgAuditLogSignIn -Filter ("ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All:$True | Group-Object ResourceTenantID
 
             }
             else {
@@ -244,7 +244,7 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Outbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting external tenant IDs accessed by local users"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -all:$True | Group-Object ResourceTenantID
+                $SignIns = Get-MgAuditLogSignIn -Filter ("ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All:$True | Group-Object ResourceTenantID
             }
 
         }
@@ -255,7 +255,7 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Inbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting sign-ins for users accessing local tenant from external tenant ID - $ExternalTenantId"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -all:$True | Group-Object HomeTenantID
+                $SignIns = Get-MgAuditLogSignIn -Filter ("HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -All:$True | Group-Object HomeTenantID
 
             }
             else {
@@ -263,7 +263,7 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Inbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting external tenant IDs for external users accessing local tenant"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -all:$True | Group-Object HomeTenantID
+                $SignIns = Get-MgAuditLogSignIn -Filter ("HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -All:$True | Group-Object HomeTenantID
 
             }
 
@@ -275,12 +275,12 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Default access direction 'Both'"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting sign-ins for local users accessing external tenant ID - $ExternalTenantId"
             
-                $Outbound = Get-MgAuditLogSignIn -Filter ("ResourceTenantId eq '{0}'" -f $ExternalTenantId) -all:$True | Group-Object ResourceTenantID
+                $Outbound = Get-MgAuditLogSignIn -Filter ("ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All:$True | Group-Object ResourceTenantID
 
 
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting sign-ins for users accessing local tenant from external tenant ID - $ExternalTenantId"
 
-                $Inbound = Get-MgAuditLogSignIn -Filter ("HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -all:$True | Group-Object HomeTenantID
+                $Inbound = Get-MgAuditLogSignIn -Filter ("HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -All:$True | Group-Object HomeTenantID
 
 
             }
@@ -289,21 +289,21 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Default access direction 'Both'"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting external tenant IDs accessed by local users"
 
-                $Outbound = Get-MgAuditLogSignIn -Filter ("ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -all:$True | Group-Object ResourceTenantID
+                $Outbound = Get-MgAuditLogSignIn -Filter ("ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All:$True | Group-Object ResourceTenantID
 
 
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting external tenant IDs for external users accessing local tenant"
 
-                $Inbound = Get-MgAuditLogSignIn -Filter ("HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -all:$True | Group-Object HomeTenantID
+                $Inbound = Get-MgAuditLogSignIn -Filter ("HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -All:$True | Group-Object HomeTenantID
 
 
 
             }
 
-                #Combine outbound and inbound results
+            #Combine outbound and inbound results
 
-                [array]$SignIns = $Outbound
-                $SignIns += $Inbound
+            [array]$SignIns = $Outbound
+            $SignIns += $Inbound
 
 
 
@@ -334,8 +334,8 @@ function Get-MSIDCrossTenantAccessActivity {
 
                     #Attempt to resolve tenant ID
 
-                    try {$ResolvedTenant = Resolve-MSIDTenant -TenantId $TenantId.Name -ErrorAction SilentlyContinue}
-                    catch{Write-Verbose -Message "$(Get-Date -f T) - Issue resolving external tenant - $($TenantId.Name)"}
+                    try { $ResolvedTenant = Resolve-MSIDTenant -TenantId $TenantId.Name -ErrorAction SilentlyContinue }
+                    catch { Write-Verbose -Message "$(Get-Date -f T) - Issue resolving external tenant - $($TenantId.Name)" }
 
                     if ($ResolvedTenant) {
 
@@ -348,8 +348,8 @@ function Get-MSIDCrossTenantAccessActivity {
                         }
                         else {
 
-                                $ExternalTenantName = $ResolvedTenant.Result
-                                $DefaultDomainName = $ResolvedTenant.Result
+                            $ExternalTenantName = $ResolvedTenant.Result
+                            $DefaultDomainName = $ResolvedTenant.Result
 
                         }
  
@@ -410,15 +410,15 @@ function Get-MSIDCrossTenantAccessActivity {
 
                         $Analysis = [pscustomobject]@{
 
-                            ExternalTenantId = $TenantId.Name
-                            ExternalTenantName = $ExternalTenantName
+                            ExternalTenantId          = $TenantId.Name
+                            ExternalTenantName        = $ExternalTenantName
                             ExternalTenantRegionScope = $oidcMetadataTenantRegionScope
-                            AccessDirection = $Direction
-                            SignIns = ($TenantId).count
-                            SuccessSignIns = ($TenantID.Group.Status | Where-Object {$_.ErrorCode -eq 0} | Measure-Object).count
-                            FailedSignIns = ($TenantID.Group.Status | Where-Object {$_.ErrorCode -ne 0} | Measure-Object).count
-                            UniqueUsers = ($TenantID.Group | Select-Object UserId -unique | Measure-Object).count
-                            UniqueResources = ($TenantID.Group | Select-Object ResourceId -unique | Measure-Object).count
+                            AccessDirection           = $Direction
+                            SignIns                   = ($TenantId).count
+                            SuccessSignIns            = ($TenantID.Group.Status | Where-Object { $_.ErrorCode -eq 0 } | Measure-Object).count
+                            FailedSignIns             = ($TenantID.Group.Status | Where-Object { $_.ErrorCode -ne 0 } | Measure-Object).count
+                            UniqueUsers               = ($TenantID.Group | Select-Object UserId -Unique | Measure-Object).count
+                            UniqueResources           = ($TenantID.Group | Select-Object ResourceId -Unique | Measure-Object).count
 
                         }
 
@@ -430,12 +430,12 @@ function Get-MSIDCrossTenantAccessActivity {
                         $Analysis = [pscustomobject]@{
 
                             ExternalTenantId = $TenantId.Name
-                            AccessDirection = $Direction
-                            SignIns = ($TenantId).count
-                            SuccessSignIns = ($TenantID.Group.Status | Where-Object {$_.ErrorCode -eq 0} | Measure-Object).count
-                            FailedSignIns = ($TenantID.Group.Status | Where-Object {$_.ErrorCode -ne 0} | Measure-Object).count
-                            UniqueUsers = ($TenantID.Group | Select-Object UserId -unique | Measure-Object).count
-                            UniqueResources = ($TenantID.Group | Select-Object ResourceId -unique | Measure-Object).count
+                            AccessDirection  = $Direction
+                            SignIns          = ($TenantId).count
+                            SuccessSignIns   = ($TenantID.Group.Status | Where-Object { $_.ErrorCode -eq 0 } | Measure-Object).count
+                            FailedSignIns    = ($TenantID.Group.Status | Where-Object { $_.ErrorCode -ne 0 } | Measure-Object).count
+                            UniqueUsers      = ($TenantID.Group | Select-Object UserId -Unique | Measure-Object).count
+                            UniqueResources  = ($TenantID.Group | Select-Object ResourceId -Unique | Measure-Object).count
 
                         }
 
@@ -461,24 +461,24 @@ function Get-MSIDCrossTenantAccessActivity {
 
                             $CustomEvent = [pscustomobject]@{
 
-                                ExternalTenantId = $TenantId.Name
-                                ExternalTenantName = $ExternalTenantName
-                                ExternalDefaultDomain = $DefaultDomainName
+                                ExternalTenantId          = $TenantId.Name
+                                ExternalTenantName        = $ExternalTenantName
+                                ExternalDefaultDomain     = $DefaultDomainName
                                 ExternalTenantRegionScope = $oidcMetadataTenantRegionScope
-                                AccessDirection = $Direction
-                                UserDisplayName = $Event.UserDisplayName
-                                UserPrincipalName = $Event.UserPrincipalName
-                                UserId = $Event.UserId
-                                UserType = $Event.UserType
-                                CrossTenantAccessType = $Event.CrossTenantAccessType
-                                AppDisplayName = $Event.AppDisplayName
-                                AppId = $Event.AppId 
-                                ResourceDisplayName = $Event.ResourceDisplayName
-                                ResourceId = $Event.ResourceId
-                                SignInId = $Event.Id
-                                CreatedDateTime = $Event.CreatedDateTime
-                                StatusCode = $Event.Status.Errorcode
-                                StatusReason = $Event.Status.FailureReason
+                                AccessDirection           = $Direction
+                                UserDisplayName           = $Event.UserDisplayName
+                                UserPrincipalName         = $Event.UserPrincipalName
+                                UserId                    = $Event.UserId
+                                UserType                  = $Event.UserType
+                                CrossTenantAccessType     = $Event.CrossTenantAccessType
+                                AppDisplayName            = $Event.AppDisplayName
+                                AppId                     = $Event.AppId 
+                                ResourceDisplayName       = $Event.ResourceDisplayName
+                                ResourceId                = $Event.ResourceId
+                                SignInId                  = $Event.Id
+                                CreatedDateTime           = $Event.CreatedDateTime
+                                StatusCode                = $Event.Status.Errorcode
+                                StatusReason              = $Event.Status.FailureReason
 
 
                             }
@@ -490,21 +490,21 @@ function Get-MSIDCrossTenantAccessActivity {
 
                             $CustomEvent = [pscustomobject]@{
 
-                                ExternalTenantId = $TenantId.Name
-                                AccessDirection = $Direction
-                                UserDisplayName = $Event.UserDisplayName
-                                UserPrincipalName = $Event.UserPrincipalName
-                                UserId = $Event.UserId
-                                UserType = $Event.UserType
+                                ExternalTenantId      = $TenantId.Name
+                                AccessDirection       = $Direction
+                                UserDisplayName       = $Event.UserDisplayName
+                                UserPrincipalName     = $Event.UserPrincipalName
+                                UserId                = $Event.UserId
+                                UserType              = $Event.UserType
                                 CrossTenantAccessType = $Event.CrossTenantAccessType
-                                AppDisplayName = $Event.AppDisplayName
-                                AppId = $Event.AppId 
-                                ResourceDisplayName = $Event.ResourceDisplayName
-                                ResourceId = $Event.ResourceId
-                                SignInId = $Event.Id
-                                CreatedDateTime = $Event.CreatedDateTime
-                                StatusCode = $Event.Status.Errorcode
-                                StatusReason = $Event.Status.FailureReason
+                                AppDisplayName        = $Event.AppDisplayName
+                                AppId                 = $Event.AppId 
+                                ResourceDisplayName   = $Event.ResourceDisplayName
+                                ResourceId            = $Event.ResourceId
+                                SignInId              = $Event.Id
+                                CreatedDateTime       = $Event.CreatedDateTime
+                                StatusCode            = $Event.Status.Errorcode
+                                StatusReason          = $Event.Status.FailureReason
 
 
                             }
