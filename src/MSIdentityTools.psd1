@@ -86,6 +86,7 @@
         '.\internal\Get-X509Certificate.ps1'
         '.\internal\Invoke-CommandAsSystem.ps1'
         '.\internal\Test-IpAddressInSubnet.ps1'
+        '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
         '.\Confirm-MSIDJwtTokenSignature.ps1'
         '.\ConvertFrom-MSIDAadcAadConnectorSpaceDn.ps1'

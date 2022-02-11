@@ -20,40 +20,57 @@ function Invoke-CommandAsSystem {
         [string[]] $ArgumentList
     )
 
-    [guid] $GUID = New-Guid
+    begin {
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        try {
+            Import-Module PSScheduledJob, ScheduledTasks -ErrorAction Stop
+        }
+        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+    }
 
-    try {
-        ## Register ScheduleJob
-        if ($ArgumentList) {
-            $ScheduledJob = Register-ScheduledJob -Name $GUID -ScheduledJobOption (New-ScheduledJobOption -RunElevated) -ScriptBlock $ScriptBlock -ArgumentList $ArgumentList -ErrorAction Stop
-        }
-        else {
-            $ScheduledJob = Register-ScheduledJob -Name $GUID -ScheduledJobOption (New-ScheduledJobOption -RunElevated) -ScriptBlock $ScriptBlock -ErrorAction Stop
-        }
+    process {
+        ## Return Immediately On Critical Error
+        if ($CriticalError) { return }
+
+        ## Process
+        [guid] $GUID = New-Guid
 
         try {
-            ## Register ScheduledTask for ScheduledJob
-            $ScheduledTask = Register-ScheduledTask -TaskName $GUID -Action (New-ScheduledTaskAction -Execute $ScheduledJob.PSExecutionPath -Argument $ScheduledJob.PSExecutionArgs) -Principal (New-ScheduledTaskPrincipal -UserId 'NT AUTHORITY\SYSTEM' -LogonType ServiceAccount -RunLevel Highest) -ErrorAction Stop
+            ## Register ScheduleJob
+            if ($ArgumentList) {
+                $ScheduledJob = Register-ScheduledJob -Name $GUID -ScheduledJobOption (New-ScheduledJobOption -RunElevated) -ScriptBlock $ScriptBlock -ArgumentList $ArgumentList -ErrorAction Stop
+            }
+            else {
+                $ScheduledJob = Register-ScheduledJob -Name $GUID -ScheduledJobOption (New-ScheduledJobOption -RunElevated) -ScriptBlock $ScriptBlock -ErrorAction Stop
+            }
+            try {
+                ## Register ScheduledTask for ScheduledJob
+                $ScheduledTask = Register-ScheduledTask -TaskName $GUID -Action (New-ScheduledTaskAction -Execute $ScheduledJob.PSExecutionPath -Argument $ScheduledJob.PSExecutionArgs) -Principal (New-ScheduledTaskPrincipal -UserId 'NT AUTHORITY\SYSTEM' -LogonType ServiceAccount -RunLevel Highest) -ErrorAction Stop
 
-            ## Execute ScheduledTask Job to Run ScheduledJob Job
-            $ScheduledTask | Start-ScheduledTask -AsJob -ErrorAction Stop | Wait-Job | Remove-Job -Force -Confirm:$False
+                try {
+                    ## Execute ScheduledTask Job to Run ScheduledJob Job
+                    $ScheduledTask | Start-ScheduledTask -AsJob -ErrorAction Stop | Wait-Job | Remove-Job -Force -Confirm:$False
 
-            ## Wait for ScheduledTask to finish
-            While (($ScheduledTask | Get-ScheduledTaskInfo).LastTaskResult -eq 267009) { Start-Sleep -Milliseconds 150 }
+                    ## Wait for ScheduledTask to finish
+                    While (($ScheduledTask | Get-ScheduledTaskInfo).LastTaskResult -eq 267009) { Start-Sleep -Milliseconds 150 }
 
-            ## Find ScheduledJob and get the result
-            $Job = Get-Job -Name $GUID -ErrorAction SilentlyContinue | Wait-Job
-            $Result = $Job | Receive-Job -Wait -AutoRemoveJob
+                    ## Find ScheduledJob and get the result
+                    $Job = Get-Job -Name $GUID -ErrorAction SilentlyContinue | Wait-Job
+                    $Result = $Job | Receive-Job -Wait -AutoRemoveJob
+                }
+                finally {
+                    ## Unregister ScheduledTask for ScheduledJob
+                    $ScheduledTask | Unregister-ScheduledTask -Confirm:$false
+                }
+            }
+            finally {
+                ## Unregister ScheduleJob
+                $ScheduledJob | Unregister-ScheduledJob -Force -Confirm:$False
+            }
         }
-        finally {
-            ## Unregister ScheduledTask for ScheduledJob
-            $ScheduledTask | Unregister-ScheduledTask -Confirm:$false
-        }
-    }
-    finally {
-        ## Unregister ScheduleJob
-        $ScheduledJob | Unregister-ScheduledJob -Force -Confirm:$False
-    }
+        catch { Write-Error -ErrorRecord $_; return }
 
-    return $Result
+        return $Result
+    }
 }
