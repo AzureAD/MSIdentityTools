@@ -167,7 +167,7 @@
             Tags       = 'Microsoft', 'Identity', 'Azure', 'AzureActiveDirectory', 'AzureAD', 'AAD', 'ActiveDirectory', 'AD', 'AzureADConnect', 'AADC', 'OAuth', 'OpenIdConnect', 'OIDC', 'JsonWebSignature', 'JWS', 'JsonWebToken', 'JWT', 'SecurityAssertionMarkupLanguage', 'SAML', 'PSEdition_Desktop', 'PSEdition_Core', 'Windows', 'Linux', 'MacOS'
 
             # A URL to the license for this module.
-            LicenseUri = 'https://raw.githubusercontent.com/AzureAD/MSIdentityTools/master/LICENSE'
+            LicenseUri = 'https://raw.githubusercontent.com/AzureAD/MSIdentityTools/main/LICENSE'
 
             # A URL to the main website for this project.
             ProjectUri = 'https://github.com/AzureAD/MSIdentityTools'
