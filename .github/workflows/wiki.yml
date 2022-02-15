@@ -1,0 +1,42 @@
+name: Update Wiki
+
+on:
+  push:
+    branches: [ main ]
+    tags-ignore:
+    - "**"
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout Code"
+      uses: actions/Checkout@v2
+    - name: "Generate Pages"
+      run: |
+        Install-Module -Name "Microsoft.Graph.Authentication" -RequiredVersion "1.9.2" -Force
+        ./Build-Wiki.ps1
+      shell: pwsh
+      working-directory: ./build
+    - name: "Upload Wiki"
+      run: |
+        mkdir tmpwiki
+        cd tmpwiki
+        echo "init git"
+        git init
+        echo "set git user"
+        git config --global user.email "action@github.com"
+        git config --global user.name "Github Action"
+        echo "pull from git wiki"
+        git pull https://githubaction:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.wiki.git
+        echo "copy generated files"
+        cp -f ../.wiki/*.md ./
+        echo "add generated fomes"
+        git add .
+        echo "commit new wiki"
+        git commit --allow-empty -m "update wiki $GITHUB_SHA"
+        echo "push to wiki"
+        git push https://githubaction:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.wiki.git
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      
