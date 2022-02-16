@@ -55,13 +55,34 @@ $($help.Synopsis.Trim())
 "@
     }
     # Syntax
-    if (![string]::IsNullOrWhiteSpace($help.Syntax)) {
-        $md += @"
+    $cmd = Get-Command -Name $help.name
+
+    $md += @"
 ## Syntax
 
+
+"@
+    foreach($paramSet in $cmd.ParameterSets) {
+        $name = ""
+        if (!$paramSet.Name.StartsWith("__")) {
+            $name = $paramSet.Name
+        }
+        $default = ""
+        if ($paramSet.IsDefault) {
+            $default = "(Default)"
+        }
+        if ($name) {
+            $md += @"
+### $($name) $default
+
+
+"@
+        }
+        $md += @"
 ``````powershell
-$(($help.Syntax | Out-String).Trim())
+$($cmd.Name) $($paramSet.ToString())
 ``````
+
 
 "@
     }
@@ -74,6 +95,25 @@ $($help.Description.Trim())
 
 "@
     }
+    # examples
+    if($help.examples.example.Count -gt 0) {
+        $md += @"
+## Examples
+
+
+"@
+        for($i = 0; $i -lt $help.examples.example.Count; $i += 1) {
+            $md += @"
+### Example $($i+1)
+
+``````powershell
+$($help.examples.example[$i].code.Trim())
+``````
+
+
+"@
+        } 
+    }
     # Parameters
     if($help.parameters.parameter.count -gt 0) {
         $md += @"
@@ -83,27 +123,26 @@ $($help.Description.Trim())
 "@
         # output each paramter
         foreach($param in $help.parameters.parameter) {
+            $defaultValue = "None"
+            if (![string]::IsNullOrWhiteSpace($param.defaultValue)) {
+                $defaultValue = $param.defaultValue.Trim()
+            }
             $md += @"
-- $($param.name.Trim())$(if($param.required.ToBoolean($null)){"*"}): ``````$($param.type.name.Trim())``````
+### -$($param.name.Trim())
 
   $($param.description.Text.Trim())
 
+``````yaml
+Type: $($param.type.name.Trim())
+Required: $($param.required.ToString())
+Default value: $defaultValue
+Accept pipeline input: $($param.pipelineInput)
+Accept wildcard characters: $($param.globbing)
+``````
+
 
 "@
-            if (![string]::IsNullOrWhiteSpace($param.defaultValue) -and $param.type.name -ne "SwitchParameter") {
-                $md += @"
-  Default value: "$($param.defaultValue.Trim())"
-
-
-"@
-            }
         }
-        # add remark about required paramters
-        $md += @"
-> ```*```: required parameter
-
-
-"@
     }
     # input types
     if($help.inputTypes.inputType.type.name.Count -gt 0) {
@@ -138,25 +177,6 @@ $($returnValue)
 
 "@
         }        
-    }
-    # examples
-    if($help.examples.example.Count -gt 0) {
-        $md += @"
-## Examples
-
-
-"@
-        for($i = 0; $i -lt $help.examples.example.Count; $i += 1) {
-            $md += @"
-### Example $($i+1)
-
-``````powershell
-$($help.examples.example[$i].code.Trim())
-``````
-
-
-"@
-        } 
     }
     # aliases
     $aliases = $(get-alias -definition $help.Name -ErrorAction SilentlyContinue)
