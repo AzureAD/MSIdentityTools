@@ -16,5 +16,9 @@
     "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
     "powershell.codeFormatting.whitespaceBeforeOpenParen": true,
     "powershell.codeFormatting.whitespaceBetweenParameters": true,
-    "powershell.codeFormatting.whitespaceInsideBrace": true
+    "powershell.codeFormatting.whitespaceInsideBrace": true,
+
+    // Editor Settings
+    //"editor.formatOnSave": true,
+    //"editor.formatOnSaveMode": "modificationsIfAvailable"
 }
