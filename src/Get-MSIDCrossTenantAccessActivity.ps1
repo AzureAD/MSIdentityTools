@@ -22,6 +22,8 @@
 
     -Verbose will give insight into the cmdlets activities.
 
+    Requires AuditLog.Read.All scope, i.e. Connect-MgGraph -Scopes AuditLog.Read.All
+
 
 .EXAMPLE
     Get-MSIDCrossTenantAccessActivity
@@ -172,7 +174,9 @@ function Get-MSIDCrossTenantAccessActivity {
     )
     
     begin {
+
         ## Initialize Critical Dependencies
+
         $CriticalError = $null
         try {
             #Import-Module Microsoft.Graph.Reports -ErrorAction Stop
@@ -245,6 +249,7 @@ function Get-MSIDCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting external tenant IDs accessed by local users"
 
                 $SignIns = Get-MgAuditLogSignIn -Filter ("ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All:$True | Group-Object ResourceTenantID
+
             }
 
         }
