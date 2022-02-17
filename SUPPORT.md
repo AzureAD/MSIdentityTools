@@ -5,6 +5,24 @@ issues before filing new issues to avoid duplicates.  For new issues, file your 
 feature request as a new Issue.
 
 For help and questions about using this project, please raise Issues.
+
+# Fiing Issues
+Please file a new issue with the appropriate label for the type if item on the [issues](https://github.com/AzureAD/MSIdentityTools/issues) page
+
+## Bugs or Functional ISsues
+For bugs please create an issue with the appropriate label on the repo  page
+
+- **bug** - Issues with the functionality of the cmdlet or script in the module where something isn't working as expected
+
+## Documentation Enhancements
+
+- **documentation** - Issues or suggestions on the documenation for the module
+
+## Feature Requests
+
+- **enhacement** - Idea for improvement or enhancement of the module
+
+
 ## Microsoft Support Policy  
 
 Support for this **PROJECT or PRODUCT** is limited to the resources listed above.
