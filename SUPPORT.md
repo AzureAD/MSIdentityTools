@@ -6,7 +6,7 @@ feature request as a new Issue.
 
 For help and questions about using this project, please raise Issues.
 
-# Fiing Issues
+# Filing Issues
 Please file a new issue with the appropriate label for the type if item on the [issues](https://github.com/AzureAD/MSIdentityTools/issues) page
 
 ## Bugs or Functional ISsues
@@ -22,6 +22,8 @@ For bugs please create an issue with the appropriate label on the repo  page
 
 - **enhacement** - Idea for improvement or enhancement of the module
 
+# Issue Lifecycle
+Issues will be triaged as appropriate.
 
 ## Microsoft Support Policy  
 
