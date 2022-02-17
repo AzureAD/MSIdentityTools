@@ -1,0 +1,37 @@
+# PowerShell Module Test Pipeline Template
+# https://aka.ms/yaml
+
+parameters:
+- name: moduleName
+  type: string
+  default:
+- name: pipelineId
+  type: string
+  default:
+- name: artifactInput
+  type: string
+  default: 'PSModule'
+- name: artifactOutput
+  type: string
+  default: 'PSModuleTestResults'
+
+steps:
+- task: PowerShell@2
+  displayName: 'Test PowerShell Module'
+  inputs:
+    filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"'
+    pwsh: true
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: 'JaCoCo'
+    summaryFileLocation: '$(Pipeline.Workspace)/build/TestResults/CodeCoverage.xml'
+    pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish PowerShell Module Test Results'
+  inputs:
+    targetPath: '$(Pipeline.Workspace)/build/TestResults'
+    artifact: '${{ parameters.artifactOutput }}'
+    publishLocation: 'pipeline'

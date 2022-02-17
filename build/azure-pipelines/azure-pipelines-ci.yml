@@ -80,9 +80,28 @@ stages:
   #     parameters:
   #       moduleName: '$(moduleName)'
 
-#- stage: Test
-#  dependsOn: Build
-#  jobs: 
-#  - job: Test
-#    steps:
-#    - script: 'echo ToDo: Integrate Pester Tests'
+- stage: Test
+  dependsOn: Build
+  jobs: 
+  - job: Prepare
+    variables:
+      skipComponentGovernanceDetection: true
+    steps:
+    - download: current
+      artifact: '$(artifactModule)'
+    - task: PowerShell@2
+      name: ModuleInfo
+      displayName: 'Get Parameters for PowerShell Module'
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+        arguments: '-ModuleManifestPath "$(Build.SourcesDirectory)/src/*.psd1" -TrimVersionDepth 2'
+        pwsh: true
+
+  - job: Test
+    dependsOn: Prepare
+    variables: 
+      moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
+    steps:
+    - template: template-psmodule-test.yml
+      parameters:
+        moduleName: '$(moduleName)'

@@ -1,8 +1,5 @@
 param
 (
-    # Directory used to base all relative paths
-    [Parameter(Mandatory = $false)]
-    [string] $BaseDirectory = ".\",
     #
     [Parameter(Mandatory = $false)]
     [string] $ModuleManifestPath = ".\src\*.psd1",
@@ -16,7 +13,7 @@ param
     [Parameter(Mandatory = $false)]
     [string[]] $PowerShellPaths = @(
         'pwsh'
-        'powershell'
+        #'powershell'
     ),
     #
     [Parameter(Mandatory = $false)]
@@ -26,10 +23,9 @@ param
 ## Initialize
 Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction SilentlyContinue -ErrorAction Stop
 
-[System.IO.DirectoryInfo] $BaseDirectoryInfo = Get-PathInfo $BaseDirectory -InputPathType Directory -ErrorAction Stop
-[System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultDirectory $BaseDirectoryInfo.FullName -DefaultFilename '*.psd1' -ErrorAction Stop
-[System.IO.DirectoryInfo] $ModuleTestsDirectoryInfo = Get-PathInfo $ModuleTestsDirectory -InputPathType Directory -DefaultDirectory $BaseDirectoryInfo.FullName -ErrorAction SilentlyContinue
-[System.IO.FileInfo] $PesterConfigurationFileInfo = Get-PathInfo $PesterConfigurationPath -DefaultDirectory $BaseDirectoryInfo.FullName -DefaultFilename 'PesterConfiguration.psd1' -ErrorAction SilentlyContinue
+[System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultFilename '*.psd1' -ErrorAction Stop
+[System.IO.DirectoryInfo] $ModuleTestsDirectoryInfo = Get-PathInfo $ModuleTestsDirectory -InputPathType Directory -ErrorAction SilentlyContinue
+[System.IO.FileInfo] $PesterConfigurationFileInfo = Get-PathInfo $PesterConfigurationPath -DefaultFilename 'PesterConfiguration.psd1' -ErrorAction SilentlyContinue
 
 [scriptblock] $ScriptBlockTest = {
     param ([string]$ModulePath, [string]$TestsDirectory, [string]$PesterConfigurationPath)
@@ -41,7 +37,7 @@ Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction Silentl
     $PesterConfiguration = New-PesterConfiguration (Import-PowerShellDataFile $PesterConfigurationPath)
     $PesterConfiguration.Run.Container = New-PesterContainer -Path $TestsDirectory -Data @{ ModulePath = $ModulePath }
     $PesterConfiguration.CodeCoverage.Path = Split-Path $ModulePath -Parent
-    $PesterConfiguration.CodeCoverage.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.CodeCoverage.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
+    #$PesterConfiguration.CodeCoverage.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.CodeCoverage.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
     $PesterConfiguration.TestResult.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.TestResult.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
     Invoke-Pester -Configuration $PesterConfiguration
 }
