@@ -11,18 +11,8 @@ The module can be found here:
  
   https://www.powershellgallery.com/packages/MSIdentityTools
   
-## Issues
-For bugs please create an issue with the appropriate label on the repo [issues](https://github.com/AzureAD/MSIdentityTools/issues) page
-
-- **bug** - Issues with the functionality of the cmdlet or script in the module where something isn't working as expected
-- **documentation** - Issues or suggestions on the documenation for the module
-
-Issues will be triaged as appropriate.
-
-## Feature Requests
-For ideas or feature requests you would like to see included in the module please file an issue with the "enhancement" label on the repo [issues](https://github.com/AzureAD/MSIdentityTools/issues) page
-
-- **enhacement** - Idea for improvement or enhancement of the module
+## Support
+For issues, questions, and feature requests please review the guidance on the [Support](https://github.com/AzureAD/MSIdentityTools/blob/main/SUPPORT.md) page for this project for filing issues.
 
 ## Contributing
 
