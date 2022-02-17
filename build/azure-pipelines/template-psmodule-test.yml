@@ -26,12 +26,12 @@ steps:
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: 'JaCoCo'
-    summaryFileLocation: '$(Pipeline.Workspace)/build/TestResults/CodeCoverage.xml'
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/TestResults/CodeCoverage.xml'
     pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish PowerShell Module Test Results'
   inputs:
-    targetPath: '$(Pipeline.Workspace)/build/TestResults'
+    targetPath: '$(System.DefaultWorkingDirectory)/build/TestResults'
     artifact: '${{ parameters.artifactOutput }}'
     publishLocation: 'pipeline'
