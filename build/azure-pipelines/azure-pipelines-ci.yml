@@ -41,7 +41,7 @@ stages:
   - job: Prepare
     variables:
       skipComponentGovernanceDetection: true
-      runCodesignValidationInjection: true
+      runCodesignValidationInjection: false
     steps:
     - task: PowerShell@2
       name: ModuleInfo
@@ -54,7 +54,7 @@ stages:
   - job: Build
     dependsOn: Prepare
     variables: 
-      runCodesignValidationInjection: true
+      runCodesignValidationInjection: false
       moduleNameSrc: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
       moduleVersionSrc: '$[ coalesce(dependencies.Prepare.outputs[''ModuleInfo.moduleVersionTrimmed''], dependencies.Prepare.outputs[''ModuleInfo.moduleVersion'']) ]'
       moduleVersion.Revision: '$[ counter(variables[''moduleVersionSrc''], 0) ]'
@@ -88,7 +88,7 @@ stages:
   - job: Prepare
     variables:
       skipComponentGovernanceDetection: true
-      runCodesignValidationInjection: true
+      runCodesignValidationInjection: false
     steps:
     - download: current
       artifact: '$(artifactModule)'
@@ -103,7 +103,7 @@ stages:
   - job: Test
     dependsOn: Prepare
     variables: 
-      runCodesignValidationInjection: true
+      runCodesignValidationInjection: false
       moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
     steps:
     - download: current

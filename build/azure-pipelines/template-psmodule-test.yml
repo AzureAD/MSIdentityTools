@@ -20,7 +20,7 @@ steps:
   displayName: 'Test PowerShell Module'
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
-    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -NoNewWindow'
     pwsh: true
 
 - task: PublishCodeCoverageResults@1
