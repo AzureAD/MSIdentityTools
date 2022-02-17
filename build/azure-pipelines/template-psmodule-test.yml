@@ -29,6 +29,12 @@ steps:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/TestResults/CodeCoverage.xml'
     pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'NUnit'
+    testResultsFiles: '$(System.DefaultWorkingDirectory)/build/TestResults/TestResults.xml'
+    failTaskOnFailedTests: true
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish PowerShell Module Test Results'
   inputs:

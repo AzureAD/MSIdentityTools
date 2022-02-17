@@ -38,7 +38,7 @@ Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction Silentl
     $PesterConfiguration.Run.Container = New-PesterContainer -Path $TestsDirectory -Data @{ ModulePath = $ModulePath }
     $PesterConfiguration.CodeCoverage.Path = Split-Path $ModulePath -Parent
     #$PesterConfiguration.CodeCoverage.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.CodeCoverage.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
-    $PesterConfiguration.TestResult.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.TestResult.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
+    #$PesterConfiguration.TestResult.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.TestResult.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
     Invoke-Pester -Configuration $PesterConfiguration
 }
 $strScriptBlockTest = 'Invoke-Command -ScriptBlock {{ {0} }} -ArgumentList {1}, {2}, {3}' -f $ScriptBlockTest, $ModuleManifestFileInfo.FullName, $ModuleTestsDirectoryInfo.FullName, $PesterConfigurationFileInfo.FullName
