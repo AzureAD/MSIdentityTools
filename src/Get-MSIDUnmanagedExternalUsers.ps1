@@ -10,18 +10,70 @@ function Get-MSIDUnmanagedExternalUsers {
 
     param ()
 
-    $uri = "https://login.microsoftonline.com/common/userrealm?user={urlEncodedMail}&api-version=2.1"
+    $graphBaseUri = "https://graph.microsoft.com/$((Get-MgProfile).Name)"
+    $pageCount = 100
+    $guestUserUri = $graphBaseUri + "/users?`$filter=userType eq 'Guest'&`$select=id,userPrincipalName,mail,displayName,identities&`$count=true&`$top=$pageCount"
 
-    $users = Get-MgUser -Filter "userType eq 'Guest'" -All
+    $userRealmUriFormat = "https://login.microsoftonline.com/common/userrealm?user={urlEncodedMail}&api-version=2.1"
 
-    foreach ($user in $users){
-        $encodedMail = [System.Web.HttpUtility]::UrlEncode($user.mail)
-        
-        $userRealmUri = $uri -replace "{urlEncodedMail}", $encodedMail
-        $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
-        $content = ConvertFrom-Json $userRealmResponse.Content
-        if ($content.IsViral -eq "True"){
-            $user
-        }
+    $results = Invoke-MgGraphRequest -Uri $guestUserUri -Headers @{ ConsistencyLevel = 'eventual' }
+    $count = $results.'@odata.count'
+    $viralUsers = @()
+    $currentPage = 0
+    $hasMoreData = $true
+    $userIndex = 1
+    if ($count -eq 0){
+        Write-Host "No guest users in this tenant."
     }
+    elseif ($count -gt 0) {
+        while($hasMoreData) {     
+            $percentCompleted = $currentPage * $pageCount / $count * 100
+            $currentPage += 1
+            Write-Progress -Activity "Checking Guest Users"  -PercentComplete $percentCompleted
+
+            foreach ($user in $results.value){
+                Write-Verbose "$userIndex / $count"
+                $userIndex += 1
+                $isAzureAdUser = $false
+                foreach($identity in $user.identities){
+                    if($identity.issuer -eq 'ExternalAzureAD'){
+                        $isAzureAdUser = $true
+                        break;
+                    }
+                }
+                if($isAzureAdUser){
+                    Write-Verbose "Checking if user is viral user. $($user.userPrincipalName)"
+
+                    $encodedMail = [System.Web.HttpUtility]::UrlEncode($user.mail)
+                    
+                    $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
+                    Write-Verbose $userRealmUri
+
+                    $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
+                    $content = ConvertFrom-Json $userRealmResponse.Content
+                    if ($content.IsViral -eq "True"){
+                        Write-Verbose "$($user.userPrincipalName)  = viral user"
+                        $viralUsers += $user
+                    }
+                    else {
+                        Write-Verbose "$($user.userPrincipalName) <> viral user"
+                    }
+                }
+                else {
+                    Write-Verbose "Skipping. $($user.userPrincipalName) <> ExternalAzureAD managed user"
+                }
+            }
+        
+            if($results.'@odata.nextLink'){
+                $results = Invoke-MgGraphRequest -Uri $results.'@odata.nextLink' -Headers @{ ConsistencyLevel = 'eventual' }
+            }
+            else {
+                $hasMoreData = $false
+            }
+            
+        } 
+        Write-Progress -Activity "Checking Guest Users" -Completed
+    }
+    
+    Write-Output $viralUsers
 }
