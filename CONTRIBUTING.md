@@ -14,18 +14,31 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 ## Style Guide for Contributions
 # Cmdlet Format
-When creating a cmdlet that is to be included please follow the guidelines when creating your logic:
+When creating a cmdlet for inclusion please follow these guidelines.
+
 ## Structure
 Create your cmdlet as an advanced function.
 
 See `Get-Help about_Functions_Advanced`
-## Prefix
-Please use the prefix for your cmdlet: **MsId** 
 
-(For example, `Get-MsIdUserDetails`)
 ## Verb
-Please ensure that you are using a verb as per the guidelines in 
+Please ensure that you are using an approved verb as per the guidelines in 
 [Approved Verbs for PowerShell Commands](https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2)
+
+## Noun Prefix
+Please use this prefix for your cmdlet: **MsId** 
+
+For example, `Get-MsIdUserDetails`
+
+## Help
+Please provide detailed coment based help and good parameter descriptions to help the end-user.
+
+See `Get-Help about_Comment_Based_Help` 
+
+## Parameters
+Use advanced function parameters with validation (where feasible):
+
+See `Get-Help about_Functions_Advanced_Parameters` 
 
 # Cmdlet Status Feedback
 Utilize `Write-Verbose` statements for providing optional feedback on the processing of the cmdlet during execution, for example:
