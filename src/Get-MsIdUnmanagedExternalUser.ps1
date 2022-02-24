@@ -5,7 +5,7 @@
     PS C:\>Get-MsIdUnmanagedExternalUsers
     Gets a list of all the unmanaged (viral) users in the tenant.
 #>
-function Get-MsIdUnmanagedExternalUsers {
+function Get-MsIdUnmanagedExternalUser {
     [CmdletBinding()]
 
     param ()
@@ -17,7 +17,7 @@ function Get-MsIdUnmanagedExternalUsers {
     $userRealmUriFormat = "https://login.microsoftonline.com/common/userrealm?user={urlEncodedMail}&api-version=2.1"
 
     $results = Invoke-MgGraphRequest -Uri $guestUserUri -Headers @{ ConsistencyLevel = 'eventual' }
-    $count = $results.'@odata.count'
+    $count = Get-ObjectPropertyValue $results '@odata.count'
     $viralUsers = @()
     $currentPage = 0
     $hasMoreData = $true
@@ -31,32 +31,42 @@ function Get-MsIdUnmanagedExternalUsers {
             $currentPage += 1
             Write-Progress -Activity "Checking Guest Users"  -PercentComplete $percentCompleted
 
-            foreach ($user in $results.value){
+            foreach ($user in (Get-ObjectPropertyValue $results 'value')){
+
                 Write-Verbose "$userIndex / $count"
                 $userIndex += 1
                 $isAzureAdUser = $false
-                foreach($identity in $user.identities){
-                    if($identity.issuer -eq 'ExternalAzureAD'){
+                foreach($identity in (Get-ObjectPropertyValue $user 'identities')){
+                    if((Get-ObjectPropertyValue $identity  'issuer') -eq 'ExternalAzureAD'){
                         $isAzureAdUser = $true
                         break;
                     }
                 }
+
                 if($isAzureAdUser){
                     Write-Verbose "Checking if user is viral user. $($user.userPrincipalName)"
 
-                    $encodedMail = [System.Web.HttpUtility]::UrlEncode($user.mail)
-                    
-                    $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
-                    Write-Verbose $userRealmUri
+                    $mail = Get-ObjectPropertyValue $user 'mail'
+                    if(![string]::IsNullOrEmpty($mail)) {
+                        $encodedMail = [System.Web.HttpUtility]::UrlEncode($user.mail)
+                        
+                        $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
+                        Write-Verbose $userRealmUri
 
-                    $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
-                    $content = ConvertFrom-Json $userRealmResponse.Content
-                    if ($content.IsViral -eq "True"){
-                        Write-Verbose "$($user.userPrincipalName)  = viral user"
-                        $viralUsers += $user
-                    }
-                    else {
-                        Write-Verbose "$($user.userPrincipalName) <> viral user"
+                        try {
+                            $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
+                            $content = ConvertFrom-Json (Get-ObjectPropertyValue $userRealmResponse 'Content')
+                            if ((Get-ObjectPropertyValue $content 'IsViral') -eq "True"){
+                                Write-Verbose "$($user.userPrincipalName)  = viral user"
+                                $viralUsers += $user
+                            }
+                            else {
+                                Write-Verbose "$($user.userPrincipalName) <> viral user"
+                            }                                
+                        }
+                        catch {
+                            
+                        }
                     }
                 }
                 else {
@@ -64,8 +74,9 @@ function Get-MsIdUnmanagedExternalUsers {
                 }
             }
         
-            if($results.'@odata.nextLink'){
-                $results = Invoke-MgGraphRequest -Uri $results.'@odata.nextLink' -Headers @{ ConsistencyLevel = 'eventual' }
+            $nextLink = Get-ObjectPropertyValue $results 'nextLink'
+            if($nextLink){
+                $results = Invoke-MgGraphRequest -Uri $nextLink -Headers @{ ConsistencyLevel = 'eventual' }
             }
             else {
                 $hasMoreData = $false
