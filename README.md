@@ -3,7 +3,7 @@
 [![PSGallery Version](https://img.shields.io/powershellgallery/v/MSIdentityTools)](https://www.powershellgallery.com/packages/MSIdentityTools) 
 [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/MSIdentityTools)](https://www.powershellgallery.com/packages/MSIdentityTools)
 
-The Microsoft Identity Tools PowerShell module provides various tools for performing enhanced Identity administration activities.
+The Microsoft Identity Tools PowerShell module provides various tools for performing enhanced Identity administration activities. It is intended to address more complex business scenarios that can't be met solely with the use of MS Graph PowerShell SDK module.
 
 ## What is contained in the MSIdentityTools module?
 A collection of cmdlets that use the MS Graph SDK PowerShell module to simplify common tasks for administrators of Azure AD tenants.
