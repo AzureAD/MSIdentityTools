@@ -11,3 +11,14 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Style Guide for Contributions
+# Cmdlet Format
+When creating a cmdlet that is to be included please follow the guidelines when creating your logic:
+## Prefix
+Please use the prefix for your cmdlet: **MsId** (ex. Get-MsIdUserDetails)
+## Verb
+Please ensure that you are using a verb as per the guidelines in the [Approved Verbs for PowerShell Commands](https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2)
+
+# Cmdlet Status Feedback
+Utilize Write-Verbose statements for providing optional feedback of the processing of the cmdlet when running
