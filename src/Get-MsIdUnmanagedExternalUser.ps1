@@ -18,10 +18,12 @@ function Get-MsIdUnmanagedExternalUser {
 
     $results = Invoke-MgGraphRequest -Uri $guestUserUri -Headers @{ ConsistencyLevel = 'eventual' }
     $count = Get-ObjectPropertyValue $results '@odata.count'
-    $viralUsers = @()
     $currentPage = 0
     $hasMoreData = $true
     $userIndex = 1
+
+     #Declare $user as GraphUser object
+
     if ($count -eq 0){
         Write-Host "No guest users in this tenant."
     }
@@ -30,9 +32,10 @@ function Get-MsIdUnmanagedExternalUser {
             $percentCompleted = $currentPage * $pageCount / $count * 100
             $currentPage += 1
             Write-Progress -Activity "Checking Guest Users"  -PercentComplete $percentCompleted
-
-            foreach ($user in (Get-ObjectPropertyValue $results 'value')){
-
+            
+            foreach ($userObject in (Get-ObjectPropertyValue $results 'value')){
+                [Microsoft.Graph.PowerShell.Models.MicrosoftGraphUser1]$user = $userObject
+                
                 Write-Verbose "$userIndex / $count"
                 $userIndex += 1
                 $isAzureAdUser = $false
@@ -58,7 +61,7 @@ function Get-MsIdUnmanagedExternalUser {
                             $content = ConvertFrom-Json (Get-ObjectPropertyValue $userRealmResponse 'Content')
                             if ((Get-ObjectPropertyValue $content 'IsViral') -eq "True"){
                                 Write-Verbose "$($user.userPrincipalName)  = viral user"
-                                $viralUsers += $user
+                                Write-Output $user
                             }
                             else {
                                 Write-Verbose "$($user.userPrincipalName) <> viral user"
@@ -85,6 +88,4 @@ function Get-MsIdUnmanagedExternalUser {
         } 
         Write-Progress -Activity "Checking Guest Users" -Completed
     }
-    
-    Write-Output $viralUsers
 }
