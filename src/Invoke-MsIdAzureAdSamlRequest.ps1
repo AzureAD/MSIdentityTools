@@ -23,7 +23,7 @@ function Invoke-MsIdAzureAdSamlRequest {
     process {
         foreach ($Token in $Tokens) {
             if ($Token -is [string]) {
-                $xmlSamlRequest = ConvertFrom-SamlSecurityToken $Tokens
+                $xmlSamlRequest = ConvertFrom-SamlMessage $Tokens
             }
             else {
                 $xmlSamlRequest = $Token

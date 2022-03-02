@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+  <SelectionSets>
+    <SelectionSet>
+      <Name>SamlMessages</Name>
+      <Types>
+        <TypeName>SamlMessage</TypeName>
+      </Types>
+    </SelectionSet>
+  </SelectionSets>
+  <ViewDefinitions>
+    <View>
+      <Name>SamlMessage</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>SamlMessages</SelectionSetName>
+      </ViewSelectedBy>
+      <GroupBy>
+        <ScriptBlock>$_.DocumentElement.LocalName</ScriptBlock>
+        <Label>SAML Message</Label>
+      </GroupBy>
+      <ListControl>
+        <ListEntries>
+          <ListEntry>
+            <ListItems>
+              <ListItem>
+                <Label>DocumentElement</Label>
+                <ScriptBlock>$_.DocumentElement.Attributes.LocalName + $_.DocumentElement.ChildNodes.LocalName</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>DocumentElement.ID</Label>
+                <ScriptBlock>$_.DocumentElement.ID</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>DocumentElement.Version</Label>
+                <ScriptBlock>$_.DocumentElement.Version</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <Label>DocumentElement.IssueInstant</Label>
+                <ScriptBlock>Get-Date $_.DocumentElement.IssueInstant -Format 'G'</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Destination</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.Destination</Label>
+                <ScriptBlock>$_.DocumentElement.Destination</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.ForceAuthn</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.ForceAuthn</Label>
+                <ScriptBlock>$_.DocumentElement.ForceAuthn</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.InResponseTo</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.InResponseTo</Label>
+                <ScriptBlock>$_.DocumentElement.InResponseTo</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Issuer</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.Issuer</Label>
+                <ScriptBlock>if ($_.DocumentElement.Issuer -is [string]) { $_.DocumentElement.Issuer } else { $_.DocumentElement.Issuer.InnerText }</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.NameIDPolicy.Format</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.NameIDPolicy.Format</Label>
+                <ScriptBlock>$_.DocumentElement.NameIDPolicy.Format</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.RequestedAuthnContext</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.RequestedAuthnContext</Label>
+                <ScriptBlock>$_.DocumentElement.RequestedAuthnContext.AuthnContextClassRef</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.RequestedAuthnContext.Comparison</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.RequestedAuthnContext.Comparison</Label>
+                <ScriptBlock>$_.DocumentElement.RequestedAuthnContext.Comparison</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.NameID.Format</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.NameID.Format</Label>
+                <ScriptBlock>$_.DocumentElement.NameID.Format</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.NameID</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.NameID</Label>
+                <ScriptBlock>$_.DocumentElement.NameID.InnerText</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Status.StatusCode</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.Status.StatusCode</Label>
+                <ScriptBlock>$_.DocumentElement.Status.StatusCode.Value</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>DocumentElement.Assertion</Label>
+                <ScriptBlock>$_.DocumentElement.Assertion.Attributes.LocalName + $_.DocumentElement.Assertion.ChildNodes.LocalName</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.AuthnStatement.AuthnInstant</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .AuthnStatement.AuthnInstant</Label>
+                <ScriptBlock>Get-Date $_.DocumentElement.Assertion.AuthnStatement.AuthnInstant -Format 'G'</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.AuthnStatement.AuthnContext.AuthnContextClassRef</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .AuthnStatement.AuthnContext</Label>
+                <ScriptBlock>$_.DocumentElement.Assertion.AuthnStatement.AuthnContext.AuthnContextClassRef</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.Conditions.NotBefore</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .Conditions.NotBefore</Label>
+                <ScriptBlock>Get-Date $_.DocumentElement.Assertion.Conditions.NotBefore -Format 'G'</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.Conditions.NotOnOrAfter</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .Conditions.NotOnOrAfter</Label>
+                <ScriptBlock>Get-Date $_.DocumentElement.Assertion.Conditions.NotOnOrAfter -Format 'G'</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.Conditions.AudienceRestriction.Audience</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .Conditions.AudienceRestriction</Label>
+                <ScriptBlock>$_.DocumentElement.Assertion.Conditions.AudienceRestriction.Audience</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.Subject.NameID.Format</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .Subject.NameID.Format</Label>
+                <ScriptBlock>$_.DocumentElement.Assertion.Subject.NameID.Format</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.Subject.NameID</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .Subject.NameID</Label>
+                <ScriptBlock>$_.DocumentElement.Assertion.Subject.NameID.InnerText</ScriptBlock>
+              </ListItem>
+              <ListItem>
+                <ItemSelectionCondition>
+                  <ScriptBlock>$_.DocumentElement.Assertion.AttributeStatement.Attribute</ScriptBlock>
+                </ItemSelectionCondition>
+                <Label>    .AttributeStatement.Attribute</Label>
+                <ScriptBlock>$_.DocumentElement.Assertion.AttributeStatement.Attribute</ScriptBlock>
+              </ListItem>
+            </ListItems>
+          </ListEntry>
+        </ListEntries>
+      </ListControl>
+    </View>
+    <View>
+      <Name>SamlMessage</Name>
+      <ViewSelectedBy>
+        <SelectionSetName>SamlMessages</SelectionSetName>
+      </ViewSelectedBy>
+      <GroupBy>
+        <ScriptBlock>$_.DocumentElement.LocalName</ScriptBlock>
+        <Label>SAML Message</Label>
+      </GroupBy>
+      <TableControl>
+        <AutoSize/>
+        <TableHeaders>
+          <!-- <TableColumnHeader>
+            <Label>DocumentElement</Label>
+            <Width>15</Width>
+          </TableColumnHeader> -->
+          <TableColumnHeader>
+            <Label>ID</Label>
+            <Width>4</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Version</Label>
+            <Width>4</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>IssueInstant</Label>
+            <Width>20</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>StatusCode</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Issuer</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Destination</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>InResponseTo</Label>
+            <Width>10</Width>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <!-- <TableColumnItem>
+                <ScriptBlock>$_.DocumentElement</ScriptBlock>
+              </TableColumnItem> -->
+              <TableColumnItem>
+                <ScriptBlock>$_.DocumentElement.ID</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>$_.DocumentElement.Version</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <FormatString>G</FormatString>
+                <ScriptBlock>Get-Date $_.DocumentElement.IssueInstant</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>$_.DocumentElement.Status.StatusCode.Value.Replace('urn:oasis:names:tc:SAML:2.0:status:','')</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>if ($_.DocumentElement.Issuer -is [string]) { $_.DocumentElement.Issuer } else { $_.DocumentElement.Issuer.InnerText }</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>$_.DocumentElement.Destination</ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>$_.DocumentElement.InResponseTo</ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

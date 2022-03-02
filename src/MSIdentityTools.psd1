@@ -63,7 +63,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = @()
+    FormatsToProcess = @('.\internal\SamlMessages.format.ps1xml')
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules        = @(
@@ -73,7 +73,7 @@
         '.\internal\ConvertFrom-HexString.ps1'
         '.\internal\ConvertFrom-JsonWebSignature.ps1'
         '.\internal\ConvertFrom-QueryString.ps1'
-        '.\internal\ConvertFrom-SamlSecurityToken.ps1'
+        '.\internal\ConvertFrom-SamlMessage.ps1'
         '.\internal\ConvertFrom-SecureStringAsPlainText.ps1'
         '.\internal\ConvertTo-Base64String.ps1'
         '.\internal\ConvertTo-HexString.ps1'
@@ -86,6 +86,8 @@
         '.\internal\Get-SamlFederationMetadata.ps1'
         '.\internal\Get-X509Certificate.ps1'
         '.\internal\Invoke-CommandAsSystem.ps1'
+        '.\internal\Resolve-XmlAttribute.ps1'
+        '.\internal\Resolve-XmlElement.ps1'
         '.\internal\Test-IpAddressInSubnet.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
@@ -109,7 +111,7 @@
         '.\Reset-MsIdExternalUser.ps1'
         '.\Resolve-MsIdAzureIpAddress.ps1'
         '.\Show-MsIdJwtToken.ps1'
-        '.\Show-MsIdSamlSecurityToken.ps1'
+        '.\Show-MsIdSamlToken.ps1'
         '.\Test-MsIdAzureAdDeviceRegConnectivity.ps1'
         '.\Resolve-MsIdTenant.ps1'
     )
@@ -137,7 +139,7 @@
         'Resolve-MsIdTenant'
         'Resolve-MsIdAzureIpAddress'
         'Show-MsIdJwtToken'
-        'Show-MsIdSamlSecurityToken'
+        'Show-MsIdSamlToken'
         'Test-MsIdAzureAdDeviceRegConnectivity'
     )
 
