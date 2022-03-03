@@ -37,7 +37,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Restore PSModule Dependencies'
-  condition: and(succeeded(), ne(variables.PSModuleDependencies_IsCached, 'true'))
+  condition: 'and(succeeded(), ne(variables[''PSModuleDependencies_IsCached''], ''true''))'
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Restore-PSModuleDependencies.ps1'
     arguments: >
@@ -54,7 +54,7 @@ steps:
       -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
       -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"
       -TestResultPath "$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
-      -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_PowerShellCore_$(Build.BuildId).xml"
+      -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
     pwsh: true
 
 - task: PublishTestResults@2
@@ -70,12 +70,13 @@ steps:
   displayName: 'Publish PSModule Code Coverage Results'
   inputs:
     codeCoverageTool: 'JaCoCo'
-    summaryFileLocation: '$(Pipeline.Workspace)/TestResults/CodeCoverage_PowerShellCore_$(Build.BuildId).xml'
+    summaryFileLocation: '$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
     pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
 - ${{ if eq(parameters.testWindowsPowershell, true) }}:
   - task: PowerShell@2
     displayName: 'Test PSModule on Windows PowerShell'
+    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
     inputs:
       filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
       arguments: >
@@ -83,11 +84,12 @@ steps:
         -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
         -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"
         -TestResultPath "$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
-        -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_WindowsPowerShell_$(Build.BuildId).xml"
+        -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
       pwsh: false
 
   - task: PublishTestResults@2
     displayName: 'Publish PSModule Test Results on Windows PowerShell'
+    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
     inputs:
       testResultsFormat: 'NUnit'
       testResultsFiles: '$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml'
