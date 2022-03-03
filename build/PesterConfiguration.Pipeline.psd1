@@ -1,6 +1,6 @@
 @{
     Run          = @{
-        PassThru = $true
+        #PassThru = $true
     }
     CodeCoverage = @{
         Enabled      = $true
@@ -11,9 +11,9 @@
     TestResult   = @{
         Enabled      = $true
         OutputFormat = 'NUnitXML'
-        OutputPath   = '.\build\TestResults\TestResults.xml'
+        OutputPath   = '.\build\TestResults\TestResult.xml'
     }
     Output       = @{
-        Verbosity = 'Detailed'
+        #Verbosity = 'Detailed'
     }
 }

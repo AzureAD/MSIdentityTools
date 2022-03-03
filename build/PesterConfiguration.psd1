@@ -5,13 +5,13 @@
     CodeCoverage = @{
         Enabled      = $true
         OutputFormat = 'JaCoCo'
-        OutputPath   = '.\build\TestResult\CodeCoverage.xml'
+        OutputPath   = '.\build\TestResults\CodeCoverage.xml'
         RecursePaths = $false
     }
     TestResult   = @{
-        Enabled      = $true
+        Enabled      = $false
         OutputFormat = 'NUnitXML'
-        OutputPath   = '.\build\TestResult\TestResult.xml'
+        OutputPath   = '.\build\TestResults\TestResult.xml'
     }
     Output       = @{
         Verbosity = 'Detailed'
