@@ -18,9 +18,6 @@ parameters:
   type: string
   default: 'PSModuleTestResults'
 
-variables:
-  pathModuleDirectory: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
-
 steps:
 - pwsh: |
     $ModuleManifest = Import-PowerShellDataFile (Join-Path $env:ModuleDirectory '*.psd1')
@@ -44,7 +41,7 @@ steps:
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Restore-PSModuleDependencies.ps1'
     arguments: >
-      -ModuleManifestPath "$(pathModuleDirectory)"
+      -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
       -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
     pwsh: true
 
@@ -53,7 +50,7 @@ steps:
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
     arguments: >
-      -ModuleManifestPath "$(pathModuleDirectory)"
+      -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
       -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
       -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"
       -TestResultPath "$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
