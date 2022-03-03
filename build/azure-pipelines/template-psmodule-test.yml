@@ -18,23 +18,23 @@ parameters:
 steps:
 - pwsh: |
     $ModuleManifest = Import-PowerShellDataFile (Join-Path $env:ModuleDirectory '*.psd1')
-    $CacheKey = [pscustomobject]@{ RequiredModules = $PSModuleData.RequiredModules; ExternalModuleDependencies = $PSModuleData.PrivateData.PSData.ExternalModuleDependencies } | ConvertTo-Json -Compress -Depth 2
-    Write-Host ('##vso[task.setvariable variable=PSModuleCacheKey;isOutput=true]{0}' -f $CacheKey)
-  name: GetCacheKey
-  displayName: 'Get PSModule Cache Key'
+    $LockFileContent = [pscustomobject]@{ RequiredModules = $PSModuleData.RequiredModules; ExternalModuleDependencies = $PSModuleData.PrivateData.PSData.ExternalModuleDependencies } | ConvertTo-Json -Compress -Depth 2
+    Set-Content $env:LockFilePath -Value $LockFileContent
+  displayName: 'Generate PSModule Dependencies Lock File'
   env:
     ModuleDirectory: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+    LockFilePath: '$(Pipeline.Workspace)/PSModuleDependencies.lock.json'
 
 - task: Cache@2
   displayName: 'Cache PSModule Dependencies'
   inputs:
-    key:  PSModuleDependencies | $(GetCacheKey.PSModuleCacheKey)
+    key:  PSModuleDependencies | $(Pipeline.Workspace)/PSModuleDependencies.lock.json
     path: "$(Pipeline.Workspace)/PSModuleCache"
     cacheHitVar: PSModuleDependencies_IsCached
 
 - task: PowerShell@2
   displayName: 'Restore PSModule Dependencies'
-  condition: ne(variables.PSModuleDependencies_IsCached, 'true')
+  condition: and(succeeded(), ne(variables.PSModuleDependencies_IsCached, 'true'))
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Restore-PSModuleDependencies.ps1'
     arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"'
