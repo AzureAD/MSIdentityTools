@@ -17,13 +17,13 @@ parameters:
 
 steps:
 - pwsh: |
-    $ModuleManifest = Import-PowerShellDataFile "$env:ModuleManifestPath"
+    $ModuleManifest = Import-PowerShellDataFile (Join-Path $env:ModuleDirectory '*.psd1')
     $CacheKey = [pscustomobject]@{ RequiredModules = $PSModuleData.RequiredModules; ExternalModuleDependencies = $PSModuleData.PrivateData.PSData.ExternalModuleDependencies } | ConvertTo-Json -Compress -Depth 2
     Write-Host ('##vso[task.setvariable variable=PSModuleCacheKey;isOutput=true]{0}' -f $CacheKey)
   name: GetCacheKey
   displayName: 'Get PSModule Cache Key'
   env:
-    ModuleManifestPath: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+    ModuleDirectory: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
 - task: Cache@2
   displayName: 'Cache PSModule Dependencies'
