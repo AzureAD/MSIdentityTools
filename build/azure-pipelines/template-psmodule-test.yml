@@ -57,6 +57,9 @@ steps:
   inputs:
     testResultsFormat: 'NUnit'
     testResultsFiles: '$(System.DefaultWorkingDirectory)/build/TestResults/TestResults.xml'
+    testRunTitle: 'Unit Tests'
+    buildPlatform: '$(Agent.OS)_$(Agent.OSArchitecture)'
+    buildConfiguration: 'PowerShell Core'
     failTaskOnFailedTests: true
 
 - task: PublishPipelineArtifact@1
@@ -66,28 +69,32 @@ steps:
     artifact: '${{ parameters.artifactOutput }}'
     publishLocation: 'pipeline'
 
-- task: PowerShell@2
-  displayName: 'Test PowerShell Module'
-  inputs:
-    filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
-    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache" -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"'
-    pwsh: false
+- ${{ if eq(variables.Agent.OS, 'Windows_NT') }}:
+  - task: PowerShell@2
+    displayName: 'Test PowerShell Module'
+    inputs:
+      filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
+      arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache" -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"'
+      pwsh: false
 
-- task: PublishCodeCoverageResults@1
-  inputs:
-    codeCoverageTool: 'JaCoCo'
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/TestResults/CodeCoverage.xml'
-    pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+  # - task: PublishCodeCoverageResults@1
+  #   inputs:
+  #     codeCoverageTool: 'JaCoCo'
+  #     summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/TestResults/CodeCoverage.xml'
+  #     pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'NUnit'
-    testResultsFiles: '$(System.DefaultWorkingDirectory)/build/TestResults/TestResults.xml'
-    failTaskOnFailedTests: false
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: '$(System.DefaultWorkingDirectory)/build/TestResults/TestResults.xml'
+      testRunTitle: 'Unit Tests'
+      buildPlatform: '$(Agent.OS)_$(Agent.OSArchitecture)'
+      buildConfiguration: 'PowerShell Core'
+      failTaskOnFailedTests: false
 
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish PowerShell Module Test Results'
-  inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/build/TestResults'
-    artifact: '${{ parameters.artifactOutput }}'
-    publishLocation: 'pipeline'
+  # - task: PublishPipelineArtifact@1
+  #   displayName: 'Publish PowerShell Module Test Results'
+  #   inputs:
+  #     targetPath: '$(System.DefaultWorkingDirectory)/build/TestResults'
+  #     artifact: '${{ parameters.artifactOutput }}'
+  #     publishLocation: 'pipeline'
