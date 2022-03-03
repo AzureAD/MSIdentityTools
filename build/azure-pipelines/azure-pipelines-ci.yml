@@ -66,22 +66,6 @@ stages:
         moduleVersion: '$(moduleVersion)'
         prereleaseTag: '$(prereleaseTag)'
 
-  # - job: Sign
-  #   dependsOn:
-  #   - Prepare
-  #   - Build
-  #   variables:
-  #     #moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
-  #     skipComponentGovernanceDetection: true
-  #   pool:
-  #     vmImage: 'windows-latest'
-  #   steps:
-  #   - download: current
-  #     artifact: '$(artifactModule)'
-  #   - template: template-psmodule-sign.yml
-  #     parameters:
-  #       moduleName: '$(moduleName)'
-
 - stage: Test
   dependsOn: Build
   jobs: 
@@ -125,7 +109,6 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
-        testWindowsPowershell: true
 
   - job: MacOS
     variables: 

@@ -87,6 +87,14 @@ steps:
         -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
       pwsh: false
 
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish PSModule Code Coverage Results on Windows PowerShell'
+    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    inputs:
+      codeCoverageTool: 'JaCoCo'
+      summaryFileLocation: '$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml'
+      pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+
   - task: PublishTestResults@2
     displayName: 'Publish PSModule Test Results on Windows PowerShell'
     condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'

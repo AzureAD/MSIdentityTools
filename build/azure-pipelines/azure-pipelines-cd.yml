@@ -40,7 +40,7 @@ stages:
   jobs: 
   - job: Prepare
     variables:
-      skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -73,8 +73,8 @@ stages:
     dependsOn:
     - Prepare
     variables:
-      moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
       skipComponentGovernanceDetection: true
+      moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -92,6 +92,7 @@ stages:
   - job: Prepare
     variables:
       skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
     steps:
     - download: current
       artifact: '$(artifactModuleSigned)'
@@ -107,6 +108,7 @@ stages:
     dependsOn: Prepare
     environment: Standalone
     variables:
+      runCodesignValidationInjection: false
       moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
       moduleVersion: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleVersion''] ]'
     strategy:
@@ -126,6 +128,7 @@ stages:
 #   - job: Prepare
 #     variables:
 #       skipComponentGovernanceDetection: true
+#       runCodesignValidationInjection: false
 #     steps:
 #     - download: current
 #       artifact: '$(artifactModuleSigned)'
@@ -165,6 +168,7 @@ stages:
   - job: Prepare
     variables:
       skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
     steps:
     - download: current
       artifact: '$(artifactModuleSigned)'
