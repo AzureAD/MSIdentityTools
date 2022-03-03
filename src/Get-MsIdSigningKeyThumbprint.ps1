@@ -1,20 +1,21 @@
 <#
 .SYNOPSIS
-    Get signing keys used by Azure AD
+    Get signing keys used by Azure AD.
 .EXAMPLE
-    PS C:\>Get-MsIdAADSigningKey
-    Get common Azure AD signing keys
+    PS C:\>Get-MsIdSigningKeyThumbprint
+    Get common Azure AD signing key thumbprints.
 .EXAMPLE
-    PS C:\>Get-MsIdAADSigningKey.ps1 -Tenant <tenandId>
-    Get Azure AD signing keys for the given tenant..
+    PS C:\>Get-MsIdSigningKeyThumbprint -Tenant <tenandId>
+    Get Azure AD signing key thumbprints for the given tenant.
 .EXAMPLE
-    PS C:\>Get-MsIdAADSigningKey.ps1 -Tenant <tenandId> -Latest
-    Get the latest Azure AD signing key for the given tenant.
+    PS C:\>Get-MsIdSigningKeyThumbprint -Tenant <tenandId> -Latest
+    Get the latest Azure AD signing key thumbprint for the given tenant.
 .EXAMPLE
-    PS C:\>Get-MsIdSigningKey -DownloadPath C:\temp
-    Export the certificates to a folder destination
+    PS C:\>Get-MsIdSigningKeyThumbprint -DownloadPath C:\temp
+    Export the certificates to a folder destination.
 #>
-function Get-MsIdSigningKey{
+
+function Get-MsIdSigningKeyThumbprint{
     Param(
         # Tenant ID
         $Tenant = "common",
@@ -55,11 +56,8 @@ function Get-MsIdSigningKey{
                 [System.IO.File]::WriteAllBytes($path, $cert.Cert.Export("Cert"));
                 Write-Host "Certificate successfully exported to $path"
             }
+        }else{
+            Write-Output $certs.Thumbprint 
         }
-
-        Write-Output $certs 
     }
-
 }
-
-$x = Get-MsIdSigningKey

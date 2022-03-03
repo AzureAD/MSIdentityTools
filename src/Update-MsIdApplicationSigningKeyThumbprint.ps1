@@ -1,16 +1,19 @@
 <#
 .SYNOPSIS
     Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint
-    For more information on Microsoft Identity platorm signing key rollover https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-signing-key-rollover
+    For more information on Microsoft Identity platorm signing key rollover see https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-signing-key-rollover
 .EXAMPLE
-    PS C:\>Update-MsIdApplicationSigningKey -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
+    PS C:\>Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
     Update Application's preferred signing key to the specified thumbprint
 .EXAMPLE
-    PS C:\>Update-MsIdApplicationSigningKey -ApplicationId <ApplicationId> -Default
+    PS C:\>Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -Default
     Update Application's preferred signing key to default value null
+.EXAMPLE
+    PS C:\>Get-MsIdSigningKeyThumbprint -Latest | Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId>
+    Get the latest signing key thumbprint and set it as the perferred signing key on the application
 #>
 
-function Update-MsIdApplicationSigningKey{
+function Update-MsIdApplicationSigningKeyThumbprint{
     [CmdletBinding()]
     Param(
         # Tenant ID
@@ -21,8 +24,7 @@ function Update-MsIdApplicationSigningKey{
         [string]$ApplicationId,
 
         # Thumbprint of certificate
-        [parameter(parametersetname = "Thumbprint", ValueFromPipeline = $false)]
-        [parameter(parametersetname = "SpecificCert", ValueFromPipeline = $true)]
+        [parameter(ValueFromPipeline = $true)]
         [string]$KeyThumbprint,
 
         # Return preferredTokenSigningKeyThumbprint to default value
@@ -31,24 +33,11 @@ function Update-MsIdApplicationSigningKey{
     )
 
     process{
+
         if ($Default) { 
             Write-Verbose "Default flag set. preferredTokenSigningKeyThumbprint will be set to null "
             $KeyThumbprint = $null 
         }
-
-        switch ($PSCmdlet.ParameterSetName) {
-            "Thumbprint" {
-                 
-                break
-            }
-            "SpecificCert" {
-                # "$KeyThumbprint is"
-                String[]$KeyThumbprint
-                $KeyThumbprint = $KeyThumbprint[0].Thumbprint
-                break
-            }
-        }
-        
 
         if ($null -ne $KeyThumbprint) {
             $KeyThumbprint = $KeyThumbprint.Replace(" ", "").ToLower()

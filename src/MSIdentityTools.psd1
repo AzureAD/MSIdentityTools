@@ -112,8 +112,8 @@
         '.\Show-MsIdSamlSecurityToken.ps1'
         '.\Test-MsIdAzureAdDeviceRegConnectivity.ps1'
         '.\Resolve-MsIdTenant.ps1'
-        '.\Get-MsIdSigningKey.ps1'
-        '.\Update-MsIdApplicationSigningKey.ps1'
+        '.\Get-MsIdSigningKeyThumbprint.ps1'
+        '.\Update-MsIdApplicationSigningKeyThumbprint.ps1'
     )
 
     # Functions to export from this module
@@ -141,8 +141,8 @@
         'Show-MsIdJwtToken'
         'Show-MsIdSamlSecurityToken'
         'Test-MsIdAzureAdDeviceRegConnectivity'
-        'Get-MsIdSigningKey'
-        'Update-MsIdApplicationSigningKey'
+        'Get-MsIdSigningKeyThumbprint'
+        'Update-MsIdApplicationSigningKeyThumbprint'
     )
 
     # Cmdlets to export from this module
