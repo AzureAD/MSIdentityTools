@@ -6,12 +6,14 @@
     Convert Saml Message to XML object.
 .INPUTS
     System.String
+.OUTPUTS
+    SamlMessage : System.Xml.XmlDocument
 #>
 function ConvertFrom-SamlMessage {
     [CmdletBinding()]
     [Alias('ConvertFrom-SamlRequest')]
     [Alias('ConvertFrom-SamlResponse')]
-    [OutputType([xml])]
+    #[OutputType([xml])]
     param (
         # SAML Message
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]

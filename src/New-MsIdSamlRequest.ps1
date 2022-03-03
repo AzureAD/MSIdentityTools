@@ -6,10 +6,12 @@
     Create New Saml Request for Claims X-Ray.
 .INPUTS
     System.String
+.OUTPUTS
+    SamlMessage : System.Xml.XmlDocument, System.String
 #>
 function New-MsIdSamlRequest {
     [CmdletBinding()]
-    [OutputType([xml], [string])]
+    #[OutputType([xml], [string])]
     param (
         # Azure AD uses this attribute to populate the InResponseTo attribute of the returned response.
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]

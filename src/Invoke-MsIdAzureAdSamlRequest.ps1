@@ -14,16 +14,16 @@ function Invoke-MsIdAzureAdSamlRequest {
     param (
         # SAML Request
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [object[]] $Tokens,
+        [object[]] $SamlRequest,
         # Azure AD Tenant Id
         [Parameter(Mandatory = $false)]
         [string] $TenantId = 'common'
     )
 
     process {
-        foreach ($Token in $Tokens) {
+        foreach ($_SamlRequest in $SamlRequest) {
             if ($Token -is [string]) {
-                $xmlSamlRequest = ConvertFrom-SamlMessage $Tokens
+                $xmlSamlRequest = ConvertFrom-SamlMessage $_SamlRequest
             }
             else {
                 $xmlSamlRequest = $Token

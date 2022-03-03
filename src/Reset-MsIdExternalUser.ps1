@@ -50,11 +50,11 @@ function Reset-MsIdExternalUser {
 
     begin {
         $previousProfile = Get-MgProfile
-        if($previousProfile.Name -ne 'beta'){
+        if ($previousProfile.Name -ne 'beta') {
             Select-MgProfile -Name 'beta'
         }
     
-        if(!$InviteRedirectUrl){
+        if (!$InviteRedirectUrl) {
             $tenantId = (Get-MgContext).TenantId
             $InviteRedirectUrl = "https://myapps.microsoft.com?tenantId=$tenantId"
         }
@@ -96,7 +96,7 @@ function Reset-MsIdExternalUser {
         switch ($PSCmdlet.ParameterSetName) {
             "ObjectId" {
                 $graphUser = Get-MgUser -UserId $UserId
-                if($graphUser){
+                if ($graphUser) {
                     Send-Invitation $graphUser
                 }
                 else {
@@ -112,7 +112,7 @@ function Reset-MsIdExternalUser {
     }
 
     end {
-        if($previousProfile.Name -ne (Get-MgProfile).Name){
+        if ($previousProfile.Name -ne (Get-MgProfile).Name) {
             Select-MgProfile -Name $previousProfile.Name
         }
     }

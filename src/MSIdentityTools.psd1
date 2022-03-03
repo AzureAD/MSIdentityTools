@@ -95,6 +95,7 @@
         '.\ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1'
         '.\ConvertFrom-MsIdAadcSourceAnchor.ps1'
         '.\ConvertFrom-MsIdJwtToken.ps1'
+        '.\ConvertFrom-MsIdSamlMessage.ps1'
         '.\Expand-MsIdJwtTokenPayload.ps1'
         '.\Get-MsIdAuthorityUri.ps1'
         '.\Get-MsIdAzureIpRange.ps1'
@@ -122,6 +123,7 @@
         'ConvertFrom-MsIdAadcAadConnectorSpaceDn'
         'ConvertFrom-MsIdAadcSourceAnchor'
         'ConvertFrom-MsIdJwtToken'
+        'ConvertFrom-MsIdSamlMessage'
         'Expand-MsIdJwtTokenPayload'
         'Get-MsIdAuthorityUri'
         'Get-MsIdAzureIpRange'
@@ -153,6 +155,8 @@
     AliasesToExport      = @(
         'ConvertFrom-MsIdAzureAdImmutableId'
         'Get-MsIdWsFedFederationMetadata'
+        'ConvertFrom-MsIdSamlRequest'
+        'ConvertFrom-MsIdSamlResponse'
     )
 
     # DSC resources to export from this module
@@ -162,10 +166,7 @@
     # ModuleList = @()
 
     # List of all files packaged with this module
-    #FileList = @(
-    #    '..\build\packages\Microsoft.Identity.Client.4.1.0\lib\netcoreapp2.1\Microsoft.Identity.Client.dll'
-    #    '..\build\packages\Microsoft.Identity.Client.4.1.0\lib\net45\Microsoft.Identity.Client.dll'
-    #)
+    # FileList = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData          = @{
