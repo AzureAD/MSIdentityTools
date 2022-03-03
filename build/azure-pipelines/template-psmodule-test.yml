@@ -16,11 +16,35 @@ parameters:
   default: 'PSModuleTestResults'
 
 steps:
+- pwsh: |
+    $ModuleManifest = Import-PowerShellDataFile "$env:ModuleManifestPath"
+    $CacheKey = [pscustomobject]@{ RequiredModules = $PSModuleData.RequiredModules; ExternalModuleDependencies = $PSModuleData.PrivateData.PSData.ExternalModuleDependencies } | ConvertTo-Json -Compress -Depth 2
+    Write-Host ('##vso[task.setvariable variable=PSModuleCacheKey;isOutput=true]{0}' -f $CacheKey)
+  name: GetCacheKey
+  displayName: 'Get PSModule Cache Key'
+  env:
+    ModuleManifestPath: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+
+- task: Cache@2
+  displayName: 'Cache PSModule Dependencies'
+  inputs:
+    key:  PSModuleDependencies | $(GetCacheKey.PSModuleCacheKey)
+    path: "$(Pipeline.Workspace)/PSModuleCache"
+    cacheHitVar: PSModuleDependencies_IsCached
+
+- task: PowerShell@2
+  displayName: 'Restore PSModule Dependencies'
+  condition: ne(variables.PSModuleDependencies_IsCached, 'true')
+  inputs:
+    filePath: '$(System.DefaultWorkingDirectory)/build/Restore-PSModuleDependencies.ps1'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"'
+    pwsh: true
+
 - task: PowerShell@2
   displayName: 'Test PowerShell Module'
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
-    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache" -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"'
     pwsh: true
 
 - task: PublishCodeCoverageResults@1
@@ -46,7 +70,7 @@ steps:
   displayName: 'Test PowerShell Module'
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
-    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache" -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"'
     pwsh: false
 
 - task: PublishCodeCoverageResults@1
