@@ -49,6 +49,15 @@ function Reset-MsIdExternalUser {
     )
 
     begin {
+        
+        ## Initialize Critical Dependencies
+
+        $CriticalError = $null
+        try {
+            Import-Module Microsoft.Graph.Identity.SignIns -MinimumVersion 1.9.2 -ErrorAction Stop
+        }
+        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+
         $previousProfile = Get-MgProfile
         if ($previousProfile.Name -ne 'beta') {
             Select-MgProfile -Name 'beta'
@@ -62,7 +71,6 @@ function Reset-MsIdExternalUser {
     }
 
     process {
-
         function Send-Invitation {
             [CmdletBinding()]
             param (
@@ -91,6 +99,11 @@ function Reset-MsIdExternalUser {
                 -ResetRedemption `
                 -SendInvitationMessage:$doSendInvitationMessage `
                 -InvitedUser @{ "id" = $GraphUser.Id }
+        }
+
+        # don't process further if there is a critical error
+        if ($CriticalError) {
+            return
         }
 
         switch ($PSCmdlet.ParameterSetName) {
