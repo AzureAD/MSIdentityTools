@@ -53,7 +53,10 @@ steps:
     displayName: 'Sign PowerShell Module Files'
     inputs:
       filePath: '$(System.DefaultWorkingDirectory)/build/Sign-PSModule.ps1'
-      arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/*" -SigningCertificate "$(${{ parameters.SigningCertificateSecretName }})" -AddCatalogFile'
+      arguments: >
+        -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/*"
+        -SigningCertificate "$(${{ parameters.SigningCertificateSecretName }})"
+        -AddCatalogFile
       pwsh: true
 
 - ${{ if ne(parameters.EsrpCodeSigningServiceName,'') }}:
@@ -62,7 +65,7 @@ steps:
     inputs:
       ConnectedServiceName: '${{ parameters.EsrpCodeSigningServiceName }}'
       FolderPath: '$(Pipeline.Workspace)/${{ parameters.artifactOutput }}'
-      Pattern: '*.psd1,*.psm1,*.ps1'
+      Pattern: '*.psd1,*.psm1,*.ps1*,'
       signConfigType: inlineSignParams
       inlineOperation: >-
         [

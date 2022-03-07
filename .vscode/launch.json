@@ -29,14 +29,28 @@
             ]
         },
         {
+            "name": "PowerShell Debug Module Tests",
+            "type": "PowerShell",
+            "request": "launch",
+            "preLaunchTask": "",
+            "script": "${workspaceFolder}/build/Launch-PSModule.ps1",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-ModuleManifestPath './src/*.psd1'",
+                "-PostImportScriptBlock { ${workspaceFolder}/build/Test-PSModule.ps1 -ModuleManifestPath './src/*.psd1' -PesterConfigurationPath './build/PesterConfiguration.Debug.psd1' }",
+                "-NoNewWindow"
+            ]
+        },
+        {
             "name": "PowerShell Test Module in External Console",
             "type": "PowerShell",
             "request": "launch",
             "preLaunchTask": "",
-            "script": "${workspaceFolder}/build/Test-PSModule.ps1",
+            "script": "${workspaceFolder}/build/Launch-PSModule.ps1",
             "cwd": "${workspaceFolder}",
             "args": [
                 "-ModuleManifestPath './src/*.psd1'",
+                "-PostImportScriptBlock { ${workspaceFolder}/build/Test-PSModule.ps1 -ModuleManifestPath './src/*.psd1' }",
                 "-PowerShellPaths ${input:pickPowerShellExecutable}",
                 "-NoNewWindow:$false"
             ]

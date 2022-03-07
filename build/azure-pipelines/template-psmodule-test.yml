@@ -8,6 +8,9 @@ parameters:
 - name: pipelineId
   type: string
   default:
+- name: testWindowsPowershell
+  type: boolean
+  default: false
 - name: artifactInput
   type: string
   default: 'PSModule'
@@ -16,28 +19,95 @@ parameters:
   default: 'PSModuleTestResults'
 
 steps:
-- task: PowerShell@2
-  displayName: 'Test PowerShell Module'
+- pwsh: |
+    $ModuleManifest = Import-PowerShellDataFile (Join-Path $env:ModuleDirectory '*.psd1')
+    $LockFileContent = [pscustomobject]@{ RequiredModules = $ModuleManifest.RequiredModules; ExternalModuleDependencies = $ModuleManifest.PrivateData.PSData.ExternalModuleDependencies } | ConvertTo-Json -Compress -Depth 2
+    Set-Content $env:LockFilePath -Value $LockFileContent
+  displayName: 'Generate PSModule Dependencies Lock File'
+  env:
+    ModuleDirectory: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+    LockFilePath: '$(Pipeline.Workspace)/PSModuleDependencies.lock.json'
+
+- task: Cache@2
+  displayName: 'Cache PSModule Dependencies'
   inputs:
-    filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
-    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}" -NoNewWindow'
+    key:  PSModuleDependencies | $(Pipeline.Workspace)/PSModuleDependencies.lock.json
+    path: "$(Pipeline.Workspace)/PSModuleCache"
+    cacheHitVar: PSModuleDependencies_IsCached
+
+- task: PowerShell@2
+  displayName: 'Restore PSModule Dependencies'
+  condition: 'and(succeeded(), ne(variables[''PSModuleDependencies_IsCached''], ''true''))'
+  inputs:
+    filePath: '$(System.DefaultWorkingDirectory)/build/Restore-PSModuleDependencies.ps1'
+    arguments: >
+      -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
+      -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
     pwsh: true
 
-- task: PublishCodeCoverageResults@1
+- task: PowerShell@2
+  displayName: 'Test PSModule'
   inputs:
-    codeCoverageTool: 'JaCoCo'
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/build/TestResults/CodeCoverage.xml'
-    pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+    filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
+    arguments: >
+      -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
+      -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
+      -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"
+      -TestResultPath "$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
+      -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
+    pwsh: true
 
 - task: PublishTestResults@2
+  displayName: 'Publish PSModule Test Results'
   inputs:
     testResultsFormat: 'NUnit'
-    testResultsFiles: '$(System.DefaultWorkingDirectory)/build/TestResults/TestResults.xml'
+    testResultsFiles: '$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
+    testRunTitle: '$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId)'
+    buildPlatform: '$(Agent.OSArchitecture)'
     failTaskOnFailedTests: true
 
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish PowerShell Module Test Results'
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish PSModule Code Coverage Results'
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/build/TestResults'
-    artifact: '${{ parameters.artifactOutput }}'
+    codeCoverageTool: 'JaCoCo'
+    summaryFileLocation: '$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
+    pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+
+- ${{ if eq(parameters.testWindowsPowershell, true) }}:
+  - task: PowerShell@2
+    displayName: 'Test PSModule on Windows PowerShell'
+    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    inputs:
+      filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
+      arguments: >
+        -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
+        -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
+        -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.Pipeline.psd1"
+        -TestResultPath "$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
+        -CodeCoveragePath "$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
+      pwsh: false
+
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish PSModule Code Coverage Results on Windows PowerShell'
+    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    inputs:
+      codeCoverageTool: 'JaCoCo'
+      summaryFileLocation: '$(Pipeline.Workspace)/TestResults/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml'
+      pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
+
+  - task: PublishTestResults@2
+    displayName: 'Publish PSModule Test Results on Windows PowerShell'
+    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    inputs:
+      testResultsFormat: 'NUnit'
+      testResultsFiles: '$(Pipeline.Workspace)/TestResults/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml'
+      testRunTitle: '$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId)'
+      buildPlatform: '$(Agent.OSArchitecture)'
+      failTaskOnFailedTests: false
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish PSModule Test Results'
+  inputs:
+    targetPath: '$(Pipeline.Workspace)/TestResults'
+    artifact: '${{ parameters.artifactOutput }}_$(Agent.OS)_$(Agent.OSArchitecture)'
     publishLocation: 'pipeline'

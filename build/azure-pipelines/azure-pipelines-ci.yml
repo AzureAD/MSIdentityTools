@@ -66,29 +66,15 @@ stages:
         moduleVersion: '$(moduleVersion)'
         prereleaseTag: '$(prereleaseTag)'
 
-  # - job: Sign
-  #   dependsOn:
-  #   - Prepare
-  #   - Build
-  #   variables:
-  #     #moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
-  #     skipComponentGovernanceDetection: true
-  #   pool:
-  #     vmImage: 'windows-latest'
-  #   steps:
-  #   - download: current
-  #     artifact: '$(artifactModule)'
-  #   - template: template-psmodule-sign.yml
-  #     parameters:
-  #       moduleName: '$(moduleName)'
-
 - stage: Test
   dependsOn: Build
   jobs: 
-  - job: Prepare
-    variables:
+  - job: Windows
+    variables: 
       skipComponentGovernanceDetection: true
       runCodesignValidationInjection: false
+    pool:
+      vmImage: 'windows-latest'
     steps:
     - download: current
       artifact: '$(artifactModule)'
@@ -97,17 +83,49 @@ stages:
       displayName: 'Get Parameters for PowerShell Module'
       inputs:
         filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-        arguments: '-ModuleManifestPath "$(Build.SourcesDirectory)/src/*.psd1" -TrimVersionDepth 2'
+        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModule)/*/*.psd1"'
         pwsh: true
+    - template: template-psmodule-test.yml
+      parameters:
+        moduleName: '$(ModuleInfo.moduleName)'
+        testWindowsPowershell: true
 
-  - job: Test
-    dependsOn: Prepare
+  - job: Ubuntu
     variables: 
+      skipComponentGovernanceDetection: true
       runCodesignValidationInjection: false
-      moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - download: current
       artifact: '$(artifactModule)'
+    - task: PowerShell@2
+      name: ModuleInfo
+      displayName: 'Get Parameters for PowerShell Module'
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModule)/*/*.psd1"'
+        pwsh: true
     - template: template-psmodule-test.yml
       parameters:
-        moduleName: '$(moduleName)'
+        moduleName: '$(ModuleInfo.moduleName)'
+
+  - job: MacOS
+    variables: 
+      skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - download: current
+      artifact: '$(artifactModule)'
+    - task: PowerShell@2
+      name: ModuleInfo
+      displayName: 'Get Parameters for PowerShell Module'
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModule)/*/*.psd1"'
+        pwsh: true
+    - template: template-psmodule-test.yml
+      parameters:
+        moduleName: '$(ModuleInfo.moduleName)'

@@ -22,35 +22,35 @@ function Get-MsIdUnmanagedExternalUser {
     $hasMoreData = $true
     $userIndex = 1
 
-     #Declare $user as GraphUser object
+    #Declare $user as GraphUser object
 
-    if ($count -eq 0){
+    if ($count -eq 0) {
         Write-Host "No guest users in this tenant."
     }
     elseif ($count -gt 0) {
-        while($hasMoreData) {     
+        while ($hasMoreData) {     
             $percentCompleted = $currentPage * $pageCount / $count * 100
             $currentPage += 1
-            Write-Progress -Activity "Checking Guest Users"  -PercentComplete $percentCompleted
+            Write-Progress -Activity "Checking Guest Users" -PercentComplete $percentCompleted
             
-            foreach ($userObject in (Get-ObjectPropertyValue $results 'value')){
+            foreach ($userObject in (Get-ObjectPropertyValue $results 'value')) {
                 [Microsoft.Graph.PowerShell.Models.MicrosoftGraphUser1]$user = $userObject
                 
                 Write-Verbose "$userIndex / $count"
                 $userIndex += 1
                 $isAzureAdUser = $false
-                foreach($identity in (Get-ObjectPropertyValue $user 'identities')){
-                    if((Get-ObjectPropertyValue $identity  'issuer') -eq 'ExternalAzureAD'){
+                foreach ($identity in (Get-ObjectPropertyValue $user 'identities')) {
+                    if ((Get-ObjectPropertyValue $identity 'issuer') -eq 'ExternalAzureAD') {
                         $isAzureAdUser = $true
                         break;
                     }
                 }
 
-                if($isAzureAdUser){
+                if ($isAzureAdUser) {
                     Write-Verbose "Checking if user is viral user. $($user.userPrincipalName)"
 
                     $mail = Get-ObjectPropertyValue $user 'mail'
-                    if(![string]::IsNullOrEmpty($mail)) {
+                    if (![string]::IsNullOrEmpty($mail)) {
                         $encodedMail = [System.Web.HttpUtility]::UrlEncode($user.mail)
                         
                         $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
@@ -59,7 +59,7 @@ function Get-MsIdUnmanagedExternalUser {
                         try {
                             $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
                             $content = ConvertFrom-Json (Get-ObjectPropertyValue $userRealmResponse 'Content')
-                            if ((Get-ObjectPropertyValue $content 'IsViral') -eq "True"){
+                            if ((Get-ObjectPropertyValue $content 'IsViral') -eq "True") {
                                 Write-Verbose "$($user.userPrincipalName)  = viral user"
                                 Write-Output $user
                             }
@@ -78,7 +78,7 @@ function Get-MsIdUnmanagedExternalUser {
             }
         
             $nextLink = Get-ObjectPropertyValue $results 'nextLink'
-            if($nextLink){
+            if ($nextLink) {
                 $results = Invoke-MgGraphRequest -Uri $nextLink -Headers @{ ConsistencyLevel = 'eventual' }
             }
             else {

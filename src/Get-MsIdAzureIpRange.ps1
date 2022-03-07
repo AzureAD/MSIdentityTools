@@ -35,7 +35,7 @@ function Get-MsIdAzureIpRange {
                 [string] $ServiceTag = ''  # Default ServiceTag parameter value
                 if ($fakeBoundParameters.ContainsKey('ServiceTag')) { $ServiceTag = $fakeBoundParameters.ServiceTag }
 
-                [array] $AllServiceTagsAndRegions = Get-MsIdAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
+                [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
                 #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
 
                 $listRegions = New-Object System.Collections.Generic.List[string]
@@ -62,7 +62,7 @@ function Get-MsIdAzureIpRange {
                 [string] $Region = ''  # Default Region parameter value
                 if ($fakeBoundParameters.ContainsKey('Region')) { $Region = $fakeBoundParameters.Region }
 
-                [array] $AllServiceTagsAndRegions = Get-MsIdAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
+                [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
                 #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
 
                 $listServiceTags = New-Object System.Collections.Generic.List[string]

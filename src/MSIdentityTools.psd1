@@ -63,7 +63,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = @()
+    FormatsToProcess = @('.\internal\SamlMessages.format.ps1xml')
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules        = @(
@@ -73,7 +73,7 @@
         '.\internal\ConvertFrom-HexString.ps1'
         '.\internal\ConvertFrom-JsonWebSignature.ps1'
         '.\internal\ConvertFrom-QueryString.ps1'
-        '.\internal\ConvertFrom-SamlSecurityToken.ps1'
+        '.\internal\ConvertFrom-SamlMessage.ps1'
         '.\internal\ConvertFrom-SecureStringAsPlainText.ps1'
         '.\internal\ConvertTo-Base64String.ps1'
         '.\internal\ConvertTo-HexString.ps1'
@@ -86,6 +86,8 @@
         '.\internal\Get-SamlFederationMetadata.ps1'
         '.\internal\Get-X509Certificate.ps1'
         '.\internal\Invoke-CommandAsSystem.ps1'
+        '.\internal\Resolve-XmlAttribute.ps1'
+        '.\internal\Resolve-XmlElement.ps1'
         '.\internal\Test-IpAddressInSubnet.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
@@ -93,6 +95,7 @@
         '.\ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1'
         '.\ConvertFrom-MsIdAadcSourceAnchor.ps1'
         '.\ConvertFrom-MsIdJwtToken.ps1'
+        '.\ConvertFrom-MsIdSamlMessage.ps1'
         '.\Expand-MsIdJwtTokenPayload.ps1'
         '.\Get-MsIdAuthorityUri.ps1'
         '.\Get-MsIdAzureIpRange.ps1'
@@ -109,7 +112,7 @@
         '.\Reset-MsIdExternalUser.ps1'
         '.\Resolve-MsIdAzureIpAddress.ps1'
         '.\Show-MsIdJwtToken.ps1'
-        '.\Show-MsIdSamlSecurityToken.ps1'
+        '.\Show-MsIdSamlToken.ps1'
         '.\Test-MsIdAzureAdDeviceRegConnectivity.ps1'
         '.\Resolve-MsIdTenant.ps1'
         '.\Get-MsIdSigningKeyThumbprint.ps1'
@@ -122,6 +125,7 @@
         'ConvertFrom-MsIdAadcAadConnectorSpaceDn'
         'ConvertFrom-MsIdAadcSourceAnchor'
         'ConvertFrom-MsIdJwtToken'
+        'ConvertFrom-MsIdSamlMessage'
         'Expand-MsIdJwtTokenPayload'
         'Get-MsIdAuthorityUri'
         'Get-MsIdAzureIpRange'
@@ -139,7 +143,7 @@
         'Resolve-MsIdTenant'
         'Resolve-MsIdAzureIpAddress'
         'Show-MsIdJwtToken'
-        'Show-MsIdSamlSecurityToken'
+        'Show-MsIdSamlToken'
         'Test-MsIdAzureAdDeviceRegConnectivity'
         'Get-MsIdSigningKeyThumbprint'
         'Update-MsIdApplicationSigningKeyThumbprint'
@@ -155,6 +159,8 @@
     AliasesToExport      = @(
         'ConvertFrom-MsIdAzureAdImmutableId'
         'Get-MsIdWsFedFederationMetadata'
+        'ConvertFrom-MsIdSamlRequest'
+        'ConvertFrom-MsIdSamlResponse'
     )
 
     # DSC resources to export from this module
@@ -164,10 +170,7 @@
     # ModuleList = @()
 
     # List of all files packaged with this module
-    #FileList = @(
-    #    '..\build\packages\Microsoft.Identity.Client.4.1.0\lib\netcoreapp2.1\Microsoft.Identity.Client.dll'
-    #    '..\build\packages\Microsoft.Identity.Client.4.1.0\lib\net45\Microsoft.Identity.Client.dll'
-    #)
+    # FileList = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData          = @{

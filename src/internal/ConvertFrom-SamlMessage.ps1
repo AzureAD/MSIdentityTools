@@ -1,40 +1,38 @@
 <#
 .SYNOPSIS
-   Convert Saml Security Token structure to PowerShell object.
+   Convert Saml Message to XML object.
 .EXAMPLE
-    PS C:\>ConvertFrom-SamlSecurityToken 'Base64String'
-    Convert Saml Security Token to XML object.
+    PS C:\>ConvertFrom-SamlMessage 'Base64String'
+    Convert Saml Message to XML object.
 .INPUTS
     System.String
+.OUTPUTS
+    SamlMessage : System.Xml.XmlDocument
 #>
-function ConvertFrom-SamlSecurityToken {
+function ConvertFrom-SamlMessage {
     [CmdletBinding()]
     [Alias('ConvertFrom-SamlRequest')]
     [Alias('ConvertFrom-SamlResponse')]
-    [OutputType([xml])]
+    #[OutputType([xml])]
     param (
-        # SAML Security Token
+        # SAML Message
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [string[]] $InputObjects
-        # Encoding to use for text strings
-        #[Parameter (Mandatory = $false)]
-        #[ValidateSet('Ascii', 'UTF32', 'UTF7', 'UTF8', 'BigEndianUnicode', 'Unicode')]
-        #[string] $Encoding = 'Default'
+        [string[]] $InputObject
     )
 
     process {
-        foreach ($InputObject in $InputObjects) {
+        foreach ($_InputObject in $InputObject) {
             [byte[]] $bytesInput = $null
-            $xmlOutput = New-Object xml
+            $xmlOutput = New-Object SamlMessage
             try {
-                $xmlOutput.LoadXml($InputObject)
+                $xmlOutput.LoadXml($_InputObject)
             }
             catch {
                 try {
-                    $bytesInput = [System.Convert]::FromBase64String($InputObject)
+                    $bytesInput = [System.Convert]::FromBase64String($_InputObject)
                 }
                 catch {
-                    $bytesInput = [System.Convert]::FromBase64String([System.Net.WebUtility]::UrlDecode($InputObject))
+                    $bytesInput = [System.Convert]::FromBase64String([System.Net.WebUtility]::UrlDecode($_InputObject))
                 }
             }
             if ($bytesInput) {

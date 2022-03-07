@@ -34,7 +34,7 @@ function Reset-MsIdExternalUser {
 
         # User object of external user
         [Parameter(Mandatory = $true, ParameterSetName = 'GraphUser', Position = 0, ValueFromPipeline = $true)]
-        [Microsoft.Graph.PowerShell.Models.MicrosoftGraphUser1] $User,
+        [psobject] $User,
         
         # The url to redirect the user to after they redeem the link
         # Defaults to My Apps page of the inviter's home tenant. https://myapps.microsoft.com?tenantId={tenantId}
@@ -49,12 +49,21 @@ function Reset-MsIdExternalUser {
     )
 
     begin {
+        
+        ## Initialize Critical Dependencies
+
+        $CriticalError = $null
+        try {
+            Import-Module Microsoft.Graph.Identity.SignIns -MinimumVersion 1.9.2 -ErrorAction Stop
+        }
+        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+
         $previousProfile = Get-MgProfile
-        if($previousProfile.Name -ne 'beta'){
+        if ($previousProfile.Name -ne 'beta') {
             Select-MgProfile -Name 'beta'
         }
     
-        if(!$InviteRedirectUrl){
+        if (!$InviteRedirectUrl) {
             $tenantId = (Get-MgContext).TenantId
             $InviteRedirectUrl = "https://myapps.microsoft.com?tenantId=$tenantId"
         }
@@ -62,22 +71,45 @@ function Reset-MsIdExternalUser {
     }
 
     process {
-
         function Send-Invitation {
-            param ($graphUser)
+            [CmdletBinding()]
+            param (
+                [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+                [psobject]$GraphUser
+            )
 
+            # check that object has requried properties
+            if ($GraphUser.psobject.Properties.Name -inotcontains "id") {
+                Write-Error "No provided user id"
+            } 
+            if ($GraphUser.psobject.Properties.Name -inotcontains "mail") {
+                Write-Error "No provided user mail"
+            } 
+            # check that values are not empty
+            if ([string]::IsNullOrWhiteSpace($GraphUser.Id)) {
+                Write-Error "Provided user id is empty"
+            }
+            if ([string]::IsNullOrWhiteSpace($GraphUser.Mail)) {
+                Write-Error "Provided user mail is empty"
+            }
+            # send the invitation
             New-MgInvitation `
-                -InvitedUserEmailAddress $graphUser.Mail `
+                -InvitedUserEmailAddress $GraphUser.Mail `
                 -InviteRedirectUrl $InviteRedirectUrl `
                 -ResetRedemption `
                 -SendInvitationMessage:$doSendInvitationMessage `
-                -InvitedUser $graphUser
+                -InvitedUser @{ "id" = $GraphUser.Id }
+        }
+
+        # don't process further if there is a critical error
+        if ($CriticalError) {
+            return
         }
 
         switch ($PSCmdlet.ParameterSetName) {
             "ObjectId" {
                 $graphUser = Get-MgUser -UserId $UserId
-                if($graphUser){
+                if ($graphUser) {
                     Send-Invitation $graphUser
                 }
                 else {
@@ -86,14 +118,14 @@ function Reset-MsIdExternalUser {
                 break
             }
             "GraphUser" {
-                Send-Invitation $graphUser
+                Send-Invitation $User
                 break
             }
         }
     }
 
     end {
-        if($previousProfile.Name -ne (Get-MgProfile).Name){
+        if ($previousProfile.Name -ne (Get-MgProfile).Name) {
             Select-MgProfile -Name $previousProfile.Name
         }
     }

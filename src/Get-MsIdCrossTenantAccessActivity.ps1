@@ -339,7 +339,7 @@ function Get-MsIdCrossTenantAccessActivity {
 
                     #Attempt to resolve tenant ID
 
-                    try { $ResolvedTenant = Resolve-MsIdTenant -TenantId $TenantId.Name -ErrorAction SilentlyContinue }
+                    try { $ResolvedTenant = Resolve-MSIDTenant -TenantId $TenantId.Name -ErrorAction SilentlyContinue }
                     catch { Write-Verbose -Message "$(Get-Date -f T) - Issue resolving external tenant - $($TenantId.Name)" }
 
                     if ($ResolvedTenant) {
