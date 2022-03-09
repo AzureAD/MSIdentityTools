@@ -30,7 +30,7 @@ parameters:
 steps:
 - pwsh: 'exit 1'
   displayName: 'Check Required Parameters'
-  condition: 'and(succeeded(), eq(${{ coalesce(parameters.SigningCertificateSecretName, parameters.EsrpCodeSigningServiceName, ''Error'') }}, ''Error''))'
+  condition: 'and(succeeded(), eq(''${{ coalesce(parameters.SigningCertificateSecretName, parameters.EsrpCodeSigningServiceName, ''Error'') }}'', ''Error''))'
 
 #- download: none
 - checkout: self
