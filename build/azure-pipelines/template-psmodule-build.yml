@@ -88,7 +88,7 @@ steps:
   - task: ManifestGeneratorTask@0
     displayName: 'Generate Software Bill of Materials (SBOM)'
     inputs:
-      BuildDropPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
+      BuildDropPath: '$(Pipeline.Workspace)/${{ parameters.artifactOutput }}'
 
 - task: PublishPipelineArtifact@1
   displayName: 'Publish PowerShell Module Artifact'
