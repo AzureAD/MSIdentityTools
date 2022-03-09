@@ -1,14 +1,20 @@
 <#
 .SYNOPSIS
     Convert Msft Identity token structure to PowerShell object.
+
 .EXAMPLE
-    PS C:\>ConvertFrom-MsIdJwtToken $OpenIdConnectToken
+    PS > ConvertFrom-MsIdJwtToken $OpenIdConnectToken
+
     Convert OAuth Id Token JWS to PowerShell object.
+
 .EXAMPLE
-    PS C:\>ConvertFrom-MsIdJwtToken $AccessToken
+    PS > ConvertFrom-MsIdJwtToken $AccessToken
+
     Convert OAuth Access Token JWS to PowerShell object.
+
 .INPUTS
     System.String
+    
 #>
 function ConvertFrom-MsIdJwtToken {
     [CmdletBinding()]

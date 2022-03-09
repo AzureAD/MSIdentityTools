@@ -88,6 +88,7 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
+        pesterConfigurationName: 'CI'
         testWindowsPowershell: true
 
   - job: Ubuntu
@@ -109,6 +110,7 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
+        pesterConfigurationName: 'CI'
 
   - job: MacOS
     variables: 
@@ -129,3 +131,4 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
+        pesterConfigurationName: 'CI'

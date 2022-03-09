@@ -1,11 +1,15 @@
 <#
 .SYNOPSIS
     Extract Json Web Token (JWT) payload from JWS structure to PowerShell object.
+
 .EXAMPLE
-    PS C:\>$MsalToken.IdToken | Expand-MsIdJwtTokenPayload
+    PS > $MsalToken.IdToken | Expand-MsIdJwtTokenPayload
+
     Extract Json Web Token (JWT) payload from JWS structure to PowerShell object.
+
 .INPUTS
     System.String
+    
 #>
 function Expand-MsIdJwtTokenPayload {
     [CmdletBinding()]

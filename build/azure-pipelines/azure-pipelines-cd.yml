@@ -85,6 +85,76 @@ stages:
         moduleName: '$(moduleName)'
         pipelineId: 'CI'
 
+- stage: Test
+  dependsOn: Build
+  jobs: 
+  - job: Windows
+    variables: 
+      skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - download: current
+      artifact: '$(artifactModuleSigned)'
+    - task: PowerShell@2
+      name: ModuleInfo
+      displayName: 'Get Parameters for PowerShell Module'
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModuleSigned)/*/*.psd1"'
+        pwsh: true
+    - template: template-psmodule-test.yml
+      parameters:
+        moduleName: '$(ModuleInfo.moduleName)'
+        pesterConfigurationName: 'CD'
+        testWindowsPowershell: true
+        artifactInput: '$(artifactModuleSigned)'
+
+  - job: Ubuntu
+    variables: 
+      skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - download: current
+      artifact: '$(artifactModuleSigned)'
+    - task: PowerShell@2
+      name: ModuleInfo
+      displayName: 'Get Parameters for PowerShell Module'
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModuleSigned)/*/*.psd1"'
+        pwsh: true
+    - template: template-psmodule-test.yml
+      parameters:
+        moduleName: '$(ModuleInfo.moduleName)'
+        pesterConfigurationName: 'CD'
+        artifactInput: '$(artifactModuleSigned)'
+
+  - job: MacOS
+    variables: 
+      skipComponentGovernanceDetection: true
+      runCodesignValidationInjection: false
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - download: current
+      artifact: '$(artifactModuleSigned)'
+    - task: PowerShell@2
+      name: ModuleInfo
+      displayName: 'Get Parameters for PowerShell Module'
+      inputs:
+        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModuleSigned)/*/*.psd1"'
+        pwsh: true
+    - template: template-psmodule-test.yml
+      parameters:
+        moduleName: '$(ModuleInfo.moduleName)'
+        pesterConfigurationName: 'CD'
+        artifactInput: '$(artifactModuleSigned)'
+
 - stage: Package
   displayName: 'Standalone Package'
   dependsOn: Build
@@ -124,6 +194,7 @@ stages:
 #   displayName: 'Deploy Test'
 #   dependsOn:
 #   - Build
+#   - Test
 #   jobs: 
 #   - job: Prepare
 #     variables:
@@ -163,6 +234,7 @@ stages:
   displayName: 'Deploy Production'
   dependsOn:
   - Build
+  - Test
   - Package
   jobs: 
   - job: Prepare

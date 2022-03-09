@@ -1,9 +1,12 @@
 <#
 .SYNOPSIS
     Returns a list of all the external users in the tenant that are unmanaged (viral users).
+    
 .EXAMPLE
-    PS C:\>Get-MsIdUnmanagedExternalUsers
+    PS > Get-MsIdUnmanagedExternalUsers
+
     Gets a list of all the unmanaged (viral) users in the tenant.
+
 #>
 function Get-MsIdUnmanagedExternalUser {
     [CmdletBinding()]

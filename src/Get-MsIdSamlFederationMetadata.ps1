@@ -1,17 +1,25 @@
 <#
 .SYNOPSIS
     Parse Federation Metadata
+    
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-SamlFederationMetadata
+    PS > Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-MsIdSamlFederationMetadata
+
     Get SAML or WS-Fed Federation Metadata for a specific Microsoft tenant.
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-SamlFederationMetadata -AppId 00000000-0000-0000-0000-000000000000
+    PS > Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com -AppType 'Saml' | Get-MsIdSamlFederationMetadata -AppId 00000000-0000-0000-0000-000000000000
+
     Get SAML or WS-Fed Federation Metadata for a specific application within a specific Microsoft tenant.
+
 .EXAMPLE
-    PS C:\>Get-SamlFederationMetadata 'https://adfs.contoso.com'
+    PS > Get-MsIdSamlFederationMetadata 'https://adfs.contoso.com'
+
     Get SAML or WS-Fed Federation Metadata for an ADFS farm.
+
 .INPUTS
     System.Uri
+
 #>
 function Get-MsIdSamlFederationMetadata {
     [CmdletBinding()]

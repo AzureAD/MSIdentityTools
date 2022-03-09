@@ -1,27 +1,32 @@
 <#
 .SYNOPSIS
-   Resets the redemption state of an external user.
+    Resets the redemption state of an external user.
 
 .EXAMPLE
-    PS C:\>Reset-MsIdExternalUser -UserId 1468b68b-8536-4bc5-ab1f-6014175b836d
+    PS > Reset-MsIdExternalUser -UserId 1468b68b-8536-4bc5-ab1f-6014175b836d
+
     Resets the invitation state of an external user.
 
 .EXAMPLE
-    PS C:\>Reset-MsIdExternalUser -UserId 1468b68b-8536-4bc5-ab1f-6014175b836d -SendInvitationMessage
+    PS > Reset-MsIdExternalUser -UserId 1468b68b-8536-4bc5-ab1f-6014175b836d -SendInvitationMessage
+
     Resets the invitation state of an external user and sends them the invitation redemption mail.
 
 .EXAMPLE
-    PS C:\>$user = Get-MgUser -Filter "startsWith(mail, 'john.doe@fabrikam.net')"
-    PS C:\>Reset-MsIdExternalUser -UserId $user.Id
+    PS > $user = Get-MgUser -Filter "startsWith(mail, 'john.doe@fabrikam.net')"
+    PS > Reset-MsIdExternalUser -UserId $user.Id
+
     Resets the invitation state of an external user with the email address john.doe@fabrikam.net.
 
 .EXAMPLE
-    PS C:\>$users = Get-MgUser -Filter "endsWith(mail, '@fabrikam.net')"
-    PS C:\>$users | Reset-MsIdExternalUser -UserId $user.Id -SendInvitationMessage
+    PS > $users = Get-MgUser -Filter "endsWith(mail, '@fabrikam.net')"
+    PS > $users | Reset-MsIdExternalUser -UserId $user.Id -SendInvitationMessage
+
     Resets the invitation state of all external users from fabrikam.net and sends them an invitation mail.
 
 .EXAMPLE
-    PS C:\>Get-MsIdUnmanagedExternalUser | Reset-MsIdExternalUser 
+    PS > Get-MsIdUnmanagedExternalUser | Reset-MsIdExternalUser
+
     Resets the invitation state of all unmanaged external users in the tenant.
 
 #>

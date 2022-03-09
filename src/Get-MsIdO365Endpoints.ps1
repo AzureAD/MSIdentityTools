@@ -1,19 +1,28 @@
 <#
 .SYNOPSIS
     Get list of URLs and IP ranges for O365
+    
 .DESCRIPTION
     http://aka.ms/ipurlws
+
 .EXAMPLE
-    PS C:\>Get-MsIdO365Endpoints
+    PS > Get-MsIdO365Endpoints
+
     Get list of URLs and IP ranges for O365 Worldwide cloud.
+
 .EXAMPLE
-    PS C:\>Get-MsIdO365Endpoints -Cloud China -ServiceAreas Exchange,SharePoint
+    PS > Get-MsIdO365Endpoints -Cloud China -ServiceAreas Exchange,SharePoint
+
     Get list of URLs and IP ranges for Exchange and SharePoint in O365 China Cloud.
+
 .EXAMPLE
-    PS C:\>Get-MsIdO365Endpoints -Cloud Worldwide -ServiceAreas Common | Where-Object id -In 54,56,59,96
+    PS > Get-MsIdO365Endpoints -Cloud Worldwide -ServiceAreas Common | Where-Object id -In 54,56,59,96
+
     Get list of URLs and IP ranges related to Azure Active Directory.
+
 .INPUTS
     System.String
+
 #>
 function Get-MsIdO365Endpoints {
     [CmdletBinding()]

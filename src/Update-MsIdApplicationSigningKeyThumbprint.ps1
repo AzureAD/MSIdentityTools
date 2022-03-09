@@ -1,16 +1,26 @@
 <#
 .SYNOPSIS
     Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint
+
+.DESCRIPTION
+    Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint
     For more information on Microsoft Identity platorm signing key rollover see https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-signing-key-rollover
+
 .EXAMPLE
-    PS C:\>Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
+    PS > Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
+
     Update Application's preferred signing key to the specified thumbprint
+
 .EXAMPLE
-    PS C:\>Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -Default
+    PS > Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -Default
+    
     Update Application's preferred signing key to default value null
+
 .EXAMPLE
-    PS C:\>Get-MsIdSigningKeyThumbprint -Latest | Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId>
+    PS > Get-MsIdSigningKeyThumbprint -Latest | Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId>
+
     Get the latest signing key thumbprint and set it as the perferred signing key on the application
+
 #>
 
 function Update-MsIdApplicationSigningKeyThumbprint{

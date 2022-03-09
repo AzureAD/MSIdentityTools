@@ -1,9 +1,12 @@
 <#
 .SYNOPSIS
     Generate Random password for user in Azure AD.
+    
 .EXAMPLE
-    PS C:\>New-MsIdTemporaryUserPassword
+    PS > New-MsIdTemporaryUserPassword
+
     Generates a new password.
+
 #>
 function New-MsIdTemporaryUserPassword {
     [CmdletBinding()]

@@ -1,11 +1,15 @@
 <#
 .SYNOPSIS
    Show Saml Security Token decoded in Web Browser.
+   
 .EXAMPLE
-    PS C:\>Show-MsIdSamlToken 'Base64String'
+    PS > Show-MsIdSamlToken 'Base64String'
+
     Show Saml Security Token decoded in Web Browser.
+
 .INPUTS
     System.String
+
 #>
 function Show-MsIdSamlToken {
     [CmdletBinding()]

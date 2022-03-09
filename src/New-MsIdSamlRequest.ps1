@@ -1,13 +1,18 @@
 <#
 .SYNOPSIS
    Create New Saml Request.
+   
 .EXAMPLE
-    PS C:\>New-MsIdSamlRequest -Issuer 'urn:microsoft:adfs:claimsxray'
+    PS > New-MsIdSamlRequest -Issuer 'urn:microsoft:adfs:claimsxray'
+
     Create New Saml Request for Claims X-Ray.
+
 .INPUTS
     System.String
+
 .OUTPUTS
     SamlMessage : System.Xml.XmlDocument, System.String
+
 #>
 function New-MsIdSamlRequest {
     [CmdletBinding()]

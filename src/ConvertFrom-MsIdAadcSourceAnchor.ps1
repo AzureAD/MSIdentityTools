@@ -1,14 +1,20 @@
 <#
 .SYNOPSIS
     Convert Azure AD Connect metaverse object sourceAnchor or Azure AD ImmutableId to sourceGuid.
+    
 .EXAMPLE
-    PS C:\>ConvertFrom-MsIdAadcSourceAnchor 'AAAAAAAAAAAAAAAAAAAAAA=='
+    PS > ConvertFrom-MsIdAadcSourceAnchor 'AAAAAAAAAAAAAAAAAAAAAA=='
+
     Convert Azure AD Connect metaverse object sourceAnchor base64 format to sourceGuid.
+
 .EXAMPLE
-    PS C:\>ConvertFrom-MsIdAadcSourceAnchor '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+    PS > ConvertFrom-MsIdAadcSourceAnchor '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+
     Convert Azure AD Connect metaverse object sourceAnchor hex format to sourceGuid.
+
 .INPUTS
     System.String
+
 #>
 function ConvertFrom-MsIdAadcSourceAnchor {
     [CmdletBinding()]

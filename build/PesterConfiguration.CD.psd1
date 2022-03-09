@@ -2,6 +2,10 @@
     Run          = @{
         #PassThru = $true
     }
+    Filter       = @{
+        #Tag        = ''
+        #ExcludeTag = 'IntegrationTest'
+    }
     CodeCoverage = @{
         Enabled      = $true
         OutputFormat = 'JaCoCo'

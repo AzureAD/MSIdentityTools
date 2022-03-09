@@ -38,6 +38,7 @@ function Get-ObjectPropertyValue {
                 }
                 else {
                     $PropertyValue = Select-Object -InputObject $InputObject -ExpandProperty $Property[$iProperty] -ErrorAction Ignore
+                    if ($null -eq $PropertyValue) { break }
                 }
                 ## Check for more nested properties
                 if ($iProperty -lt $Property.Count - 1) {

@@ -1,12 +1,16 @@
 <#
 .SYNOPSIS
-   Invoke Saml Request on Azure AD.
+    Invoke Saml Request on Azure AD.
+   
 .EXAMPLE
-    PS C:\>$samlRequest = New-MsIdSamlRequest -Issuer 'urn:microsoft:adfs:claimsxray'
-    PS C:\>Invoke-MsIdAzureAdSamlRequest $samlRequest.OuterXml
+    PS > $samlRequest = New-MsIdSamlRequest -Issuer 'urn:microsoft:adfs:claimsxray'
+    PS > Invoke-MsIdAzureAdSamlRequest $samlRequest.OuterXml
+
     Create new Saml Request for Claims X-Ray and Invoke on Azure AD.
+
 .INPUTS
     System.String
+
 #>
 function Invoke-MsIdAzureAdSamlRequest {
     [CmdletBinding()]

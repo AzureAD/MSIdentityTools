@@ -1,14 +1,20 @@
 <#
 .SYNOPSIS
     Validate the digital signature for JSON Web Token.
+
 .EXAMPLE
-    PS C:\>Confirm-MsIdJwtTokenSignature $OpenIdConnectToken
+    PS > Confirm-MsIdJwtTokenSignature $OpenIdConnectToken
+
     Validate the OpenId token was signed by token issuer based on the OIDC Provider Configuration for token issuer.
+
 .EXAMPLE
-    PS C:\>Confirm-MsIdJwtTokenSignature $AccessToken
+    PS > Confirm-MsIdJwtTokenSignature $AccessToken
+
     Validate the access token was signed by token issuer based on the OIDC Provider Configuration for token issuer.
+
 .INPUTS
     System.String
+    
 #>
 function Confirm-MsIdJwtTokenSignature {
     [CmdletBinding()]

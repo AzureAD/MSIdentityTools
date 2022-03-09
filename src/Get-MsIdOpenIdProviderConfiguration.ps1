@@ -1,17 +1,25 @@
 <#
 .SYNOPSIS
     Parse OpenId Provider Configuration and Keys
+    
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com | Get-OpenIdProviderConfiguration
+    PS > Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com | Get-MsIdOpenIdProviderConfiguration
+
     Get OpenId Provider Configuration for a specific Microsoft organizational tenant (Azure AD).
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com | Get-OpenIdProviderConfiguration -Keys
+    PS > Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com | Get-MsIdOpenIdProviderConfiguration -Keys
+
     Get public keys for OpenId Provider for a specific Microsoft organizational tenant (Azure AD).
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -Msa | Get-OpenIdProviderConfiguration
+    PS > Get-MsIdAuthorityUri -Msa | Get-MsIdOpenIdProviderConfiguration
+
     Get OpenId Provider Configuration for Microsoft consumer accounts (MSA).
+
 .INPUTS
     System.Uri
+
 #>
 function Get-MsIdOpenIdProviderConfiguration {
     [CmdletBinding()]

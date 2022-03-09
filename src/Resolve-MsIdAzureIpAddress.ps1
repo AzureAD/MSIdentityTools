@@ -1,16 +1,22 @@
 <#
 .SYNOPSIS
     Lookup Azure IP address for Azure Cloud, Region, and Service Tag.
+    
 .EXAMPLE
-    PS C:\>$IpAddress = Resolve-DnsName login.microsoftonline.com | Where-Object QueryType -eq A | Select-Object -First 1 -ExpandProperty IPAddress
-    PS C:\>Resolve-MsIdAzureIpAddress $IpAddress
+    PS > $IpAddress = Resolve-DnsName login.microsoftonline.com | Where-Object QueryType -eq A | Select-Object -First 1 -ExpandProperty IPAddress
+    PS > Resolve-MsIdAzureIpAddress $IpAddress
+
     Lookup Azure IP address for Azure Cloud, Region, and Service Tag.
+
 .EXAMPLE
-    PS C:\>Resolve-MsIdAzureIpAddress graph.microsoft.com
+    PS > Resolve-MsIdAzureIpAddress graph.microsoft.com
+
     Lookup Azure IP address for Azure Cloud, Region, and Service Tag.
+
 .INPUTS
     System.String
     System.Net.IPAddress
+
 #>
 function Resolve-MsIdAzureIpAddress {
     [CmdletBinding()]

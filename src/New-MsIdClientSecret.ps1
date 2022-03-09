@@ -1,12 +1,17 @@
 <#
 .SYNOPSIS
     Generate Random Client Secret for application registration or service principal in Azure AD.
+    
 .EXAMPLE
-    PS C:\>New-MsIdClientSecret
+    PS > New-MsIdClientSecret
+
     Generates a new client secret 32 characters long.
+    
 .EXAMPLE
-    PS C:\>New-MsIdClientSecret -Length 64 -Base64Encode
+    PS > New-MsIdClientSecret -Length 64 -Base64Encode
+
     Generates a new client secret 64 bytes long and then base64 encodes it.
+
 #>
 function New-MsIdClientSecret {
     [CmdletBinding()]

@@ -1,11 +1,15 @@
 <#
 .SYNOPSIS
     Parse Microsoft Identity Association Configuration for a Public Domain (such as published apps)
+
 .EXAMPLE
-    PS C:\>Get-MsIdMsftIdentityAssociation https://contoso.com/
+    PS > Get-MsIdMsftIdentityAssociation https://contoso.com/
+    
     Get Microsoft Identity Association Configuration for contoso domain.
+
 .INPUTS
     System.Uri
+
 #>
 function Get-MsIdMsftIdentityAssociation {
     [CmdletBinding()]

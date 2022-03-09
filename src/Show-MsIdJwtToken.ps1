@@ -1,11 +1,15 @@
 <#
 .SYNOPSIS
    Show Json Web Token (JWT) decoded in Web Browser.
+   
 .EXAMPLE
-    PS C:\>$MsalToken.IdToken | Show-MsIdJwtToken
+    PS > $MsalToken.IdToken | Show-MsIdJwtToken
+
     Show OAuth IdToken JWT decoded in Web Browser.
+
 .INPUTS
     System.String
+
 #>
 function Show-MsIdJwtToken {
     [CmdletBinding()]

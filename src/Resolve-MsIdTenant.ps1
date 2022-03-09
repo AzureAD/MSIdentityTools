@@ -1,17 +1,31 @@
 <#
 .SYNOPSIS
     Resolve TenantId or DomainName to an Azure AD Tenant
+    
 .DESCRIPTION
     Resolves TenantID or DomainName values to an Azure AD tenant to retrieve metadata about the tenant when resolved
+
 .EXAMPLE
     Resolve-MsIdTenant -Tenant example.com
+
+    Resolve tenant example.com
+
 .EXAMPLE
     Resolve-MsIdTenant -TenantId c19543f3-d36c-435c-ad33-18f11b8c1a15
+
+    Resolve tenant guid c19543f3-d36c-435c-ad33-18f11b8c1a15
+
 .EXAMPLE
     Resolve-MsIdTenant -Tenant "example.com","c19543f3-d36c-435c-ad33-18f11b8c1a15"
+
+    Resolve tenant domain, example.com, and tenant guid, c19543f3-d36c-435c-ad33-18f11b8c1a15.
+
 .EXAMPLE
     $DomainList = get-content .\DomainList.txt
     Resolve-MsIdTenant -Tenant $DomainList
+
+    Resolve tenants in DomainList.txt
+
 .NOTES
     - Azure AD OIDC Metadata endpoint - https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
     - A Result of NotFound does not mean that the tenant does not exist at all, but it might be in a different cloud environment.   Additional queries to other environments may result in it being found.
@@ -29,6 +43,7 @@
     the use of or inability to use the sample or documentation, even if Microsoft has been advised 
     of the possibility of such damages, rising out of the use of or inability to use the sample script, 
     even if Microsoft has been advised of the possibility of such damages.
+
 #>
 function Resolve-MsIdTenant {
     [CmdletBinding(DefaultParameterSetName = 'Parameter Set 1',

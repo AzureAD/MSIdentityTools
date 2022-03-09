@@ -1,21 +1,32 @@
 <#
 .SYNOPSIS
     Build Microsoft Identity Provider Authority URI
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri
+    PS > Get-MsIdAuthorityUri
+
     Get common Microsoft authority URI endpoint.
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -TenantId contoso.com
+    PS > Get-MsIdAuthorityUri -TenantId contoso.com
+
     Get Microsoft IdP authority URI endpoint for a specific organizational tenant (Azure AD).
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -AzureAd
+    PS > Get-MsIdAuthorityUri -AzureAd
+
     Get Microsoft IdP authority URI endpoint for any organizational account (Azure AD).
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -Msa
+    PS > Get-MsIdAuthorityUri -Msa
+
     Get Microsoft IdP authority URI endpoint for any Microsoft consumer account (MSA).
+
 .EXAMPLE
-    PS C:\>Get-MsIdAuthorityUri -AzureAdB2c -TenantName contoso -Policy B2C_1_SignUp
+    PS > Get-MsIdAuthorityUri -AzureAdB2c -TenantName contoso -Policy B2C_1_SignUp
+
     Get Microsoft IdP authority URI endpoint for a specific organization B2C tenant (Azure AD B2C) using the B2C_1_SignUp policy.
+    
 #>
 function Get-MsIdAuthorityUri {
     [CmdletBinding(DefaultParameterSetName = 'Common')]

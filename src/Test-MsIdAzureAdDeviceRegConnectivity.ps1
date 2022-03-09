@@ -1,16 +1,23 @@
 <#
 .SYNOPSIS
     Test connectivity on Windows OS for Azure AD Device Registration
+    
 .EXAMPLE
-    PS C:\>Test-MsIdAzureAdDeviceRegConnectivity
+    PS > Test-MsIdAzureAdDeviceRegConnectivity
+
     Test required hostnames
+
 .EXAMPLE
-    PS C:\>Test-MsIdAzureAdDeviceRegConnectivity -AdfsHostname 'adfs.contoso.com'
+    PS > Test-MsIdAzureAdDeviceRegConnectivity -AdfsHostname 'adfs.contoso.com'
+
     Test required hostnames and ADFS server
+
 .INPUTS
     System.String
+
 .LINK
     https://docs.microsoft.com/en-us/samples/azure-samples/testdeviceregconnectivity/testdeviceregconnectivity/
+
 #>
 function Test-MsIdAzureAdDeviceRegConnectivity {
     [CmdletBinding()]

@@ -1,14 +1,20 @@
 <#
 .SYNOPSIS
     Convert Azure AD connector space object Distinguished Name (DN) in AAD Connect
+
 .EXAMPLE
-    PS C:\>ConvertFrom-MsIdAadcAadConnectorSpaceDn 'CN={414141414141414141414141414141414141414141413D3D}'
+    PS > ConvertFrom-MsIdAadcAadConnectorSpaceDn 'CN={414141414141414141414141414141414141414141413D3D}'
+
     Convert Azure AD connector space object DN in AAD Connect to sourceAnchor and sourceGuid.
+
 .EXAMPLE
-    PS C:\>'CN={4F626A656374547970655F30303030303030302D303030302D303030302D303030302D303030303030303030303030}' | ConvertFrom-MsIdAadcAadConnectorSpaceDn
+    PS > 'CN={4F626A656374547970655F30303030303030302D303030302D303030302D303030302D303030303030303030303030}' | ConvertFrom-MsIdAadcAadConnectorSpaceDn
+    
     Convert Azure AD connector space object DN in AAD Connect to cloudAnchor and cloudGuid.
+
 .INPUTS
     System.String
+    
 #>
 function ConvertFrom-MsIdAadcAadConnectorSpaceDn {
     [CmdletBinding()]

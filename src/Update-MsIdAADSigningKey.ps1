@@ -1,12 +1,17 @@
 <#
 .SYNOPSIS
     Update a Service Princpal's preferredTokenSigningKeyThumbprint value
+    
 .EXAMPLE
-    PS C:\>Update-MsIdAADSigningKey -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
+    PS > Update-MsIdAADSigningKey -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
+
     Update Application preffered signing key
+
 .EXAMPLE
-    PS C:\>Update-MsIdAADSigningKey -ApplicationId <ApplicationId> -Default
+    PS > Update-MsIdAADSigningKey -ApplicationId <ApplicationId> -Default
+
     Update Application preffered signing key to 'unused'
+
 #>
 
 Param(

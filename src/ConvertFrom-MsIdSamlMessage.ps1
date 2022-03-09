@@ -1,13 +1,18 @@
 <#
 .SYNOPSIS
     Convert SAML Message structure to PowerShell object.
+
 .EXAMPLE
-    PS C:\>ConvertFrom-MsIdSamlMessage 'Base64String'
+    PS > ConvertFrom-MsIdSamlMessage 'Base64String'
+
     Convert Saml Message to XML object.
+
 .INPUTS
     System.String
+
 .OUTPUTS
     SamlMessage : System.Xml.XmlDocument
+    
 #>
 function ConvertFrom-MsIdSamlMessage {
     [CmdletBinding()]

@@ -1,18 +1,27 @@
 <#
 .SYNOPSIS
     Get signing keys used by Azure AD.
+    
 .EXAMPLE
-    PS C:\>Get-MsIdSigningKeyThumbprint
+    PS > Get-MsIdSigningKeyThumbprint
+
     Get common Azure AD signing key thumbprints.
+
 .EXAMPLE
-    PS C:\>Get-MsIdSigningKeyThumbprint -Tenant <tenandId>
+    PS > Get-MsIdSigningKeyThumbprint -Tenant <tenandId>
+
     Get Azure AD signing key thumbprints for the given tenant.
+
 .EXAMPLE
-    PS C:\>Get-MsIdSigningKeyThumbprint -Tenant <tenandId> -Latest
+    PS > Get-MsIdSigningKeyThumbprint -Tenant <tenandId> -Latest
+
     Get the latest Azure AD signing key thumbprint for the given tenant.
+
 .EXAMPLE
-    PS C:\>Get-MsIdSigningKeyThumbprint -DownloadPath C:\temp
+    PS > Get-MsIdSigningKeyThumbprint -DownloadPath C:\temp
+
     Export the certificates to a folder destination.
+
 #>
 
 function Get-MsIdSigningKeyThumbprint{
