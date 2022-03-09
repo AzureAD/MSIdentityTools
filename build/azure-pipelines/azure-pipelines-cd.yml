@@ -26,6 +26,10 @@ pr: none
 
 variables:
   #moduleName: 'MSIdentityTools'
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    prereleaseTag: 
+  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+    prereleaseTag: 'preview'
   vmImage: '${{ parameters.vmImage }}'
   artifactModule: 'PSModule'
   artifactModuleSigned: 'PSModuleSigned'
