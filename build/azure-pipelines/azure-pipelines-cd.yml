@@ -150,7 +150,7 @@ stages:
     - task: PSScriptAnalyzer@1
       displayName: 'PowerShell Script Analyzer'
       inputs:
-        Path: '$(Pipeline.Workspace)/CI/$(artifactModuleSigned)'
+        Path: '$(Pipeline.Workspace)/$(artifactModuleSigned)'
         Settings: 'required'
         Recurse: true
 
