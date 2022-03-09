@@ -1,15 +1,15 @@
 # Continuous Delivery Pipeline
 # https://aka.ms/yaml
 
-resources:
-  pipelines:
-  - pipeline: 'CI'
-    source: 'AzureAD.MSIdentityTools.CI'
-    trigger: 
-      branches:
-        include:
-        - main
-        - preview
+# resources:
+#   pipelines:
+#   - pipeline: 'CI'
+#     source: 'AzureAD.MSIdentityTools.CI'
+#     trigger: 
+#       branches:
+#         include:
+#         - main
+#         - preview
 
 parameters:
 - name: vmImage
@@ -120,7 +120,7 @@ stages:
     - template: template-psmodule-sign.yml
       parameters:
         moduleName: '$(moduleName)'
-        EsrpCodeSigningServiceName: 'ESRP - MSFT Identity - Community Projects'
+        #EsrpCodeSigningServiceName: 'ESRP - MSFT Identity - Community Projects'
 
 - stage: Test
   dependsOn: Build
