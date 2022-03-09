@@ -8,18 +8,18 @@ parameters:
 - name: pipelineId
   type: string
   default:
-- name: pesterConfigurationName
-  type: string
-  default: 'Pipeline'
-- name: testWindowsPowershell
-  type: boolean
-  default: false
 - name: artifactInput
   type: string
   default: 'PSModule'
 - name: artifactOutput
   type: string
   default: 'PSModuleTestResults'
+- name: PesterConfigurationName
+  type: string
+  default: 'Pipeline'
+- name: TestWindowsPowershell
+  type: boolean
+  default: false
 
 steps:
 - pwsh: |
@@ -40,7 +40,7 @@ steps:
 
 - task: PowerShell@2
   displayName: 'Restore PSModule Dependencies'
-  condition: 'and(succeeded(), ne(variables[''PSModuleDependencies_IsCached''], ''true''))'
+  condition: 'and(succeeded(), variables[''PSModuleDependencies_IsCached''])'
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Restore-PSModuleDependencies.ps1'
     arguments: >
@@ -55,7 +55,7 @@ steps:
     arguments: >
       -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
       -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
-      -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.${{ parameters.pesterConfigurationName }}.psd1"
+      -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.${{ parameters.PesterConfigurationName }}.psd1"
       -TestResultPath "$(Common.TestResultsDirectory)/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
       -CodeCoveragePath "$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
     pwsh: true
@@ -76,7 +76,7 @@ steps:
     summaryFileLocation: '$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
     pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
-- ${{ if eq(parameters.testWindowsPowershell, true) }}:
+- ${{ if eq(parameters.TestWindowsPowershell, true) }}:
   - task: PowerShell@2
     displayName: 'Test PSModule on Windows PowerShell'
     condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
@@ -85,7 +85,7 @@ steps:
       arguments: >
         -ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}"
         -PSModuleCacheDirectory "$(Pipeline.Workspace)/PSModuleCache"
-        -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.${{ parameters.pesterConfigurationName }}.psd1"
+        -PesterConfigurationPath "$(System.DefaultWorkingDirectory)/build/PesterConfiguration.${{ parameters.PesterConfigurationName }}.psd1"
         -TestResultPath "$(Common.TestResultsDirectory)/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
         -CodeCoveragePath "$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml"
       pwsh: false

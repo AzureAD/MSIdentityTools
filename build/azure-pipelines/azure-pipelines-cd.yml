@@ -30,60 +30,93 @@ variables:
   artifactModule: 'PSModule'
   artifactModuleSigned: 'PSModuleSigned'
   artifactModulePackage: 'PSModulePackage'
+  #Packaging.EnableSBOMSigning: true
 
 pool:
   vmImage: $(vmImage)
 
 stages:
 - stage: Build
-  displayName: 'Finalize Build'
+  #displayName: 'Finalize Build'
   jobs: 
+  # - job: Prepare
+  #   variables:
+  #     runCodesignValidationInjection: false
+  #   pool:
+  #     vmImage: 'windows-latest'
+  #   steps:
+  #   #- checkout: none
+  #   - download: CI
+  #     artifact: '$(artifactModule)'
+  #   - task: PowerShell@2
+  #     name: ModuleInfo
+  #     displayName: 'Get PowerShell Module Information'
+  #     inputs:
+  #       filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+  #       arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/CI/$(artifactModule)/*/*.psd1"'
+  #       pwsh: true
+  #   - task: PSScriptAnalyzer@1
+  #     displayName: 'PowerShell Script Analyzer'
+  #     inputs:
+  #       Path: '$(Pipeline.Workspace)/CI/$(artifactModule)'
+  #       Settings: 'required'
+  #       Recurse: true
+  #   - task: ManifestGeneratorTask@0
+  #     displayName: 'Generate Manifest'
+  #     inputs:
+  #       BuildDropPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
+  #   - task: PublishPipelineArtifact@1
+  #     displayName: 'Publish PowerShell Module Artifact'
+  #     inputs:
+  #       targetPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
+  #       artifact: '$(artifactModule)'
+  #       publishLocation: 'pipeline'
+
   - job: Prepare
     variables:
+      skipComponentGovernanceDetection: true
       runCodesignValidationInjection: false
-    pool:
-      vmImage: 'windows-latest'
     steps:
-    #- checkout: none
-    - download: CI
-      artifact: '$(artifactModule)'
     - task: PowerShell@2
       name: ModuleInfo
-      displayName: 'Get PowerShell Module Information'
+      displayName: 'Get Parameters for PowerShell Module'
       inputs:
         filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-        arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/CI/$(artifactModule)/*/*.psd1"'
+        arguments: '-ModuleManifestPath "$(Build.SourcesDirectory)/src/*.psd1" -TrimVersionDepth 2'
         pwsh: true
-    - task: PSScriptAnalyzer@1
-      inputs:
-        Path: '$(Pipeline.Workspace)/CI/$(artifactModule)'
-        Settings: 'required'
-        Recurse: true
-    - task: ManifestGeneratorTask@0
-      inputs:
-        BuildDropPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publish PowerShell Module Artifact'
-      inputs:
-        targetPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
-        artifact: '$(artifactModule)'
-        publishLocation: 'pipeline'
-        
+
+  - job: Build
+    dependsOn: Prepare
+    variables: 
+      runCodesignValidationInjection: false
+      moduleNameSrc: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
+      moduleVersionSrc: '$[ coalesce(dependencies.Prepare.outputs[''ModuleInfo.moduleVersionTrimmed''], dependencies.Prepare.outputs[''ModuleInfo.moduleVersion'']) ]'
+      moduleVersion.Revision: '$[ counter(variables[''moduleVersionSrc''], 0) ]'
+      moduleVersion: '$[ coalesce(variables[''moduleVersionOverride''], format(''{0}.{1}'', variables[''moduleVersionSrc''], variables[''moduleVersion.Revision''])) ]'
+    steps:
+    - template: template-psmodule-build.yml
+      parameters:
+        moduleName: '$(moduleNameSrc)'
+        moduleVersion: '$(moduleVersion)'
+        prereleaseTag: '$(prereleaseTag)'
+        GenerateManifest: true
+
   - job: Sign
     dependsOn:
     - Prepare
+    - Build
     variables:
-      skipComponentGovernanceDetection: true
+      skipComponentGovernanceDetection: false
       moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
     pool:
       vmImage: 'windows-latest'
     steps:
-    - download: 'CI'
+    - download: current
       artifact: '$(artifactModule)'
     - template: template-psmodule-sign.yml
       parameters:
         moduleName: '$(moduleName)'
-        pipelineId: 'CI'
+        #EsrpCodeSigningServiceName: 'ESRP - MSFT Identity - Community Projects'
 
 - stage: Test
   dependsOn: Build
@@ -107,9 +140,15 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
-        pesterConfigurationName: 'CD'
-        testWindowsPowershell: true
         artifactInput: '$(artifactModuleSigned)'
+        PesterConfigurationName: 'CD'
+        TestWindowsPowershell: true
+    - task: PSScriptAnalyzer@1
+      displayName: 'PowerShell Script Analyzer'
+      inputs:
+        Path: '$(Pipeline.Workspace)/CI/$(artifactModuleSigned)'
+        Settings: 'required'
+        Recurse: true
 
   - job: Ubuntu
     variables: 
@@ -130,8 +169,8 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
-        pesterConfigurationName: 'CD'
         artifactInput: '$(artifactModuleSigned)'
+        PesterConfigurationName: 'CD'
 
   - job: MacOS
     variables: 
@@ -152,8 +191,8 @@ stages:
     - template: template-psmodule-test.yml
       parameters:
         moduleName: '$(ModuleInfo.moduleName)'
-        pesterConfigurationName: 'CD'
         artifactInput: '$(artifactModuleSigned)'
+        PesterConfigurationName: 'CD'
 
 - stage: Package
   displayName: 'Standalone Package'

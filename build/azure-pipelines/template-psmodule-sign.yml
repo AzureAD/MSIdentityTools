@@ -28,6 +28,10 @@ parameters:
   default: 
 
 steps:
+- pwsh: 'exit 1'
+  displayName: 'Check Required Parameters'
+  condition: 'and(succeeded(), eq(${{ coalesce(parameters.SigningCertificateSecretName, parameters.EsrpCodeSigningServiceName) }}, ''''))'
+
 #- download: none
 - checkout: self
 
