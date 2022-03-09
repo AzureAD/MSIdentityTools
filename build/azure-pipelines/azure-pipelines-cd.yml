@@ -120,7 +120,7 @@ stages:
     - template: template-psmodule-sign.yml
       parameters:
         moduleName: '$(moduleName)'
-        #EsrpCodeSigningServiceName: 'ESRP - MSFT Identity - Community Projects'
+        EsrpCodeSigningServiceName: 'ESRP - MSFT Identity - Community Projects'
 
 - stage: Test
   dependsOn: Build
