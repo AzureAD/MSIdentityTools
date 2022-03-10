@@ -28,9 +28,9 @@ parameters:
   default: 
 
 steps:
-# - ${{ if eq(coalesce(parameters.SigningCertificateSecretName, parameters.EsrpCodeSigningServiceName, ''),'') }}:
-#   - pwsh: 'exit 1'
-#     displayName: 'Required Template Parameter Error'
+- ${{ if eq(coalesce(parameters.SigningCertificateSecretName, parameters.EsrpCodeSigningServiceName, ''),'') }}:
+  - pwsh: 'exit 1'
+    displayName: 'Required Template Parameter Error'
 
 #- download: none
 - checkout: self
