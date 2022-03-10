@@ -69,7 +69,7 @@ steps:
     inputs:
       ConnectedServiceName: '${{ parameters.EsrpCodeSigningServiceName }}'
       FolderPath: '$(Pipeline.Workspace)/${{ parameters.artifactOutput }}'
-      Pattern: '*.psd1,*.psm1,*.ps1*,'
+      Pattern: '*.psd1,*.psm1,*.ps1*'
       signConfigType: inlineSignParams
       inlineOperation: >-
         [
