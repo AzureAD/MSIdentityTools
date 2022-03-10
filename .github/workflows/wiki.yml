@@ -2,9 +2,11 @@ name: Update Wiki
 
 on:
   push:
-    branches: [ main ]
-    tags-ignore:
-    - "**"
+    branches:
+    - main
+    - preview
+    paths: 
+    - 'src/**'
 
 jobs:
   update:
