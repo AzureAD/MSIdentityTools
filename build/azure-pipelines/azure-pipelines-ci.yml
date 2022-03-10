@@ -24,8 +24,8 @@ trigger:
 #pr: none
 
 variables:
+  # moduleName: 'MSIdentityTools'
   vmImage: '${{ parameters.vmImage }}'
-  #moduleName: 'MSIdentityTools'
   ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
     prereleaseTag: 
   ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
@@ -76,28 +76,10 @@ stages:
     pool:
       vmImage: 'windows-latest'
     steps:
-    # - download: current
-    #   artifact: '$(artifactModule)'
-    # - task: CopyFiles@2
-    #   displayName: 'Copy Source to Staging'
-    #   inputs:
-    #     SourceFolder: '$(Build.SourcesDirectory)/src'
-    #     Contents: '**'
-    #     TargetFolder: '$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}'
-    #     CleanTargetFolder: true
-    #     preserveTimestamp: true
-    # - task: PowerShell@2
-    #   name: ModuleInfo
-    #   displayName: 'Get Parameters for PowerShell Module'
-    #   inputs:
-    #     filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-    #     arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModule)/*/*.psd1"'
-    #     pwsh: true
     - template: template-psmodule-test.yml
       parameters:
         pipelineId: 's'
         artifactInput: 'src'
-        #moduleName: '$(moduleName)'
         PesterConfigurationName: 'CI'
         TestWindowsPowershell: true
 
@@ -108,20 +90,10 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    # - download: current
-    #   artifact: '$(artifactModule)'
-    # - task: PowerShell@2
-    #   name: ModuleInfo
-    #   displayName: 'Get Parameters for PowerShell Module'
-    #   inputs:
-    #     filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-    #     arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModule)/*/*.psd1"'
-    #     pwsh: true
     - template: template-psmodule-test.yml
       parameters:
         pipelineId: 's'
         artifactInput: 'src'
-        #moduleName: '$(moduleName)'
         PesterConfigurationName: 'CI'
 
   - job: MacOS
@@ -131,18 +103,8 @@ stages:
     pool:
       vmImage: 'macOS-latest'
     steps:
-    # - download: current
-    #   artifact: '$(artifactModule)'
-    # - task: PowerShell@2
-    #   name: ModuleInfo
-    #   displayName: 'Get Parameters for PowerShell Module'
-    #   inputs:
-    #     filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-    #     arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/$(artifactModule)/*/*.psd1"'
-    #     pwsh: true
     - template: template-psmodule-test.yml
       parameters:
         pipelineId: 's'
         artifactInput: 'src'
-        #moduleName: '$(moduleName)'
         PesterConfigurationName: 'CI'

@@ -41,53 +41,19 @@ pool:
 
 stages:
 - stage: Build
-  #displayName: 'Finalize Build'
   jobs: 
-  # - job: Prepare
-  #   variables:
-  #     runCodesignValidationInjection: false
-  #   pool:
-  #     vmImage: 'windows-latest'
-  #   steps:
-  #   #- checkout: none
-  #   - download: CI
-  #     artifact: '$(artifactModule)'
-  #   - task: PowerShell@2
-  #     name: ModuleInfo
-  #     displayName: 'Get PowerShell Module Information'
-  #     inputs:
-  #       filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-  #       arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/CI/$(artifactModule)/*/*.psd1"'
-  #       pwsh: true
-  #   - task: PSScriptAnalyzer@1
-  #     displayName: 'PowerShell Script Analyzer'
-  #     inputs:
-  #       Path: '$(Pipeline.Workspace)/CI/$(artifactModule)'
-  #       Settings: 'required'
-  #       Recurse: true
-  #   - task: ManifestGeneratorTask@0
-  #     displayName: 'Generate Manifest'
-  #     inputs:
-  #       BuildDropPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
-  #   - task: PublishPipelineArtifact@1
-  #     displayName: 'Publish PowerShell Module Artifact'
-  #     inputs:
-  #       targetPath: '$(Pipeline.Workspace)/CI/$(artifactModule)'
-  #       artifact: '$(artifactModule)'
-  #       publishLocation: 'pipeline'
-
   - job: Prepare
-    variables:
-      skipComponentGovernanceDetection: true
-      runCodesignValidationInjection: false
-    steps:
-    - task: PowerShell@2
-      name: ModuleInfo
-      displayName: 'Get Parameters for PowerShell Module'
-      inputs:
-        filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
-        arguments: '-ModuleManifestPath "$(Build.SourcesDirectory)/src/*.psd1" -TrimVersionDepth 2'
-        pwsh: true
+  variables:
+    skipComponentGovernanceDetection: true
+    runCodesignValidationInjection: false
+  steps:
+  - task: PowerShell@2
+    name: ModuleInfo
+    displayName: 'Get Parameters for PowerShell Module'
+    inputs:
+      filePath: '$(System.DefaultWorkingDirectory)/build/Get-PSModuleInfo.ps1'
+      arguments: '-ModuleManifestPath "$(Build.SourcesDirectory)/src/*.psd1" -TrimVersionDepth 2'
+      pwsh: true
 
   - job: Build
     dependsOn: Prepare
