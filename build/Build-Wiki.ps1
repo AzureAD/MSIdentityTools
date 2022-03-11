@@ -42,6 +42,10 @@ foreach($help in $helps) {
     $md = @"
 # $($help.Name)
 
+Reference
+
+Module: [$moduleName](./)
+
 
 "@
     # Synopsis
@@ -87,11 +91,13 @@ $($cmd.Name) $($paramSet.ToString())
 "@
     }
     # Description
-    if (![string]::IsNullOrWhiteSpace($help.Description)) {
+    $description = $help.Description | Out-String
+    if (![string]::IsNullOrWhiteSpace($description)) {
         $md += @"
 ## Description
 
-$($help.Description.Trim())
+$($description.Trim())
+
 
 "@
     }
@@ -112,6 +118,14 @@ $($help.examples.example[$i].code.Trim())
 
 
 "@
+            $remarks = ($help.examples.example[$i].remarks | Out-String).Trim()
+            if (![string]::IsNullOrWhiteSpace($remarks)) {
+    $md += @"
+$remarks
+
+
+"@
+            }
         } 
     }
     # Parameters
