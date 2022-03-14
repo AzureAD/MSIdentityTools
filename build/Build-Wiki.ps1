@@ -109,6 +109,7 @@ $($description.Trim())
 
 "@
         for($i = 0; $i -lt $help.examples.example.Count; $i += 1) {
+            # example
             $md += @"
 ### Example $($i+1)
 
@@ -119,6 +120,7 @@ $($help.examples.example[$i].code.Trim())
 
 "@
             $remarks = ($help.examples.example[$i].remarks | Out-String).Trim()
+            # remarks for example
             if (![string]::IsNullOrWhiteSpace($remarks)) {
     $md += @"
 $remarks
