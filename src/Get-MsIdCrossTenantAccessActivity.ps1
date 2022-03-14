@@ -9,8 +9,8 @@
     
     Has a parameter, -AccessDirection, to further refine results, using the following values: 
 
-        * Outboud - lists sign-in events of external tenant IDs accessed by local users
-        * Inbound - list sign-in events of external tenant IDs of external users accessing local tenant
+      * Outboud - lists sign-in events of external tenant IDs accessed by local users
+      * Inbound - list sign-in events of external tenant IDs of external users accessing local tenant
 
     Has a parameter, -ExternalTenantId, to target a single external tenant ID.
 
