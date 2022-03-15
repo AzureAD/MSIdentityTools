@@ -22,7 +22,8 @@
 
     -Verbose will give insight into the cmdlets activities.
 
-    Requires AuditLog.Read.All scope, i.e. Connect-MgGraph -Scopes AuditLog.Read.All
+    Requires AuditLog.Read.All scope (to access logs) and CrossTenantInfo.ReadBasic.All scope 
+    (for -ResolveTenantId), i.e. Connect-MgGraph -Scopes AuditLog.Read.All
 
 
 .EXAMPLE

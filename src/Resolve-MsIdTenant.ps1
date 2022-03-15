@@ -29,7 +29,8 @@
 .NOTES
     - Azure AD OIDC Metadata endpoint - https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
     - A Result of NotFound does not mean that the tenant does not exist at all, but it might be in a different cloud environment.   Additional queries to other environments may result in it being found.
-    -     THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
+    - Requires CrossTenantInfo.ReadBasic.All scope, i.e. Connect-MgGraph -Scopes AuditLog.Read.All
+    - THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR 
     FITNESS FOR A PARTICULAR PURPOSE.
     This sample is not supported under any Microsoft standard support program or service. 
