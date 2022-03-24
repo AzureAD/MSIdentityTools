@@ -29,7 +29,7 @@
 .NOTES
     - Azure AD OIDC Metadata endpoint - https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc#fetch-the-openid-connect-metadata-document
     - A Result of NotFound does not mean that the tenant does not exist at all, but it might be in a different cloud environment.   Additional queries to other environments may result in it being found.
-    - Requires CrossTenantInfo.ReadBasic.All scope, i.e. Connect-MgGraph -Scopes AuditLog.Read.All
+    - Requires CrossTenantInfo.ReadBasic.All scope to read MS Graph API info, i.e. Connect-MgGraph -Scopes CrossTenantInfo.ReadBasic.All
     - THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR 
     FITNESS FOR A PARTICULAR PURPOSE.
@@ -91,6 +91,17 @@ function Resolve-MsIdTenant {
         if ($null -eq (Get-MgContext)) {
             Write-Error "$(Get-Date -f T) - Please Connect to MS Graph API with the Connect-MgGraph cmdlet from the Microsoft.Graph.Authentication module first before calling functions!" -ErrorAction Stop
         }
+        else {
+            
+            if ((Get-MgContext).Scopes -notcontains "CrossTenantInformation.ReadBasic.All") {
+                Write-Warning "$(Get-Date -f T) - Please Connect to MS Graph API with the 'Connect-MgGraph -Scopes CrossTenantInformation.ReadBasic.All' to include the CrossTenantInformation.ReadBasic.All scope to read tenant information from MS Graph API."
+            }
+            
+            
+
+        }
+
+        
 
         $GraphEndPoint = (Get-MgEnvironment -Name $Environment).GraphEndpoint
         $AzureADEndpoint = (Get-MgEnvironment -Name $Environment).AzureADEndpoint
