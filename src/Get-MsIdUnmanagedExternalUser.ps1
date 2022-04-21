@@ -80,7 +80,7 @@ function Get-MsIdUnmanagedExternalUser {
                 }
             }
         
-            $nextLink = Get-ObjectPropertyValue $results 'nextLink'
+            $nextLink = Get-ObjectPropertyValue $results '@odata.nextLink'
             if ($nextLink) {
                 $results = Invoke-MgGraphRequest -Uri $nextLink -Headers @{ ConsistencyLevel = 'eventual' }
             }
