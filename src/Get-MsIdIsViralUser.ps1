@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Returns true if the user's mail domain is a viral Azure AD tenant.
+    Returns true if the user's mail domain is a viral (unmanaged) Azure AD tenant.
 
     To learn more about viral tenants see [Take over an unmanaged directory as administrator in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/enterprise-users/domains-admin-takeover)
     
 .EXAMPLE
-    PS > Get-MsIdUnmanagedExternalUsers
+    PS > Get-MsIdIsViralUser -Mail john@yopmail.net
 
-    Gets a list of all the unmanaged (viral) users in the tenant.
+    Check if the mail address is from a viral tenant.
 
 #>
 function Get-MsIdIsViralUser {
