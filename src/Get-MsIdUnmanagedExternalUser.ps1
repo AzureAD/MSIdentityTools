@@ -3,16 +3,31 @@
     Returns a list of all the external users in the tenant that are unmanaged (viral users).
     
 .EXAMPLE
-    PS > Get-MsIdUnmanagedExternalUsers
+    PS > Get-MsIdUnmanagedExternalUser
 
-    Gets a list of all the unmanaged (viral) users in the tenant.
+    Gets a list of all the unmanaged/viral external users.
+
+.EXAMPLE
+    PS > Get-MsIdUnmanagedExternalUser -Type ExternalAzureADViral
+
+    Gets a list of all the unmanaged/viral external users. This is the same as running Get-MsIdUnmanagedExternalUser without any parameters.
+
+.EXAMPLE
+    PS > Get-MsIdUnmanagedExternalUser -Type MicrosoftAccount
+
+    Gets a list of all the external users with a personal Microsoft Account.
+
+.EXAMPLE
+    PS > Get-MsIdUnmanagedExternalUser -Type All
+
+    Gets a list of all the external users that are from an unmanaged/viral tenant or have a personal Microsoft Account. 
 
 #>
 function Get-MsIdUnmanagedExternalUser {
     [CmdletBinding()]
 
     param (
-        # Environment to Resolve Azure AD Tenant In (Global, USGov, China, USGovDoD, Germany)
+        # The type of unmanaged user to return
         [Parameter(Mandatory = $false,
             Position = 1,
             ValueFromPipeline = $true,
