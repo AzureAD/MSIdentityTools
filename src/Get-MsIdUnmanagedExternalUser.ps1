@@ -11,13 +11,22 @@
 function Get-MsIdUnmanagedExternalUser {
     [CmdletBinding()]
 
-    param ()
+    param (
+        # Environment to Resolve Azure AD Tenant In (Global, USGov, China, USGovDoD, Germany)
+        [Parameter(Mandatory = $false,
+            Position = 1,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true,
+            ValueFromRemainingArguments = $false,
+            ParameterSetName = 'Parameter Set 1')]
+        [ValidateSet("ExternalAzureADViral", "MicrosoftAccount", "All")]
+        [string]
+        $Type = "ExternalAzureADViral"
+    )
 
     $graphBaseUri = "https://graph.microsoft.com/$((Get-MgProfile).Name)"
-    $pageCount = 100
+    $pageCount = 999
     $guestUserUri = $graphBaseUri + "/users?`$filter=userType eq 'Guest'&`$select=id,userPrincipalName,mail,displayName,identities&`$count=true&`$top=$pageCount"
-
-    $userRealmUriFormat = "https://login.microsoftonline.com/common/userrealm?user={urlEncodedMail}&api-version=2.1"
 
     $results = Invoke-MgGraphRequest -Uri $guestUserUri -Headers @{ ConsistencyLevel = 'eventual' }
     $count = Get-ObjectPropertyValue $results '@odata.count'
@@ -41,43 +50,50 @@ function Get-MsIdUnmanagedExternalUser {
                 
                 Write-Verbose "$userIndex / $count"
                 $userIndex += 1
+
                 $isAzureAdUser = $false
+                $isMsaUser = $false
+                $mail = Get-ObjectPropertyValue $user 'mail'
+
                 foreach ($identity in (Get-ObjectPropertyValue $user 'identities')) {
-                    if ((Get-ObjectPropertyValue $identity 'issuer') -eq 'ExternalAzureAD') {
-                        $isAzureAdUser = $true
-                        break;
+                    $issuer = Get-ObjectPropertyValue $identity 'issuer'
+                    Write-Verbose "$($mail) Issuer = $($issuer) [$($user.userPrincipalName)]"
+                    switch ($issuer) {
+                        'ExternalAzureAD' { $isAzureAdUser = $true }
+                        'MicrosoftAccount' { $isMsaUser = $true }
                     }
                 }
 
-                if ($isAzureAdUser) {
-                    Write-Verbose "Checking if user is viral user. $($user.userPrincipalName)"
-
-                    $mail = Get-ObjectPropertyValue $user 'mail'
-                    if (![string]::IsNullOrEmpty($mail)) {
-                        $encodedMail = [System.Web.HttpUtility]::UrlEncode($user.mail)
+                $isViralUser = $false
+                if($Type -eq 'ExternalAzureADViral' -or $Type -eq 'All')
+                {
+                    if ($isAzureAdUser) {
                         
-                        $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
-                        Write-Verbose $userRealmUri
+                        Write-Verbose "Checking if user $($mail) is viral user. [$($user.userPrincipalName)]"
 
-                        try {
-                            $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
-                            $content = ConvertFrom-Json (Get-ObjectPropertyValue $userRealmResponse 'Content')
-                            if ((Get-ObjectPropertyValue $content 'IsViral') -eq "True") {
-                                Write-Verbose "$($user.userPrincipalName)  = viral user"
-                                Write-Output $user
-                            }
-                            else {
-                                Write-Verbose "$($user.userPrincipalName) <> viral user"
-                            }                                
+                        if (![string]::IsNullOrEmpty($mail)) {
+                            $isViralUser = Get-MsIdIsViralUser -Mail $mail
                         }
-                        catch {
-                            
+                        else {
+                            Write-Verbose "Skipping viral check. $($user.userPrincipalName) does not have a mail address."
                         }
                     }
+                    else {
+                        Write-Verbose "Skipping viral check. $($mail) <> ExternalAzureAD managed user"
+                    }
                 }
-                else {
-                    Write-Verbose "Skipping. $($user.userPrincipalName) <> ExternalAzureAD managed user"
+
+                if(($Type -eq 'ExternalAzureADViral' -or $Type -eq 'All') -and $isViralUser)
+                {
+                    Write-Verbose "$($mail) = viral user [$($user.userPrincipalName)]"
+                    Write-Output $user
                 }
+                if(($Type -eq 'MicrosoftAccount' -or $Type -eq 'All') -and $isMsaUser)
+                {
+                    Write-Verbose "$($mail) = Microsoft Account [$($user.userPrincipalName)]"
+                    Write-Output $user
+                }
+
             }
         
             $nextLink = Get-ObjectPropertyValue $results '@odata.nextLink'

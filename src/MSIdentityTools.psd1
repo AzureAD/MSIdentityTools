@@ -117,6 +117,7 @@
         '.\Resolve-MsIdTenant.ps1'
         '.\Get-MsIdSigningKeyThumbprint.ps1'
         '.\Update-MsIdApplicationSigningKeyThumbprint.ps1'
+        '.\Get-MsIdIsViralUser.ps1'
     )
 
     # Functions to export from this module
@@ -147,6 +148,7 @@
         'Test-MsIdAzureAdDeviceRegConnectivity'
         'Get-MsIdSigningKeyThumbprint'
         'Update-MsIdApplicationSigningKeyThumbprint'
+        'Get-MsIdIsViralUser'
     )
 
     # Cmdlets to export from this module
