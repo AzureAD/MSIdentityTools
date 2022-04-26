@@ -118,6 +118,7 @@
         '.\Get-MsIdSigningKeyThumbprint.ps1'
         '.\Update-MsIdApplicationSigningKeyThumbprint.ps1'
         '.\Get-MsIdIsViralUser.ps1'
+        '.\Get-MsIdHasMicrosoftAccount.ps1'
     )
 
     # Functions to export from this module
@@ -149,6 +150,7 @@
         'Get-MsIdSigningKeyThumbprint'
         'Update-MsIdApplicationSigningKeyThumbprint'
         'Get-MsIdIsViralUser'
+        'Get-MsIdHasMicrosoftAccount'
     )
 
     # Cmdlets to export from this module
