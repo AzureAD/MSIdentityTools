@@ -179,8 +179,8 @@ function Get-PathInfo {
             if ($Path) {
                 ## Look for existing path
                 try {
-                    $ResolvePath = Resolve-FullPath $Path -BaseDirectory $DefaultDirectory -ErrorAction SilentlyContinue
-                    $OutputPath = Get-Item $ResolvePath -ErrorAction SilentlyContinue
+                    $ResolvePath = Resolve-FullPath $Path -BaseDirectory $DefaultDirectory -ErrorAction Ignore
+                    $OutputPath = Get-Item $ResolvePath -ErrorAction Ignore
                 }
                 catch { }
                 if ($OutputPath -is [array]) {
@@ -206,8 +206,8 @@ function Get-PathInfo {
                     [string] $AbsolutePath = (Join-Path $OutputPath.FullName $DefaultFileName)
                     $OutputPath = $null
                     try {
-                        $ResolvePath = Resolve-FullPath $AbsolutePath -BaseDirectory $DefaultDirectory -ErrorAction SilentlyContinue
-                        $OutputPath = Get-Item $ResolvePath -ErrorAction SilentlyContinue
+                        $ResolvePath = Resolve-FullPath $AbsolutePath -BaseDirectory $DefaultDirectory -ErrorAction Ignore
+                        $OutputPath = Get-Item $ResolvePath -ErrorAction Ignore
                     }
                     catch { }
                     if (!$OutputPath -and $AbsolutePath -notmatch '[*?]') {

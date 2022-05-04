@@ -24,9 +24,9 @@ param
 Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction SilentlyContinue -ErrorAction Stop
 
 [System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultFilename "*.psd1" -ErrorAction Stop | Select-Object -Last 1
-[System.IO.FileInfo] $TestResultFileInfo = Get-PathInfo $TestResultPath -DefaultFilename 'TestResult.xml' -ErrorAction SilentlyContinue
-[System.IO.FileInfo] $CodeCoverageFileInfo = Get-PathInfo $CodeCoveragePath -DefaultFilename 'CodeCoverage.xml' -ErrorAction SilentlyContinue
-[System.IO.DirectoryInfo] $PSModuleCacheDirectoryInfo = Get-PathInfo $PSModuleCacheDirectory -InputPathType Directory -SkipEmptyPaths -ErrorAction SilentlyContinue
+[System.IO.FileInfo] $TestResultFileInfo = Get-PathInfo $TestResultPath -DefaultFilename 'TestResult.xml' -ErrorAction Ignore
+[System.IO.FileInfo] $CodeCoverageFileInfo = Get-PathInfo $CodeCoveragePath -DefaultFilename 'CodeCoverage.xml' -ErrorAction Ignore
+[System.IO.DirectoryInfo] $PSModuleCacheDirectoryInfo = Get-PathInfo $PSModuleCacheDirectory -InputPathType Directory -SkipEmptyPaths -ErrorAction Ignore
 [System.IO.FileInfo] $PesterConfigurationFileInfo = Get-PathInfo $PesterConfigurationPath -DefaultFilename 'PesterConfiguration.psd1' -ErrorAction SilentlyContinue
 [System.IO.DirectoryInfo] $ModuleTestsDirectoryInfo = Get-PathInfo $ModuleTestsDirectory -InputPathType Directory -ErrorAction SilentlyContinue
 
