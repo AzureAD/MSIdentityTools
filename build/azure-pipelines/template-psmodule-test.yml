@@ -59,9 +59,19 @@ steps:
       -TestResultPath "$(Common.TestResultsDirectory)/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
       -CodeCoveragePath "$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml"
     pwsh: true
+    ignoreLASTEXITCODE: true
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish PSModule Code Coverage Results'
+  condition: 'succeeded()'
+  inputs:
+    codeCoverageTool: 'JaCoCo'
+    summaryFileLocation: '$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
+    pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
 
 - task: PublishTestResults@2
   displayName: 'Publish PSModule Test Results'
+  condition: 'succeeded()'
   inputs:
     testResultsFormat: 'NUnit'
     testResultsFiles: '$(Common.TestResultsDirectory)/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
@@ -69,17 +79,10 @@ steps:
     buildPlatform: '$(Agent.OSArchitecture)'
     failTaskOnFailedTests: true
 
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish PSModule Code Coverage Results'
-  inputs:
-    codeCoverageTool: 'JaCoCo'
-    summaryFileLocation: '$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_PowerShellCore_$(Build.BuildId).xml'
-    pathToSources: '$(Pipeline.Workspace)/${{ parameters.pipelineId }}/${{ parameters.artifactInput }}/${{ parameters.moduleName }}'
-
 - ${{ if eq(parameters.TestWindowsPowershell, true) }}:
   - task: PowerShell@2
     displayName: 'Test PSModule on Windows PowerShell'
-    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    condition: 'and(succeededOrFailed(), eq(variables[''Agent.OS''], ''Windows_NT''))'
     inputs:
       filePath: '$(System.DefaultWorkingDirectory)/build/Test-PSModule.ps1'
       arguments: >
@@ -92,7 +95,7 @@ steps:
 
   - task: PublishCodeCoverageResults@1
     displayName: 'Publish PSModule Code Coverage Results on Windows PowerShell'
-    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    condition: 'and(succeededOrFailed(), eq(variables[''Agent.OS''], ''Windows_NT''))'
     inputs:
       codeCoverageTool: 'JaCoCo'
       summaryFileLocation: '$(Common.TestResultsDirectory)/CodeCoverage_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml'
@@ -100,16 +103,17 @@ steps:
 
   - task: PublishTestResults@2
     displayName: 'Publish PSModule Test Results on Windows PowerShell'
-    condition: 'and(succeeded(), eq(variables[''Agent.OS''], ''Windows_NT''))'
+    condition: 'and(succeededOrFailed(), eq(variables[''Agent.OS''], ''Windows_NT''))'
     inputs:
       testResultsFormat: 'NUnit'
       testResultsFiles: '$(Common.TestResultsDirectory)/TestResult_$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId).xml'
       testRunTitle: '$(Agent.OS)_$(Agent.OSArchitecture)_WindowsPowerShell_$(Build.BuildId)'
       buildPlatform: '$(Agent.OSArchitecture)'
-      failTaskOnFailedTests: false
+      #failTaskOnFailedTests: false
 
 - task: PublishPipelineArtifact@1
-  displayName: 'Publish PSModule Test Results'
+  displayName: 'Publish PSModule Test Results Directory'
+  condition: 'succeededOrFailed()'
   inputs:
     targetPath: '$(Common.TestResultsDirectory)'
     artifact: '${{ parameters.artifactOutput }}_$(Agent.OS)_$(Agent.OSArchitecture)'

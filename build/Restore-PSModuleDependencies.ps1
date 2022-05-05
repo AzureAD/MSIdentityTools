@@ -5,7 +5,7 @@ param
     [string] $ModuleManifestPath = ".\src\*.psd1",
     #
     [Parameter(Mandatory = $false)]
-    [string] $PSModuleCacheDirectory = ".\build\TestResult\PSModuleCache",
+    [string] $PSModuleCacheDirectory = ".\build\TestResults\PSModuleCache",
     # 
     [Parameter(Mandatory = $false)]
     [string[]] $Repository = "PSGallery",
@@ -19,7 +19,7 @@ Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction Silentl
 #$PSModulePathBackup = $env:PSModulePath
 
 [System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultFilename "*.psd1" -ErrorAction Stop | Select-Object -Last 1
-[System.IO.DirectoryInfo] $PSModuleCacheDirectoryInfo = Get-PathInfo $PSModuleCacheDirectory -InputPathType Directory -SkipEmptyPaths -ErrorAction Ignore
+[System.IO.DirectoryInfo] $PSModuleCacheDirectoryInfo = Get-PathInfo $PSModuleCacheDirectory -InputPathType Directory -SkipEmptyPaths -ErrorAction SilentlyContinue
 
 ## Read Module Manifest
 $ModuleManifest = Import-PowerShellDataFile $ModuleManifestFileInfo.FullName

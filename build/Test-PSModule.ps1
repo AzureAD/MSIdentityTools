@@ -26,7 +26,7 @@ Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction Silentl
 [System.IO.FileInfo] $ModuleManifestFileInfo = Get-PathInfo $ModuleManifestPath -DefaultFilename "*.psd1" -ErrorAction Stop | Select-Object -Last 1
 [System.IO.FileInfo] $TestResultFileInfo = Get-PathInfo $TestResultPath -DefaultFilename 'TestResult.xml' -ErrorAction Ignore
 [System.IO.FileInfo] $CodeCoverageFileInfo = Get-PathInfo $CodeCoveragePath -DefaultFilename 'CodeCoverage.xml' -ErrorAction Ignore
-[System.IO.DirectoryInfo] $PSModuleCacheDirectoryInfo = Get-PathInfo $PSModuleCacheDirectory -InputPathType Directory -SkipEmptyPaths -ErrorAction Ignore
+[System.IO.DirectoryInfo] $PSModuleCacheDirectoryInfo = Get-PathInfo $PSModuleCacheDirectory -InputPathType Directory -SkipEmptyPaths -ErrorAction SilentlyContinue
 [System.IO.FileInfo] $PesterConfigurationFileInfo = Get-PathInfo $PesterConfigurationPath -DefaultFilename 'PesterConfiguration.psd1' -ErrorAction SilentlyContinue
 [System.IO.DirectoryInfo] $ModuleTestsDirectoryInfo = Get-PathInfo $ModuleTestsDirectory -InputPathType Directory -ErrorAction SilentlyContinue
 
@@ -43,4 +43,8 @@ if ($TestResultPath) { $PesterConfiguration.TestResult.OutputPath = $TestResultF
 if ($CodeCoveragePath) { $PesterConfiguration.CodeCoverage.OutputPath = $CodeCoverageFileInfo.FullName }
 #$PesterConfiguration.CodeCoverage.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.CodeCoverage.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
 #$PesterConfiguration.TestResult.OutputPath = [IO.Path]::ChangeExtension($PesterConfiguration.TestResult.OutputPath.Value, "$($PSVersionTable.PSVersion).xml")
-Invoke-Pester -Configuration $PesterConfiguration
+$PesterRun = Invoke-Pester -Configuration $PesterConfiguration
+$PesterRun
+
+## Return SucceededWithIssues when running in ADO Pipeline and a test fails.
+if ($env:AGENT_ID -and $PesterRun -and $PesterRun.Result -ne 'Passed') { Write-Host '##vso[task.complete result=SucceededWithIssues;]FailedTest' }

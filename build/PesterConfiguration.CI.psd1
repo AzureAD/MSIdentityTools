@@ -1,6 +1,6 @@
 @{
     Run          = @{
-        #PassThru = $true
+        PassThru = $true
     }
     Filter       = @{
         #Tag        = ''
