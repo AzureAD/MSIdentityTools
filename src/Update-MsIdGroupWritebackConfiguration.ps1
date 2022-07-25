@@ -15,6 +15,10 @@
     PS > Update-MsIdGroupWritebackConfiguration -GroupId <GroupId> -WriteBackEnabled $false
 
     Disable Group Writeback for Group ID
+.EXAMPLE
+    PS > Get-mggroup -filter "groupTypes/any(c:c eq 'Unified')"|Update-MsIdGroupWritebackConfiguration -WriteBackEnabled $false -verbose
+
+    For all M365 Groups in the tenant, set the WritebackEnabled to false to prevent them from being written back on-premises
 .NOTES
     - Updating Role Assignable Groups or Privileged Access Groups require PrivilegedAccess.ReadWrite.AzureADGroup permission scope
 
@@ -130,7 +134,7 @@ function Update-MsIdGroupWritebackConfiguration {
                 if ($mgGroup.SecurityEnabled -eq $true) {
                     $cloudGroupType = "Security"
 
-                    if ($null -ne $mgGroup.ProxyAddresses) {
+                    if ($null -notlike $mgGroup.ProxyAddresses) {
                         $cloudGroupType = "Mail-Enabled Security" 
                     }
                 }
@@ -205,8 +209,12 @@ function Update-MsIdGroupWritebackConfiguration {
 
                             $wbc.isEnabled = $WriteBackEnabled
 
-                            if ($null -eq $currentOnPremGroupType -ne $WriteBackOnPremGroupType) {
+                            if ($currentOnPremGroupType -ne $WriteBackOnPremGroupType) {
+
+                               
                                 $wbc.onPremisesGroupType = $WriteBackOnPremGroupType
+                                
+                                
                             }
                     
                
@@ -230,7 +238,20 @@ function Update-MsIdGroupWritebackConfiguration {
                 if ($skipUpdate -ne $true) {
                     Write-Debug ($wbc | Out-String)
                     Write-Verbose ("Updating Group {0} with Group Writeback settings of Writebackenabled={1} and onPremisesGroupType={2}" -f $gid, $WriteBackEnabled, $WriteBackOnPremGroupType )
-                    Update-MgGroup -GroupId $gid -writeBackConfiguration $wbc -ErrorAction Stop
+
+                    if ($null -like $wbc.onPremisesGroupType) {
+
+                        # Workaround for null properties issue filed on GitHub - https://github.com/microsoftgraph/msgraph-sdk-powershell/issues/833
+                        $root = @{}
+                        $root.writebackConfiguration = $wbc
+                        $jbody = ($root | ConvertTo-Json -Depth 10 -Compress).Replace('""', 'null')
+
+                        Update-MgGroup -GroupId $gid -BodyParameter $jbody
+                    }
+                    else {
+                        Update-MgGroup -GroupId $gid -writeBackConfiguration $wbc -ErrorAction Stop
+                    }
+                    
                     Write-Verbose ("Group Updated!")
                 }
                 else {
