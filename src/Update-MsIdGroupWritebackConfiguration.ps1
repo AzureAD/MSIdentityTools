@@ -60,7 +60,7 @@ function Update-MsIdGroupWritebackConfiguration {
         [Parameter(Mandatory = $true, ParameterSetName = 'GraphGroup', Position = 1, ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
             ValueFromRemainingArguments = $false)]
-        [Microsoft.Graph.PowerShell.Models.MicrosoftGraphGroup1[]] 
+        [Object[]] 
         $Group,
         # WritebackEnabled true or false
         [Parameter(Mandatory = $true, Position = 2, ValueFromPipeline = $false,

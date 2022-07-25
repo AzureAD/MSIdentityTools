@@ -11,10 +11,7 @@
     PS > Get-MsIdGroupWritebackConfiguration -Group <Group>
 
     Get Group Writeback for Group
-.EXAMPLE
-    PS > Get-mggroup -filter "groupTypes/any(c:c eq 'Unified')"|Update-MsIdGroupWritebackConfiguration -WriteBackEnabled $false -verbose
 
-    For all M365 Groups in the tenant, set the WritebackEnabled to false to prevent them from being written back on-premises
 
 .NOTES
     THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
@@ -54,7 +51,7 @@ function Get-MsIdGroupWritebackConfiguration {
         [Parameter(Mandatory = $true, ParameterSetName = 'GraphGroup', Position = 1, ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
             ValueFromRemainingArguments = $false)]
-        [Microsoft.Graph.PowerShell.Models.MicrosoftGraphGroup1[]] $Group
+        [Object[]] $Group
     )
     
     begin {
