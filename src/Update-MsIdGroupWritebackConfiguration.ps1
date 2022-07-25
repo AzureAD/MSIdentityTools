@@ -129,6 +129,10 @@ function Update-MsIdGroupWritebackConfiguration {
                 
                 if ($mgGroup.SecurityEnabled -eq $true) {
                     $cloudGroupType = "Security"
+
+                    if ($null -ne $mgGroup.ProxyAddresses) {
+                        $cloudGroupType = "Mail-Enabled Security" 
+                    }
                 }
                 else {
                     $cloudGroupType = "Distribution"
@@ -150,6 +154,11 @@ function Update-MsIdGroupWritebackConfiguration {
                     "Distribution" {
                         $skipUpdate = $true
                         Write-Error ("Group {0} is a cloud distribution group and will NOT be updated. Cloud Distribution Groups are not supported for group writeback to on-premises. Use M365 groups instead." -f $gid)
+
+                    }
+                    "Mail-Enabled Security" {
+                        $skipUpdate = $true
+                        Write-Error ("Group {0} is a mail-enabled security group and will NOT be updated. Cloud mail-enabled security groups are not supported for group writeback to on-premises. Use M365 groups instead." -f $gid)
 
                     }
                     "Security" {

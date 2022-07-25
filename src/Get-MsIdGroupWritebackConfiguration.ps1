@@ -11,6 +11,10 @@
     PS > Get-MsIdGroupWritebackConfiguration -Group <Group>
 
     Get Group Writeback for Group
+.EXAMPLE
+    PS > Get-mggroup -filter "groupTypes/any(c:c eq 'Unified')"|Update-MsIdGroupWritebackConfiguration -WriteBackEnabled $false -verbose
+
+    For all M365 Groups in the tenant, set the WritebackEnabled to false to prevent them from being written back on-premises
 
 .NOTES
     THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
@@ -105,6 +109,10 @@ function Get-MsIdGroupWritebackConfiguration {
                 
                 if ($mgGroup.SecurityEnabled -eq $true) {
                     $cloudGroupType = "Security"
+
+                    if ($null -notlike $mgGroup.ProxyAddresses) {
+                        $cloudGroupType = "Mail-Enabled Security" 
+                    }
                 }
                 else {
                     $cloudGroupType = "Distribution"
@@ -121,53 +129,63 @@ function Get-MsIdGroupWritebackConfiguration {
             }
             else {
             
-                if ($checkedGroup.Type -eq 'Distribution') {
-                    $checkedGroup.WriteBackEnabled = "N/A"
-                    $checkedGroup.WriteBackOnPremGroupType = "N/A"
-                    $checkedGroup.EffectiveWriteBack = "Cloud Distribution Groups are not supported for group writeback to on-premises. Use M365 groups instead."
-                }
-                else {
+                switch ($checkedGroup.Type) {
+                    "Distribution" {
+                        $checkedGroup.WriteBackEnabled = "N/A"
+                        $checkedGroup.WriteBackOnPremGroupType = "N/A"
+                        $checkedGroup.EffectiveWriteBack = "Cloud Distribution Groups are not supported for group writeback to on-premises. Use M365 groups instead."
+
+                    }
+
+                    "Mail-Enabled Security" {
+                        $checkedGroup.WriteBackEnabled = "N/A"
+                        $checkedGroup.WriteBackOnPremGroupType = "N/A"
+                        $checkedGroup.EffectiveWriteBack = "Cloud mail-enabled security groups are not supported for group writeback to on-premises. Use M365 groups instead."
+
+                    }
+                    Default {
                    
         
-                    $writebackEnabled = $null
+                        $writebackEnabled = $null
 
-                    switch ($mgGroup.writebackConfiguration.isEnabled) {
-                        $true { $writebackEnabled = "TRUE" }
-                        $false { $writebackEnabled = "FALSE" }
-                        $null { $writebackEnabled = "NOTSET" }
-                    }
+                        switch ($mgGroup.writebackConfiguration.isEnabled) {
+                            $true { $writebackEnabled = "TRUE" }
+                            $false { $writebackEnabled = "FALSE" }
+                            $null { $writebackEnabled = "NOTSET" }
+                        }
             
             
-                    if ($null -ne ($mgGroup.writebackConfiguration.onPremisesGroupType)) {
-                        $WriteBackOnPremGroupType = $mgGroup.writebackConfiguration.onPremisesGroupType
-                    }
-                    else {
+                        if ($null -ne ($mgGroup.writebackConfiguration.onPremisesGroupType)) {
+                            $WriteBackOnPremGroupType = $mgGroup.writebackConfiguration.onPremisesGroupType
+                        }
+                        else {
+                            if ($checkedGroup.Type -eq 'M365') {
+                                $WriteBackOnPremGroupType = "universalDistributionGroup (M365 DEFAULT)"
+                            }
+                            else {
+                                $WriteBackOnPremGroupType = "universalSecurityGroup (Security DEFAULT)"
+                            }
+                        }
+
+                        $checkedGroup.WriteBackEnabled = $writebackEnabled
+                        $checkedGroup.WriteBackOnPremGroupType = $WriteBackOnPremGroupType
+
                         if ($checkedGroup.Type -eq 'M365') {
-                            $WriteBackOnPremGroupType = "universalDistributionGroup (M365 DEFAULT)"
+                            if ($checkedGroup.WriteBackEnabled -ne $false) {
+                                $checkedGroup.EffectiveWriteBack = ("Cloud M365 group will be writtenback onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
+                            }
+                            else {
+                                $checkedGroup.EffectiveWriteBack = "Cloud M365 group will NOT be writtenback on-premises"
+                            }
                         }
-                        else {
-                            $WriteBackOnPremGroupType = "universalSecurityGroup (Security DEFAULT)"
-                        }
-                    }
 
-                    $checkedGroup.WriteBackEnabled = $writebackEnabled
-                    $checkedGroup.WriteBackOnPremGroupType = $WriteBackOnPremGroupType
-
-                    if ($checkedGroup.Type -eq 'M365') {
-                        if ($checkedGroup.WriteBackEnabled -ne $false) {
-                            $checkedGroup.EffectiveWriteBack = ("Cloud M365 group will be writtenback onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
-                        }
-                        else {
-                            $checkedGroup.EffectiveWriteBack = "Cloud M365 group will NOT be writtenback on-premises"
-                        }
-                    }
-
-                    if ($checkedGroup.Type -eq 'Security') {
-                        if ($checkedGroup.WriteBackEnabled -eq $true) {
-                            $checkedGroup.EffectiveWriteBack = ("Cloud security group will be writtenback onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
-                        }
-                        else {
-                            $checkedGroup.EffectiveWriteBack = "Cloud security will NOT be writtenback on-premises"
+                        if ($checkedGroup.Type -eq 'Security') {
+                            if ($checkedGroup.WriteBackEnabled -eq $true) {
+                                $checkedGroup.EffectiveWriteBack = ("Cloud security group will be writtenback onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
+                            }
+                            else {
+                                $checkedGroup.EffectiveWriteBack = "Cloud security will NOT be writtenback on-premises"
+                            }
                         }
                     }
                 }
