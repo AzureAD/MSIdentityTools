@@ -1,11 +1,13 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [string] $ModulePath = "..\src\*.psd1"
+    [string] $ModulePath = ".\src\*.psd1"
 )
 
 BeforeAll {
-    $PSModule = Import-Module $ModulePath -Force -PassThru
+    $CriticalError = $null
+    $PSModule = Import-Module $ModulePath -Force -PassThru -ErrorVariable CriticalError
+    if ($CriticalError) { throw $CriticalError }
 }
 
 ## Perform Tests

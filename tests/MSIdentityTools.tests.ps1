@@ -1,15 +1,15 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [string] $ModulePath = "..\src\*.psd1"
+    [string] $ModulePath = ".\src\*.psd1"
 )
 
 BeforeDiscovery {
-    $PSModule = Import-Module $ModulePath -Force -PassThru
+    $PSModule = Import-Module $ModulePath -Force -PassThru -ErrorAction SilentlyContinue
 }
 
 BeforeAll {
-    $PSModule = Import-Module $ModulePath -Force -PassThru
+    $PSModule = Import-Module $ModulePath -Force -PassThru -ErrorAction Stop
 }
 
 ## Perform Tests
@@ -48,8 +48,11 @@ Describe 'MSIdentityTools' -Tag 'Common' {
 Describe '<_.Name>' -ForEach $PSModule.ExportedFunctions.Values -Tag 'Common' {
 
     BeforeDiscovery {
-        $Help = Get-Help $_.Name
-        $Help.examples.example | ForEach-Object { $_.title = $_.title.Replace('-','').Trim() }
+        try {
+            $Help = Get-Help $_.Name
+            $Help.examples.example | ForEach-Object { $_.title = $_.title.Replace('-', '').Trim() }
+        }
+        catch {}
     }
 
     Context 'Help Content' {
@@ -58,6 +61,11 @@ Describe '<_.Name>' -ForEach $PSModule.ExportedFunctions.Values -Tag 'Common' {
             $PSFunction = $_
             $Help = Get-Help $_.Name
         }
+
+        # It 'Use Get-Help' {
+        #     $Help = Get-Help $_.Name
+        #     $Help | Should -Not -BeNullOrEmpty
+        # }
 
         It 'Contains Synopsis' {
             $Help.Synopsis | Should -Not -BeNullOrEmpty
