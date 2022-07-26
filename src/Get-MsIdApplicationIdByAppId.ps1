@@ -17,22 +17,21 @@ function Get-MsIdApplicationIdByAppId {
     param (
         # AppID of the Application Registration
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
-        [string] $AppId
+        [string[]] $AppId
     )
 
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        try {
-            Import-Module Microsoft.Graph.Applications -MinimumVersion 1.9.2 -ErrorAction Stop
-        }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+        if (!(Test-MgCommand 'Get-MgApplication' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
     }
 
     process {
         if ($CriticalError) { return }
 
-        ## Filter application registration by appId and return id
-        Get-MgApplication -Filter "appId eq '$AppId'" -Select id | Select-Object -ExpandProperty id
+        foreach ($_AppId in $AppId) {
+            ## Filter application registration by appId and return id
+            Get-MgApplication -Filter "appId eq '$_AppId'" -Select id | Select-Object -ExpandProperty id
+        }
     }
 }

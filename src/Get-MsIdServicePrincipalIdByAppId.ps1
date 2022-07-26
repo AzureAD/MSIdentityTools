@@ -17,22 +17,21 @@ function Get-MsIdServicePrincipalIdByAppId {
     param (
         # AppID of the Service Principal
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
-        [string] $AppId
+        [string[]] $AppId
     )
 
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        try {
-            Import-Module Microsoft.Graph.Applications -MinimumVersion 1.9.2 -ErrorAction Stop
-        }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+        if (!(Test-MgCommand 'Get-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
     }
 
     process {
         if ($CriticalError) { return }
 
-        ## Filter service principals by appId and return id
-        Get-MgServicePrincipal -Filter "appId eq '$AppId'" -Select id | Select-Object -ExpandProperty id
+        foreach ($_AppId in $AppId) {
+            ## Filter service principals by appId and return id
+            Get-MgServicePrincipal -Filter "appId eq '$_AppId'" -Select id | Select-Object -ExpandProperty id
+        }
     }
 }
