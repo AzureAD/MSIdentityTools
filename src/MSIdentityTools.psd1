@@ -49,7 +49,7 @@
     #ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @(
+    RequiredModules      = @(
         @{ ModuleName = 'Microsoft.Graph.Authentication'; Guid = '883916f2-9184-46ee-b1f8-b6a2fb784cee'; ModuleVersion = '1.9.2' }
     )
 
@@ -63,7 +63,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    FormatsToProcess = @('.\internal\SamlMessages.format.ps1xml')
+    FormatsToProcess     = @('.\internal\SamlMessages.format.ps1xml')
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules        = @(
@@ -120,6 +120,8 @@
         '.\Update-MsIdApplicationSigningKeyThumbprint.ps1'
         '.\Get-MsIdIsViralUser.ps1'
         '.\Get-MsIdHasMicrosoftAccount.ps1'
+        '.\Get-MsIdGroupWritebackConfiguration.ps1'
+        '.\Update-MsIdGroupWritebackConfiguration.ps1'
     )
 
     # Functions to export from this module
@@ -153,6 +155,8 @@
         'Update-MsIdApplicationSigningKeyThumbprint'
         'Get-MsIdIsViralUser'
         'Get-MsIdHasMicrosoftAccount'
+        'Get-MsIdGroupWritebackConfiguration'
+        'Update-MsIdGroupWritebackConfiguration'
     )
 
     # Cmdlets to export from this module
