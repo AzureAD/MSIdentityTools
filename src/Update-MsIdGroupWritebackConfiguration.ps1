@@ -41,9 +41,8 @@
 function Update-MsIdGroupWritebackConfiguration {
     [CmdletBinding(DefaultParameterSetName = 'ObjectId')]
     param (
-        [Parameter(Mandatory = $true, ParameterSetName = 'ObjectId', Position = 0, ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false)]
+        # Group Object ID
+        [Parameter(Mandatory = $true, ParameterSetName = 'ObjectId', Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [ValidateScript( {
                 try {
                     [System.Guid]::Parse($_) | Out-Null
@@ -53,56 +52,53 @@ function Update-MsIdGroupWritebackConfiguration {
                     throw "$_ is not a valid ObjectID format. Valid value is a GUID format only."
                 }
             })]
-        [string[]]
-        # Group Object ID
-        $GroupId,
+        [string[]] $GroupId,
+
         # Group Object
-        [Parameter(Mandatory = $true, ParameterSetName = 'GraphGroup', Position = 1, ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false)]
-        [Object[]] 
-        $Group,
+        [Parameter(Mandatory = $true, ParameterSetName = 'GraphGroup', Position = 1, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Object[]] $Group,
+
         # WritebackEnabled true or false
-        [Parameter(Mandatory = $true, Position = 2, ValueFromPipeline = $false,
-            ValueFromPipelineByPropertyName = $false,
-            ValueFromRemainingArguments = $false)]
-        [bool]
-        $WriteBackEnabled,
-        [Parameter(Mandatory = $false, Position = 3, ValueFromPipeline = $false,
-            ValueFromPipelineByPropertyName = $false,
-            ValueFromRemainingArguments = $false)]
+        [Parameter(Mandatory = $true, Position = 2, ValueFromPipeline = $false, ValueFromPipelineByPropertyName = $false)]
+        [bool] $WriteBackEnabled,
+
         # On-Premises Group Type cloud group is written back as
+        [Parameter(Mandatory = $false, Position = 3, ValueFromPipeline = $false, ValueFromPipelineByPropertyName = $false)]
         [ValidateSet("universalDistributionGroup", "universalSecurityGroup", "universalMailEnabledSecurityGroup")]
-        [string]
-        $WriteBackOnPremGroupType
+        [string] $WriteBackOnPremGroupType
     )
     
     begin {
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        try {
+            ## Import Required Modules
+            Import-Module Microsoft.Graph.Groups -MinimumVersion 1.10.0 -ErrorAction Stop
 
-        if ($null -eq (Get-MgContext)) {
-            Write-Error "$(Get-Date -f T) - Please Connect to MS Graph API with the Connect-MgGraph cmdlet from the Microsoft.Graph.Authentication module first before calling functions!" -ErrorAction Stop
+            ## Check MgModule Connection
+            $MgContext = Get-MgContext
+            if ($MgContext) {
+                ## Check MgModule Consented Scopes
+                $MgPermissions = Find-MgGraphCommand -Command Update-MgGroup -ApiVersion beta | Select-Object -First 1 -ExpandProperty Permissions
+                if (!(Compare-Object $MgPermissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent)) {
+                    Write-Error "Additional scope needed, call Connect-MgGraph with one of the following scopes: $($MgPermissions.Name -join ', ')" -ErrorAction Stop
+                }
+            }
+            else {
+                Write-Error "Authentication needed, call Connect-MgGraph." -ErrorAction Stop
+            }
         }
-        else {
-            
-            if (((Get-MgContext).Scopes -notcontains "Directory.ReadWrite.All") -and ((Get-MgContext).Scopes -notcontains "Group.ReadWrite.All")) {
-                Write-Error "$(Get-Date -f T) - Please Connect to MS Graph API with the 'Connect-MgGraph -Scopes Group.ReadWrite.All' to include the Group.ReadWrite.All scope to update groups from MS Graph API." -ErrorAction Stop
-            }
-            
-            if ((Get-MgProfile).Name -ne "beta") {
-                Write-Error "$(Get-Date -f T) - Please select the beta profile with 'Select-MgProfile -Name beta' to use this cmdlet" -ErrorAction Stop
-            }
-            
-            $GroupsModuleVersion = (Get-Command -Module Microsoft.Graph.Groups -Name "Get-MGGroup").Version
-            if ($GroupsModuleVersion.Major -le "1" -and $GroupsModuleVersion.Minor -lt '10') {
-                Write-Error ("Microsoft.Graph.Groups Module 1.10 or Greater is not installed!  Pleas Update-Module to the latest version!") -ErrorAction Stop
-                
-            }
-
-        }
+        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
         
+        ## Save Current MgProfile to Restore at End
+        $previousMgProfile = Get-MgProfile
+        if ($previousMgProfile.Name -ne 'beta') {
+            Select-MgProfile -Name 'beta'
+        }
     }
     
     process {
+        if ($CriticalError) { return }
 
         if ($null -ne $Group) {
             $GroupId = $group.id
@@ -146,13 +142,11 @@ function Update-MsIdGroupWritebackConfiguration {
             $groupSourceOfAuthority = if ($mgGroup.OnPremisesSyncEnabled -eq $true) { "On-Premises" }else { "Cloud" }
 
 
-
             if ($groupSourceOfAuthority -eq 'On-Premises') {
                 $skipUpdate = $true
                 Write-Verbose ("Group {0} is an on-premises SOA group and will not be updated." -f $gid)
             }
             else {
-
 
                 switch ($cloudGroupType) {
                     "Distribution" {
@@ -193,8 +187,6 @@ function Update-MsIdGroupWritebackConfiguration {
                                 }
                             }
                     
-               
-                    
                         }
                     }
 
@@ -214,21 +206,12 @@ function Update-MsIdGroupWritebackConfiguration {
                                
                                 $wbc.onPremisesGroupType = $WriteBackOnPremGroupType
                                 
-                                
                             }
-                    
-               
                     
                         }
 
                     }
 
-            
-
-                
-            
-               
-          
                 }
 
                 if ($wbc.Count -eq 0) {
@@ -258,18 +241,17 @@ function Update-MsIdGroupWritebackConfiguration {
                 
                     Write-Verbose ("No effective updates to group applied!")
                 }
-           
-            
-           
 
-               
             }
         }
     }
 
-    
-    
     end {
-        
+        if ($CriticalError) { return }
+
+        ## Restore Previous MgProfile
+        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
+            Select-MgProfile -Name $previousMgProfile.Name
+        }
     }
 }
