@@ -25,7 +25,7 @@ Describe 'Get-MsIdServicePrincipalIdByAppId' {
         )
     }
 
-    Context 'Issuer: <Issuer>' -Foreach @(
+    Context 'AppId: <AppId>' -Foreach @(
         @{ AppId = '10000000-0000-0000-0000-000000000001'; Expected = '20000000-0000-0000-0000-000000000002' }
         @{ AppId = '30000000-0000-0000-0000-000000000003'; Expected = '40000000-0000-0000-0000-000000000004' }
     ) {
