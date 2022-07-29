@@ -12,6 +12,10 @@
 
     Get Group Writeback for Group
 
+.EXAMPLE
+    PS > Get-mggroup -filter "groupTypes/any(c:c eq 'Unified')"|Get-MsIdGroupWritebackConfiguration -verbose
+    
+    Get the WritebackConfiguration for all M365 Groups in the tenant
 
 .NOTES
     THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
@@ -171,19 +175,19 @@ function Get-MsIdGroupWritebackConfiguration {
 
                         if ($checkedGroup.Type -eq 'M365') {
                             if ($checkedGroup.WriteBackEnabled -ne $false) {
-                                $checkedGroup.EffectiveWriteBack = ("Cloud M365 group will be writtenback onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
+                                $checkedGroup.EffectiveWriteBack = ("Cloud M365 group will be written back onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
                             }
                             else {
-                                $checkedGroup.EffectiveWriteBack = "Cloud M365 group will NOT be writtenback on-premises"
+                                $checkedGroup.EffectiveWriteBack = "Cloud M365 group will NOT be written back on-premises"
                             }
                         }
 
                         if ($checkedGroup.Type -eq 'Security') {
                             if ($checkedGroup.WriteBackEnabled -eq $true) {
-                                $checkedGroup.EffectiveWriteBack = ("Cloud security group will be writtenback onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
+                                $checkedGroup.EffectiveWriteBack = ("Cloud security group will be written back onprem as {0} grouptype" -f $WriteBackOnPremGroupType)
                             }
                             else {
-                                $checkedGroup.EffectiveWriteBack = "Cloud security will NOT be writtenback on-premises"
+                                $checkedGroup.EffectiveWriteBack = "Cloud security will NOT be written back on-premises"
                             }
                         }
                     }
