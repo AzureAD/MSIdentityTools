@@ -132,12 +132,12 @@ Describe 'Test-MgCommand' {
             }
         }
 
-        It 'Missing scopes' {
-            InModuleScope $PSModule.Name -Parameters $_ {
-                Mock Get-MgContext { New-Object Microsoft.Graph.PowerShell.Authentication.AuthContext -Property @{ Scopes = @('email', 'openid', 'profile', 'User.Read'); AppName = 'Microsoft Graph PowerShell'; PSHostVersion = $PSVersionTable['PSVersion'] } } -Verifiable
-                $Command = { Test-MgCommand 'Get-MgGroup' -ErrorAction SilentlyContinue }
-                $Command | Should -WriteError -ErrorId "MgScopePermissionRequired*" -ExceptionType ([System.Security.SecurityException])
-            }
-        }
+        # It 'Missing scopes' {
+        #     InModuleScope $PSModule.Name -Parameters $_ {
+        #         Mock Get-MgContext { New-Object Microsoft.Graph.PowerShell.Authentication.AuthContext -Property @{ Scopes = @('email', 'openid', 'profile', 'User.Read'); AppName = 'Microsoft Graph PowerShell'; PSHostVersion = $PSVersionTable['PSVersion'] } } -Verifiable
+        #         $Command = { Test-MgCommand 'Get-MgGroup' -ErrorAction SilentlyContinue }
+        #         $Command | Should -WriteError -ErrorId "MgScopePermissionRequired*" -ExceptionType ([System.Security.SecurityException])
+        #     }
+        # }
     }
 }
