@@ -38,43 +38,43 @@ Describe 'Test-MgCommand' {
         )
     }
 
-    Context 'Name: <Name>' -ForEach @(
-            @{ Name = 'Get-MgUser'; Expected = $true }
-            @{ Name = 'Get-MgUser'; ApiVersion = 'Beta'; Expected = $true }
-            @{ Name = 'Get-MgUser'; ApiVersion = 'Beta'; MinimumVersion = '1.0'; Expected = $true }
-        ) {
-        BeforeAll {
-            InModuleScope $PSModule.Name -ArgumentList $_ {
-                $script:params = $args[0].Clone()
-                $script:params.Remove('Name')
-                $script:params.Remove('Expected')
-            }
-        }
+    # Context 'Name: <Name>' -ForEach @(
+    #         @{ Name = 'Get-MgUser'; Expected = $true }
+    #         @{ Name = 'Get-MgUser'; ApiVersion = 'Beta'; Expected = $true }
+    #         @{ Name = 'Get-MgUser'; ApiVersion = 'Beta'; MinimumVersion = '1.0'; Expected = $true }
+    #     ) {
+    #     BeforeAll {
+    #         InModuleScope $PSModule.Name -ArgumentList $_ {
+    #             $script:params = $args[0].Clone()
+    #             $script:params.Remove('Name')
+    #             $script:params.Remove('Expected')
+    #         }
+    #     }
 
-        It 'Positional Parameter' {
-            InModuleScope $PSModule.Name -Parameters $_ {
-                $Output = Test-MgCommand $Name @params -ErrorVariable actualErrors
-                $Output | Should -BeOfType [bool]
-                $Output | Should -BeExactly $Expected
-                # Should -Invoke Get-MgServicePrincipal -ModuleName $PSModule.Name -ParameterFilter {
-                #     $Filter -eq "appId eq '$AppId'"
-                # }
-                $actualErrors | Should -HaveCount 0
-            }
-        }
+    #     It 'Positional Parameter' {
+    #         InModuleScope $PSModule.Name -Parameters $_ {
+    #             $Output = Test-MgCommand $Name @params -ErrorVariable actualErrors
+    #             $Output | Should -BeOfType [bool]
+    #             $Output | Should -BeExactly $Expected
+    #             # Should -Invoke Get-MgServicePrincipal -ModuleName $PSModule.Name -ParameterFilter {
+    #             #     $Filter -eq "appId eq '$AppId'"
+    #             # }
+    #             $actualErrors | Should -HaveCount 0
+    #         }
+    #     }
 
-        It 'Pipeline Input' {
-            InModuleScope $PSModule.Name -Parameters $_ {
-                $Output = $Name | Test-MgCommand @params -ErrorVariable actualErrors
-                $Output | Should -BeOfType [bool]
-                $Output | Should -BeExactly $Expected
-                # Should -Invoke Get-MgServicePrincipal -ModuleName $PSModule.Name -ParameterFilter {
-                #     $Filter -eq "appId eq '$AppId'"
-                # }
-                $actualErrors | Should -HaveCount 0
-            }
-        }
-    }
+    #     It 'Pipeline Input' {
+    #         InModuleScope $PSModule.Name -Parameters $_ {
+    #             $Output = $Name | Test-MgCommand @params -ErrorVariable actualErrors
+    #             $Output | Should -BeOfType [bool]
+    #             $Output | Should -BeExactly $Expected
+    #             # Should -Invoke Get-MgServicePrincipal -ModuleName $PSModule.Name -ParameterFilter {
+    #             #     $Filter -eq "appId eq '$AppId'"
+    #             # }
+    #             $actualErrors | Should -HaveCount 0
+    #         }
+    #     }
+    # }
 
     # Context 'Multiple Input' {
     #     BeforeAll {
