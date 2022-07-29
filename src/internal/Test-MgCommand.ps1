@@ -11,8 +11,8 @@ function Test-MgCommand {
     [OutputType([bool])]
     param (
         # The name of a command.
-        [Parameter(Mandatory = $true, Position = 1)]
-        [string[]] $CommandName,
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
+        [string[]] $Name,
         # The service API version.
         [Parameter(Mandatory = $false)]
         [ValidateSet('v1.0', 'beta')]
@@ -27,7 +27,7 @@ function Test-MgCommand {
         $result = $true
 
         ## Get Graph Command Details
-        [array] $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion
+        [array] $MgCommands = Find-MgGraphCommand -Command $Name -ApiVersion $ApiVersion
 
         ## Remove duplicate commands
         [hashtable] $MgCommandLookup = @{}
@@ -52,13 +52,15 @@ function Test-MgCommand {
             ## Check MgModule Consented Scopes
             foreach ($MgCommand in $MgCommandLookup.Values) {
                 if (!(Compare-Object $MgCommand.Permissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent)) {
-                    Write-Error "Additional scope needed for command '$($MgCommand.Command)', call Connect-MgGraph with one of the following scopes: $($MgCommand.Permissions.Name -join ', ')"
+                    $Exception = New-Object System.Security.SecurityException -ArgumentList "Additional scope needed for command '$($MgCommand.Command)', call Connect-MgGraph with one of the following scopes: $($MgCommand.Permissions.Name -join ', ')"
+                    Write-Error -Exception $Exception -Category ([System.Management.Automation.ErrorCategory]::PermissionDenied) -ErrorId 'MgScopePermissionRequired'
                     $result = $false
                 }
             }
         }
         else {
-            Write-Error "Authentication needed, call Connect-MgGraph."
+            $Exception = New-Object System.Security.Authentication.AuthenticationException -ArgumentList "Authentication needed, call Connect-MgGraph."
+            Write-Error -Exception $Exception -Category ([System.Management.Automation.ErrorCategory]::AuthenticationError) -CategoryReason 'AuthenticationException' -ErrorId 'MgAuthenticationRequired'
             $result = $false
         }
 
