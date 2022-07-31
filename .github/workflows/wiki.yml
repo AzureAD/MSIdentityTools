@@ -4,8 +4,8 @@ on:
   push:
     branches:
     - main
-    - preview
     paths: 
+    - '.github/workflows/wiki.yml'
     - 'src/**'
     - 'build/*Wiki.ps1'
 
@@ -23,23 +23,20 @@ jobs:
       working-directory: ./build
     - name: "Upload Wiki"
       run: |
-        mkdir tmpwiki
-        cd tmpwiki
-        echo "init git"
-        git init
         echo "set git user"
         git config --global user.email "action@github.com"
         git config --global user.name "Github Action"
-        echo "pull from git wiki"
-        git pull https://githubaction:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.wiki.git
+        echo "clone the remote wiki"
+        git clone https://githubaction:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.wiki.git tmp.wiki
+        cd tmp.wiki
         echo "copy generated files"
         cp -f ../.wiki/*.md ./
-        echo "add generated fomes"
-        git add .
+        echo "add generated files"
+        git add -A
         echo "commit new wiki"
         git commit --allow-empty -m "update wiki $GITHUB_SHA"
         echo "push to wiki"
-        git push https://githubaction:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.wiki.git
+        git push
       env:
         GITHUB_TOKEN: ${{ github.token }}
       
