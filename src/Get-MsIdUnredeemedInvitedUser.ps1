@@ -59,8 +59,8 @@ function Get-MsIdUnredeemedInvitedUser {
 
         ## Save Current MgProfile to Restore at End
         $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
+        if ($previousMgProfile.Name -ne 'v1.0') {
+            Select-MgProfile -Name 'v1.0'
         }
 
     }
