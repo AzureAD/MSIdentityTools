@@ -33,6 +33,7 @@ function Get-MsIdInactiveSignInUser {
     param (
         # User Last Sign In Activity is before Days ago
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
+        [Alias("BeforeDaysAgo")]
         [int] $LastSignInBeforeDaysAgo = 30,
         # Return results for All, Member, or Guest userTypes
         [ValidateSet("All", "Member", "Guest")]
@@ -81,7 +82,7 @@ function Get-MsIdInactiveSignInUser {
 
         # Using Date scope here, since conflict with service side odata filter on userType.
         Write-Debug ("Retrieving Users with Filter {0}" -f $queryFilter)
-        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property signInActivity, UserPrincipalName, Id, DisplayName, mail, userType
+        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property signInActivity, UserPrincipalName, Id, DisplayName, mail, userType, createdDateTime
 
         switch ($UserType) {
             "Member" {
@@ -117,6 +118,14 @@ function Get-MsIdInactiveSignInUser {
 
                 $checkedUser.LastNonInteractiveSigninDaysAgo = (New-TimeSpan -Start $checkedUser.lastNonInteractiveSignInDateTime -End (Get-Date)).Days
                 $checkedUser.lastNonInteractiveSignInRequestId = $userObject.signInActivity.lastNonInteractiveSignInRequestId
+            }
+            If ($null -eq $userObject.CreatedDateTime) {
+                $checkedUser.CreatedDateTime = "Unknown"
+                $checkedUser.CreatedDaysAgo = "Unknown"
+            }
+            else {
+                $checkedUser.CreatedDateTime = $userObject.CreatedDateTime
+                $checkedUser.CreatedDaysAgo = (New-TimeSpan -Start $userObject.CreatedDateTime -End (Get-Date)).Days
             }
 
             Write-Output ([pscustomobject]$checkedUser)
