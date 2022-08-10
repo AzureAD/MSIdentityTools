@@ -40,7 +40,8 @@ function Get-MsIdUnredeemedInvitedUser {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         try {
-
+            ## Import Required Modules
+            Import-Module Microsoft.Graph.Users -MinimumVersion 1.10.0 -ErrorAction Stop
 
             ## Check MgModule Connection
             $MgContext = Get-MgContext
@@ -70,15 +71,16 @@ function Get-MsIdUnredeemedInvitedUser {
 
         $queryUsers = $null
 
-        $queryDate = Get-Date (Get-Date).AddDays($(0 - $LastSignInBeforeDaysAgo)) -UFormat %Y-%m-%dT00:00:00Z
+        $queryDate = Get-Date (Get-Date).AddDays($(0 - $InvitedBeforeDaysAgo)) -UFormat %Y-%m-%dT00:00:00Z
 
-        $UnredeemedFilter = ("(externalUserState eq 'PendingAcceptance')")
+        $UnredeemedFilter = "(externalUserState eq 'PendingAcceptance')"
+        #$UnredeemedFilter = "(externalUserState eq 'PendingAcceptance') and createdDateTime -lt '$queryDate'"
         #To Add: Detection for invited users without externalUserState values
 
         $queryFilter = $UnredeemedFilter
 
         Write-Debug ("Retrieving Invited Users who are not redeemed with filter {0}" -f $queryFilter)
-        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property ExternalUserState, ExternalUserStateChangeDateTime, UserPrincipalName, Id, DisplayName, mail, userType, AccountEnabled, CreatedDateTime -ConsistencyLevel eventual -CountVariable $UnredeemedUsersCount
+        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -OrderBy 'createdDateTime' -Property ExternalUserState, ExternalUserStateChangeDateTime, UserPrincipalName, Id, DisplayName, mail, userType, AccountEnabled, CreatedDateTime -ConsistencyLevel eventual -CountVariable UnredeemedUsersCount
 
         Write-Verbose ("{0} Unredeemed Invite Users Found!" -f $UnredeemedUsersCount)
         foreach ($userObject in $queryUsers) {
