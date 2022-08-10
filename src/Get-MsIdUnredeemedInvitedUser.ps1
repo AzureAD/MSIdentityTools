@@ -73,11 +73,12 @@ function Get-MsIdUnredeemedInvitedUser {
         $queryDate = Get-Date (Get-Date).AddDays($(0 - $LastSignInBeforeDaysAgo)) -UFormat %Y-%m-%dT00:00:00Z
 
         $UnredeemedFilter = ("(externalUserState eq 'PendingAcceptance')")
+        #To Add: Detection for invited users without externalUserState values
 
         $queryFilter = $UnredeemedFilter
 
         Write-Debug ("Retrieving Invited Users who are not redeemed with filter {0}" -f $queryFilter)
-        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property ExternalUserState, ExternalUserStateChangeDateTime, UserPrincipalName, Id, DisplayName, mail, userType -ConsistencyLevel eventual -CountVariable $UnredeemedUsersCount
+        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property ExternalUserState, ExternalUserStateChangeDateTime, UserPrincipalName, Id, DisplayName, mail, userType, AccountEnabled -ConsistencyLevel eventual -CountVariable $UnredeemedUsersCount
 
         Write-Verbose ("{0} Unredeemed Invite Users Found!" -f $UnredeemedUsersCount)
         foreach ($userObject in $queryUsers) {
@@ -86,6 +87,7 @@ function Get-MsIdUnredeemedInvitedUser {
             $checkedUser.UserID = $userObject.Id
             $checkedUser.DisplayName = $userObject.DisplayName
             $checkedUser.UserPrincipalName = $userObject.UserPrincipalName
+            $checkedUser.AccountEnabled = $userObject.AccountEnabled
             $checkedUser.Mail = $userObject.Mail
             $checkedUser.UserType = $userObject.UserType
             $checkedUser.Identities = $userObject.Identities
