@@ -86,13 +86,10 @@ function Get-MsIdUnredeemedInvitedUser {
             $checkedUser = [ordered] @{}
             $checkedUser.UserID = $userObject.Id
             $checkedUser.DisplayName = $userObject.DisplayName
-            $checkedUser.UserPrincipalName = $userObject.UserPrincipalName
-            $checkedUser.AccountEnabled = $userObject.AccountEnabled
             $checkedUser.Mail = $userObject.Mail
-            $checkedUser.UserType = $userObject.UserType
-            $checkedUser.Identities = $userObject.Identities
-            $checkedUser.ExternalUserState = $userObject.ExternalUserState
 
+            $checkedUser.AccountEnabled = $userObject.AccountEnabled
+            $checkedUser.ExternalUserState = $userObject.ExternalUserState
             If ($null -eq $userObject.ExternalUserStateChangeDateTime) {
                 $checkedUser.ExternalUserStateChangeDateTime = "Unknown"
                 $checkedUser.InvitedDaysAgo = "Unknown"
@@ -103,6 +100,12 @@ function Get-MsIdUnredeemedInvitedUser {
                 $checkedUser.InvitedDaysAgo = (New-TimeSpan -Start $userObject.ExternalUserStateChangeDateTime -End (Get-Date)).Days
 
             }
+
+
+
+            $checkedUser.UserPrincipalName = $userObject.UserPrincipalName
+            $checkedUser.UserType = $userObject.UserType
+            $checkedUser.Identities = $userObject.Identities
 
             if ($checkedUser.ExternalUserStateChangeDateTime -eq 'Unknown' -or $checkedUser.InvitedDaysAgo -ge $InvitedBeforeDaysAgo) {
                 Write-Output ([pscustomobject]$checkedUser)
