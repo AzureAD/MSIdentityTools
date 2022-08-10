@@ -125,6 +125,8 @@
         '.\Get-MsIdHasMicrosoftAccount.ps1'
         '.\Get-MsIdGroupWritebackConfiguration.ps1'
         '.\Update-MsIdGroupWritebackConfiguration.ps1'
+        '.\Get-MsIdUnredeemedInvitedUser.ps1'
+        '.\Get-MsIdInactiveSignInUser.ps1'
     )
 
     # Functions to export from this module
@@ -162,6 +164,8 @@
         'Get-MsIdHasMicrosoftAccount'
         'Get-MsIdGroupWritebackConfiguration'
         'Update-MsIdGroupWritebackConfiguration'
+        'Get-MsIdUnredeemedInvitedUser'
+        'Get-MsIdInactiveSignInUser'
     )
 
     # Cmdlets to export from this module
