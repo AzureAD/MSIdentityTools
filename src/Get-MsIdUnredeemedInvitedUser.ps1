@@ -78,7 +78,7 @@ function Get-MsIdUnredeemedInvitedUser {
         $queryFilter = $UnredeemedFilter
 
         Write-Debug ("Retrieving Invited Users who are not redeemed with filter {0}" -f $queryFilter)
-        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property ExternalUserState, ExternalUserStateChangeDateTime, UserPrincipalName, Id, DisplayName, mail, userType, AccountEnabled -ConsistencyLevel eventual -CountVariable $UnredeemedUsersCount
+        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property ExternalUserState, ExternalUserStateChangeDateTime, UserPrincipalName, Id, DisplayName, mail, userType, AccountEnabled, CreatedDateTime -ConsistencyLevel eventual -CountVariable $UnredeemedUsersCount
 
         Write-Verbose ("{0} Unredeemed Invite Users Found!" -f $UnredeemedUsersCount)
         foreach ($userObject in $queryUsers) {
@@ -106,6 +106,14 @@ function Get-MsIdUnredeemedInvitedUser {
             $checkedUser.UserPrincipalName = $userObject.UserPrincipalName
             $checkedUser.UserType = $userObject.UserType
             $checkedUser.Identities = $userObject.Identities
+            If ($null -eq $userObject.CreatedDateTime) {
+                $checkedUser.CreatedDateTime = "Unknown"
+                $checkedUser.CreatedDaysAgo = "Unknown"
+            }
+            else {
+                $checkedUser.CreatedDateTime = $userObject.CreatedDateTime
+                $checkedUser.CreatedDaysAgo = (New-TimeSpan -Start $userObject.CreatedDateTime -End (Get-Date)).Days
+            }
 
             if ($checkedUser.ExternalUserStateChangeDateTime -eq 'Unknown' -or $checkedUser.InvitedDaysAgo -ge $InvitedBeforeDaysAgo) {
                 Write-Output ([pscustomobject]$checkedUser)
