@@ -26,15 +26,17 @@ function ConvertFrom-MsIdAadcSourceAnchor {
         [string] $InputObject
     )
 
-    if ($InputObject -imatch '(?:^|,)((?:[0-9a-f]{2} ?)+)(?:$|,)') {
-        [guid] $SourceGuid = ConvertFrom-HexString $Matches[1].Trim() -RawBytes
-    }
-    elseif ($InputObject -imatch '(?:^|,)([0-9a-z+/=]+=+)(?:$|,)') {
-        [guid] $SourceGuid = ConvertFrom-Base64String $Matches[1] -RawBytes
-    }
-    else {
-        [guid] $SourceGuid = ConvertFrom-Base64String $InputObject -RawBytes
-    }
+    process {
+        if ($InputObject -imatch '(?:^|,)((?:[0-9a-f]{2} ?)+)(?:$|,)') {
+            [guid] $SourceGuid = ConvertFrom-HexString $Matches[1].Trim() -RawBytes
+        }
+        elseif ($InputObject -imatch '(?:^|,)([0-9a-z+/=]+=+)(?:$|,)') {
+            [guid] $SourceGuid = ConvertFrom-Base64String $Matches[1] -RawBytes
+        }
+        else {
+            [guid] $SourceGuid = ConvertFrom-Base64String $InputObject -RawBytes
+        }
 
-    return $SourceGuid
+        Write-Output $SourceGuid
+    }
 }
