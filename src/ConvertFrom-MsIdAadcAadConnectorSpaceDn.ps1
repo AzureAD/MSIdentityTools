@@ -25,30 +25,32 @@ function ConvertFrom-MsIdAadcAadConnectorSpaceDn {
         [string] $InputObject
     )
 
-    ## Extract Hex String
-    if ($InputObject -imatch '(?:CN=)?\{?([0-9a-f]+)\}?') {
-        [string] $HexString = $Matches[1]
-    }
-    else {
-        [string] $HexString = $InputObject
-    }
-
-    ## Decode Hex String
-    [string] $DecodedString = ConvertFrom-HexString $HexString
-    if ($DecodedString -imatch '([a-z]+)_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})') {
-        [guid] $CloudGuid = $Matches[2]
-        $Result = [PSCustomObject]@{
-            cloudAnchor = $DecodedString
-            cloudGuid   = $CloudGuid
+    process {
+        ## Extract Hex String
+        if ($InputObject -imatch '(?:CN=)?\{?([0-9a-f]+)\}?') {
+            [string] $HexString = $Matches[1]
         }
-    }
-    else {
-        [guid] $SourceGuid = ConvertFrom-Base64String $DecodedString -RawBytes
-        $Result = [PSCustomObject]@{
-            sourceAnchor = $DecodedString
-            sourceGuid   = $SourceGuid
+        else {
+            [string] $HexString = $InputObject
         }
-    }
 
-    return $Result
+        ## Decode Hex String
+        [string] $DecodedString = ConvertFrom-HexString $HexString
+        if ($DecodedString -imatch '([a-z]+)_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})') {
+            [guid] $CloudGuid = $Matches[2]
+            $Result = [PSCustomObject]@{
+                cloudAnchor = $DecodedString
+                cloudGuid   = $CloudGuid
+            }
+        }
+        else {
+            [guid] $SourceGuid = ConvertFrom-Base64String $DecodedString -RawBytes
+            $Result = [PSCustomObject]@{
+                sourceAnchor = $DecodedString
+                sourceGuid   = $SourceGuid
+            }
+        }
+
+        Write-Output $Result
+    }
 }
