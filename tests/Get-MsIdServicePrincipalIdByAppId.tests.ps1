@@ -99,7 +99,7 @@ Describe 'Get-MsIdServicePrincipalIdByAppId' {
         }
     }
 
-    Context 'Error Conditions' {
+    Context 'Error Conditions' -Tag Slow {
         BeforeAll {
             Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -Verifiable
             Mock -ModuleName $PSModule.Name Get-MgContext { } -Verifiable
@@ -115,7 +115,7 @@ Describe 'Get-MsIdServicePrincipalIdByAppId' {
             $Command | Should -WriteError -ErrorId "MgAuthenticationRequired*" -ExceptionType ([System.Security.Authentication.AuthenticationException])
         }
 
-        It 'Missing scopes' {
+        It 'Missing scopes' -Skip {
             Mock -ModuleName $PSModule.Name Get-MgContext { New-Object Microsoft.Graph.PowerShell.Authentication.AuthContext -Property @{ Scopes = @('openid', 'profile', 'User.Read', 'email'); AppName = 'Microsoft Graph PowerShell'; PSHostVersion = $PSVersionTable['PSVersion'] } } -Verifiable
             $Command = { Get-MsIdServicePrincipalIdByAppId (New-Guid) -ErrorAction SilentlyContinue }
             $Command | Should -WriteError -ErrorId "MgScopePermissionRequired*" -ExceptionType ([System.Security.SecurityException])
