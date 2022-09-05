@@ -4,7 +4,7 @@
     }
     Filter       = @{
         #Tag        = ''
-        ExcludeTag = 'IntegrationTest'
+        ExcludeTag = 'Slow', 'IntegrationTest'
     }
     CodeCoverage = @{
         Enabled      = $true

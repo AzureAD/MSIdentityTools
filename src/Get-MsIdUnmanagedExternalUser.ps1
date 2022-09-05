@@ -39,6 +39,8 @@ function Get-MsIdUnmanagedExternalUser {
         $Type = "ExternalAzureADViral"
     )
 
+    Import-Module Microsoft.Graph.Users -MinimumVersion 1.9.2 -ErrorAction Stop
+
     $graphBaseUri = "https://graph.microsoft.com/$((Get-MgProfile).Name)"
     $pageCount = 999
     $guestUserUri = $graphBaseUri + "/users?`$filter=userType eq 'Guest'&`$select=id,userPrincipalName,mail,displayName,identities&`$count=true&`$top=$pageCount"
