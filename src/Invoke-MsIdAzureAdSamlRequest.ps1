@@ -26,11 +26,11 @@ function Invoke-MsIdAzureAdSamlRequest {
 
     process {
         foreach ($_SamlRequest in $SamlRequest) {
-            if ($Token -is [string]) {
+            if ($_SamlRequest -is [string]) {
                 $xmlSamlRequest = ConvertFrom-SamlMessage $_SamlRequest
             }
             else {
-                $xmlSamlRequest = $Token
+                $xmlSamlRequest = $_SamlRequest
             }
             $EncodedSamlRequest = $xmlSamlRequest.OuterXml | Compress-Data | ConvertTo-Base64String
 
