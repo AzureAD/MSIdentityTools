@@ -212,23 +212,26 @@
         }
 
         ## Initialize Critical Dependencies
-
         $CriticalError = $null
         try {
-            #Import-Module Microsoft.Graph.Reports -ErrorAction Stop
+            ## Import Required Modules
             Import-Module Microsoft.Graph.Applications -MinimumVersion 1.10.0 -ErrorAction Stop
+
+            ## Check MgModule Connection
+            $MgContext = Get-MgContext
+            if ($MgContext) {
+                ## Check MgModule Consented Scopes
+                $MgPermissions = Find-MgGraphCommand -Command Update-MgServicePrincipal | Select-Object -First 1 -ExpandProperty Permissions
+                if (!(Compare-Object $MgPermissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent)) {
+                    Write-Error "Additional scope needed, call Connect-MgGraph with one of the following scopes: $($MgPermissions.Name -join ', ')" -ErrorAction Stop
+                }
+            }
+            else {
+                Write-Error "Authentication needed, call Connect-MgGraph." -ErrorAction Stop
+            }
         }
         catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
-        
 
-        #Connection and profile check
-
-        Write-Verbose -Message "$(Get-Date -f T) - Checking connection..."
-
-        if ($null -eq (Get-MgContext)) {
-
-            Write-Error "$(Get-Date -f T) - Please connect to MS Graph API with the Connect-MgGraph cmdlet!" -ErrorAction Stop
-        }
     }
 
     process {
