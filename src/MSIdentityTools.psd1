@@ -127,6 +127,7 @@
         '.\Update-MsIdGroupWritebackConfiguration.ps1'
         '.\Get-MsIdUnredeemedInvitedUser.ps1'
         '.\Get-MsIdInactiveSignInUser.ps1'
+        '.\Set-MsIdServicePrincipalVisibleInMyApps.ps1'
     )
 
     # Functions to export from this module
@@ -166,6 +167,7 @@
         'Update-MsIdGroupWritebackConfiguration'
         'Get-MsIdUnredeemedInvitedUser'
         'Get-MsIdInactiveSignInUser'
+        'Set-MsIdServicePrincipalVisibleInMyApps'
     )
 
     # Cmdlets to export from this module
