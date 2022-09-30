@@ -22,6 +22,8 @@ function Import-MsIdAdfsSampleApp {
       [switch]$Force = $false
     )
 
+    $samplePolicy = "MsId Block Off Corp and VPN"
+
     if (Import-AdfsModule) {
         Try {
             foreach($RelyingParty in $Application) {
@@ -85,11 +87,15 @@ function Import-MsIdAdfsSampleApp {
                 Set-ADFSRelyingPartyTrust -TargetName $rpName -SamlResponseSignature $RelyingParty.SamlResponseSignature
                 Set-ADFSRelyingPartyTrust -TargetName $rpName -SignatureAlgorithm $RelyingParty.SignatureAlgorithm
                 Set-ADFSRelyingPartyTrust -TargetName $rpName -TokenLifetime $RelyingParty.TokenLifetime
-                if (Get-AdfsAccessControlPolicy -Name "Block Off Corp and VPN") {
-                    Set-AdfsRelyingPartyTrust -TargetName $rpName -AccessControlPolicyName $RelyingParty.AccessControlPolicyName
-                }
-                else {
-                    Write-Warning "The Access Control Policy 'Block Off Corp and VPN' is missing, run 'Import-MsIdAdfsSamplePolicies' to create."
+
+                # check if using custom plocy and test if exists
+                if ($RelyingParty.AccessControlPolicyName -eq $samplePolicy) {
+                    if (Get-AdfsAccessControlPolicy -Name $samplePolicy) {
+                        Set-AdfsRelyingPartyTrust -TargetName $rpName -AccessControlPolicyName $RelyingParty.AccessControlPolicyName
+                    }
+                    else {
+                        Write-Warning "The Access Control Policy '$($samplePolicy)' is missing, run 'Import-MsIdAdfsSamplePolicies' to create."
+                    }
                 }
             }
         }            

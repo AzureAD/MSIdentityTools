@@ -14,7 +14,7 @@ function Import-MsIdAdfsSamplePolicy {
 
     )
 
-    $name = "Sample Block Off Corp and VPN"
+    $name = "MsId Block Off Corp and VPN"
     $metadataPath = "$($PSScriptRoot)\internal\AdfsSamples\AdfsAccessControlPolicy.xml"
 
     if (Import-AdfsModule) {
