@@ -10,14 +10,12 @@
 
 .EXAMPLE
     PS > $credential = Get-Credential
-
     PS > Get-MsIdAdfsWsTrustToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com -Credential $credential
 
     Sign in  to an application on an AD FS server using credentials provided by the user using the UserNameMixed endpoint.
 
 .EXAMPLE
     PS > $identifiers =  Get-AdfsRelyingPartyTrust | foreach { $_.Identifier.Item(0) }
-
     PS > $identifiers | foreach { Get-MsIdAdfsWsTrustToken $_ -HostName adfs.contoso.com }
 
     Get all relying party trusts from the AD FS server and sign in using the logged user credentials.

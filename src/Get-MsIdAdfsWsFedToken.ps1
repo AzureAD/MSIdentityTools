@@ -10,14 +10,12 @@
 
 .EXAMPLE
     PS > $credential = Get-Credential
-
     PS > Get-MsIdAdfsWsFedToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
 
     Sign in  to an application on an AD FS server using credentials provided by the user using the Ws-Fed endpoint and forms based authentication.
 
 .EXAMPLE
     PS > $WsFedIdentifiers = Get-AdfsRelyingPartyTrust | where { $_.WSFedEndpoint -ne $null -and $_.Identifier -notcontains "urn:federation:MicrosoftOnline" } | foreach { $_.Identifier.Item(0) }
-
     PS > $WsFedIdentifiers | foreach { Get-MsIdAdfsWsFedToken $_ -HostName adfs.contoso.com }
 
     Get all Ws-Fed relying party trusts from the AD FS server excluding Azure AD and sign in using the logged user credentials.
