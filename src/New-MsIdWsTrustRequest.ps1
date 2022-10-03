@@ -2,7 +2,7 @@
 .SYNOPSIS
     Create a WS-Trust request.
 .EXAMPLE
-    PS C:\>New-MsIdWsTrustRequest urn:federation:MicrosoftOnline
+    PS C:\>New-MsIdWsTrustRequest urn:federation:MicrosoftOnline -Endpoint https://adfs.contoso.com/adfs/services/trust/2005/windowstransport
     Create a Ws-Trust request for the application urn:federation:MicrosoftOnline.
 #>
 function New-MsIdWsTrustRequest {
@@ -12,11 +12,11 @@ function New-MsIdWsTrustRequest {
         # Application identifier
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
         [string] $Identifier,
-        [Parameter(Mandatory=$true,
-            HelpMessage = 'Enter host name for the AD FS server')]
+        # Host name for the AD FS server
+        [Parameter(Mandatory=$true)]
         [string]$Endpoint,
-        [Parameter(Mandatory=$false,
-            HelpMessage = 'Provide the credential for the user to be signed in.')]
+        # Credential for the user to be signed in
+        [Parameter(Mandatory=$false)]
         [pscredential]$Credential
     )
 

@@ -20,17 +20,17 @@ function Get-MsIdAdfsWsFedToken
   [CmdletBinding()]
   [OutputType([string])]
   param(
+    # Enter the application identifier
     [Parameter(Mandatory=$true,
       Position=0,
       ValueFromPipeline=$true,
-      ValueFromPipelineByPropertyName=$true,
-      HelpMessage = 'Enter the application identifier')]
+      ValueFromPipelineByPropertyName=$true)]
     [string]$WtRealm,
-    [Parameter(Mandatory=$true,
-      HelpMessage = 'Enter host name for the AD FS server')]
+    # Enter host name for the AD FS server
+    [Parameter(Mandatory=$true)]
     [string]$HostName,
-    [Parameter(Mandatory=$false,
-      HelpMessage = 'Provide the credential for the user to be signed in.')]
+    # Provide the credential for the user to be signed in
+    [Parameter(Mandatory=$false)]
     [pscredential]$Credential
   )
 

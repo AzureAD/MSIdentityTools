@@ -1,24 +1,30 @@
 <#
 .SYNOPSIS
-    Create a WS-Trust request.
+        Imports a list availabe sample AD FS relyng party trust applications available in this module, the list is created by the Get-MsIdAdfsSampleApps cmdlet. These applications do NOT use real endpoints and are meant to be used as test applications.
 .EXAMPLE
-    PS C:\>Import-MsIdAdfsSampleApps urn:federation:MicrosoftOnline
-    Create a Ws-Trust request for the application urn:federation:MicrosoftOnline.
+    PS C:\>Get-MsIdAdfsSampleApps | Import-MsIdAdfsSampleApps
+    Import the full list of sample AD FS apps to the local AD FS server.
+.EXAMPLE
+    PS C:\>Get-MsIdAdfsSampleApps | Import-MsIdAdfsSampleApps -NamePreffix 'MsId '
+    Import the full list of sample AD FS apps to the local AD FS server, adding the MsId prefix to the app name.
+.EXAMPLE
+    PS C:\>Get-MsIdAdfsSampleApps SampleAppName | Import-MsIdAdfsSampleApps
+    Import only the SampleAppName sample AD FS app to the local AD FS server (replace SampleAppName by one of the available apps).
 #>
 function Import-MsIdAdfsSampleApp {
     [CmdletBinding()]
     param(
+      # Application identifier
       [Parameter(Mandatory=$true,
         Position=0,
         ValueFromPipeline=$true,
         ValueFromPipelineByPropertyName=$true)]
-      # Application identifier
       [object[]]$Application,
+      # Name prefix for the AD FS relying party
       [Parameter(Mandatory=$false)]
-      # Application identifier
       [string]$NamePreffix = "",
+      # Apply sample app default parameters to existing apps
       [Parameter(Mandatory=$false)]
-      # Application identifier
       [switch]$Force = $false
     )
 

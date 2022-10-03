@@ -20,17 +20,17 @@ function Get-MsIdAdfsSamlToken
   [CmdletBinding()]
   [OutputType([string])]
   param(
+    # Application identifier
     [Parameter(Mandatory=$true,
       Position=0,
       ValueFromPipeline=$true,
       ValueFromPipelineByPropertyName=$true)]
-    # Application identifier
     [string]$Issuer,
-    [Parameter(Mandatory=$true,
-      HelpMessage = 'Enter host name for the AD FS server')]
+    # Enter host name for the AD FS server
+    [Parameter(Mandatory=$true)]
     [string]$HostName,
-    [Parameter(Mandatory=$false,
-      HelpMessage = 'Provide the credential for the user to be signed in.')]
+    # Provide the credential for the user to be signed in
+    [Parameter(Mandatory=$false)]
     [pscredential]$Credential
   )
 

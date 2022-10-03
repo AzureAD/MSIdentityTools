@@ -1,15 +1,18 @@
 <#
 .SYNOPSIS
-    Create a WS-Trust request.
+        Imports a the 'MsId Block Off Corp and VPN'  sample AD FS access control policy. This policy is meant to be used as test policy.
 .EXAMPLE
-    PS C:\>Import-MsIdAdfsSamplePolicy urn:federation:MicrosoftOnline
-    Create a Ws-Trust request for the application urn:federation:MicrosoftOnline.
+    PS C:\>Import-MsIdAdfsSamplePolicy
+    Create the policy to the local AD FS server.
+.EXAMPLE
+    PS C:\>Import-MsIdAdfsSamplePolicy -ApplyTo App1,App2
+    Create the policy to the local AD FS server and apply it to to the list of applications.
 #>
 function Import-MsIdAdfsSamplePolicy {
     [CmdletBinding()]
     param(
-      [Parameter(Mandatory=$false)]
       # Application identifier
+      [Parameter(Mandatory=$false)]
       [string[]]$ApplyTo
 
     )
