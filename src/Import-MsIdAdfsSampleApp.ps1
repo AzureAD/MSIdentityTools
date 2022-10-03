@@ -108,6 +108,9 @@ function Import-MsIdAdfsSampleApp {
                         Write-Warning "The Access Control Policy '$($samplePolicy)' is missing, run 'Import-MsIdAdfsSamplePolicies' to create."
                     }
                 }
+                else {
+                    Set-AdfsRelyingPartyTrust -TargetName $rpName -AccessControlPolicyName $RelyingParty.AccessControlPolicyName
+                }
             }
         }            
         Catch {
