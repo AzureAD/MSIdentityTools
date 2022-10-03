@@ -2,17 +2,17 @@
 .SYNOPSIS
         Imports a list availabe sample AD FS relyng party trust applications available in this module, the list is created by the Get-MsIdAdfsSampleApps cmdlet. These applications do NOT use real endpoints and are meant to be used as test applications.
 .EXAMPLE
-    PS >Get-MsIdAdfsSampleApps | Import-MsIdAdfsSampleApps
+    PS >Get-MsIdAdfsSampleApp | Import-MsIdAdfsSampleApp
 
     Import the full list of sample AD FS apps to the local AD FS server.
 
 .EXAMPLE
-    PS >Get-MsIdAdfsSampleApps | Import-MsIdAdfsSampleApps -NamePreffix 'MsId '
+    PS >Get-MsIdAdfsSampleApp | Import-MsIdAdfsSampleApp -NamePreffix 'MsId '
 
     Import the full list of sample AD FS apps to the local AD FS server, adding the MsId prefix to the app name.
 
 .EXAMPLE
-    PS >Get-MsIdAdfsSampleApps SampleAppName | Import-MsIdAdfsSampleApps
+    PS >Get-MsIdAdfsSampleApp SampleAppName | Import-MsIdAdfsSampleApp
 
     Import only the SampleAppName sample AD FS app to the local AD FS server (replace SampleAppName by one of the available apps).
 #>
