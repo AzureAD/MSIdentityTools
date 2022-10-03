@@ -4,16 +4,24 @@
 .DESCRIPTION
     This command will generate log activity on the ADFS server, by requesting a Ws-Fed token using the windows or forms authentication.
 .EXAMPLE
-    PS C:\>Get-MsIdAdfsWsFedToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS > Get-MsIdAdfsWsFedToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+
     Sign in to an application on an AD FS server using logged user credentials using the Ws-Fed protocol.
+
 .EXAMPLE
-    PS C:\>$credential = Get-Credential
-    PS C:\>Get-MsIdAdfsWsFedToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS > $credential = Get-Credential
+
+    PS > Get-MsIdAdfsWsFedToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+
     Sign in  to an application on an AD FS server using credentials provided by the user using the Ws-Fed endpoint and forms based authentication.
+
 .EXAMPLE
-    PS C:\>$WsFedIdentifiers = Get-AdfsRelyingPartyTrust | where { $_.WSFedEndpoint -ne $null -and $_.Identifier -notcontains "urn:federation:MicrosoftOnline" } | foreach { $_.Identifier.Item(0) }
-    PS C:\>$WsFedIdentifiers | foreach { Get-MsIdAdfsWsFedToken $_ -HostName adfs.contoso.com }
+    PS > $WsFedIdentifiers = Get-AdfsRelyingPartyTrust | where { $_.WSFedEndpoint -ne $null -and $_.Identifier -notcontains "urn:federation:MicrosoftOnline" } | foreach { $_.Identifier.Item(0) }
+
+    PS > $WsFedIdentifiers | foreach { Get-MsIdAdfsWsFedToken $_ -HostName adfs.contoso.com }
+
     Get all Ws-Fed relying party trusts from the AD FS server excluding Azure AD and sign in using the logged user credentials.
+
 #>
 function Get-MsIdAdfsWsFedToken 
 {

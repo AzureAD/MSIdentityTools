@@ -4,16 +4,24 @@
 .DESCRIPTION
     This command will generate log activity on the ADFS server, by requesting a Ws-Trust token using the windows transport or user name mixed endpoint.
 .EXAMPLE
-    PS C:\>Get-MsIdAdfsWsTrustToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS > Get-MsIdAdfsWsTrustToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    
     Sign in to an application on an AD FS server using logged user credentials using the WindowsTransport endpoint.
+
 .EXAMPLE
-    PS C:\>$credential = Get-Credential
-    PS C:\>Get-MsIdAdfsWsTrustToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com -Credential $credential
+    PS > $credential = Get-Credential
+
+    PS > Get-MsIdAdfsWsTrustToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com -Credential $credential
+
     Sign in  to an application on an AD FS server using credentials provided by the user using the UserNameMixed endpoint.
+
 .EXAMPLE
-    PS C:\>$identifiers =  Get-AdfsRelyingPartyTrust | foreach { $_.Identifier.Item(0) }
-    PS C:\>$identifiers | foreach { Get-MsIdAdfsWsTrustToken $_ -HostName adfs.contoso.com }
+    PS > $identifiers =  Get-AdfsRelyingPartyTrust | foreach { $_.Identifier.Item(0) }
+
+    PS > $identifiers | foreach { Get-MsIdAdfsWsTrustToken $_ -HostName adfs.contoso.com }
+
     Get all relying party trusts from the AD FS server and sign in using the logged user credentials.
+
 #>
 function Get-MsIdAdfsWsTrustToken 
 {

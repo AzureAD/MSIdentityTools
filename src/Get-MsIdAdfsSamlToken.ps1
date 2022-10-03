@@ -4,16 +4,24 @@
 .DESCRIPTION
     This command will generate log activity on the ADFS server, by requesting a SAML token using Windows or forms authentication.
 .EXAMPLE
-    PS C:\>Get-MsIdAdfsSamlToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS > Get-MsIdAdfsSamlToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+
     Sign in to an application on an AD FS server using logged user credentials using the SAML protocol.
+
 .EXAMPLE
-    PS C:\>$credential = Get-Credential
-    PS C:\>Get-MsIdAdfsSamlToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS >$credential = Get-Credential
+
+    PS >Get-MsIdAdfsSamlToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+
     Sign in  to an application on an AD FS server using credentials provided by the user using the SAML endpoint and forms based authentication.
+
 .EXAMPLE
-    PS C:\>$SamlIdentifiers =  Get-AdfsRelyingPartyTrust | where { $_.WSFedEndpoint -eq $null } | foreach { $_.Identifier.Item(0) }
-    PS C:\>$SamlIdentifiers | foreach { Get-MsIdAdfsSamlToken $_ -HostName adfs.contoso.com }
+    PS > $SamlIdentifiers =  Get-AdfsRelyingPartyTrust | where { $_.WSFedEndpoint -eq $null } | foreach { $_.Identifier.Item(0) }
+    
+    PS > $SamlIdentifiers | foreach { Get-MsIdAdfsSamlToken $_ -HostName adfs.contoso.com }
+    
     Get all SAML relying party trusts from the AD FS server and sign in using the logged user credentials.
+
 #>
 function Get-MsIdAdfsSamlToken 
 {

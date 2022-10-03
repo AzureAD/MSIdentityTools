@@ -2,11 +2,15 @@
 .SYNOPSIS
     Returns the list of availabe sample AD FS relyng party trust applications available in this module. These applications do NOT use real endpoints and are meant to be used as test applications.
 .EXAMPLE
-    PS C:\>Get-MsIdAdfsSampleApps
+    PS > Get-MsIdAdfsSampleApps
+
     Get the full list of sample AD FS apps.
+
 .EXAMPLE
-    PS C:\>Get-MsIdAdfsSampleApps SampleAppName
+    PS > Get-MsIdAdfsSampleApps SampleAppName
+
     Get only SampleAppName sample AD FS app (replace SampleAppName by one of the available apps).
+
 #>
 function Get-MsIdAdfsSampleApp {
     [CmdletBinding()]
