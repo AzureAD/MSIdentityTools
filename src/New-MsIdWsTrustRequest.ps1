@@ -2,8 +2,10 @@
 .SYNOPSIS
     Create a WS-Trust request.
 .EXAMPLE
-    PS C:\>New-MsIdWsTrustRequest urn:federation:MicrosoftOnline -Endpoint https://adfs.contoso.com/adfs/services/trust/2005/windowstransport
+    PS > New-MsIdWsTrustRequest urn:federation:MicrosoftOnline -Endpoint https://adfs.contoso.com/adfs/services/trust/2005/windowstransport
+
     Create a Ws-Trust request for the application urn:federation:MicrosoftOnline.
+
 #>
 function New-MsIdWsTrustRequest {
     [CmdletBinding()]
