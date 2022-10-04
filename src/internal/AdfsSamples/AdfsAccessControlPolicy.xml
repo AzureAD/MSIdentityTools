@@ -1,0 +1,13 @@
+<PolicyMetadata xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.datacontract.org/2012/04/ADFS">
+  <RequireFreshAuthentication>false</RequireFreshAuthentication>
+  <IssuanceAuthorizationRules>
+    <Rule>
+      <Conditions>
+        <Condition i:type="LocationCondition">
+          <Operator>Equals</Operator>
+          <Values></Values>
+        </Condition>
+      </Conditions>
+    </Rule>
+  </IssuanceAuthorizationRules>
+</PolicyMetadata>
