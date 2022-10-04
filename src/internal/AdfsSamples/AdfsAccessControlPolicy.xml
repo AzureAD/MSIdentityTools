@@ -5,11 +5,7 @@
       <Conditions>
         <Condition i:type="LocationCondition">
           <Operator>Equals</Operator>
-          <Values>
-            <Value>205.143.204.1-205.143.205.250</Value>
-            <Value>12.159.168.1/24</Value>
-            <Value>12.35.175.1/26</Value>
-          </Values>
+          <Values></Values>
         </Condition>
       </Conditions>
     </Rule>

@@ -1,10 +1,12 @@
 <#
 .SYNOPSIS
-    Gets the form fields to login to AD FS server for the login URL and credentials.
+    Imports the AD FS PowerShell module.
 .DESCRIPTION
+    Imports the AD FS PowerShell module if not imported and returns $true. Returns $false in case it is not installed.
 .EXAMPLE
-    PS C:\>Import-AdfsModule -Url $url -Credential $credential
-    Gets the form fields for the variables.
+    PS > if (Import-AdfsModule) { Write-Host 'AD FS PowerShell module is present' }
+
+    Displays a string if the AD FS module was sucessfully imported.
 #>
 function Import-AdfsModule {
     $module = 'ADFS'

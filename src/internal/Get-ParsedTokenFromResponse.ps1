@@ -24,14 +24,14 @@ function Get-ParsedTokenFromResponse {
     if ($Protocol -eq "SAML") {
         # <input type="hidden" name="SAMLResponse" value="   ...   " />
         if($HttpResponse -match '<input type=\"hidden\" name=\"SAMLResponse\" value=\"(.+)\" \/><noscript>') {
-            $token = $Matches[1] | ConvertFrom-Base64String
+            # $token = $Matches[1] | ConvertFrom-Base64String
+            $token = $Matches[1] | ConvertFrom-SamlMessage
         }
     }
     else {
         # <input type="hidden" name="wresult" value="   ...   " />
         if($HttpResponse -match '<input type=\"hidden\" name=\"wresult\" value=\"(.+)\" \/><noscript>') {
-            [Reflection.Assembly]::LoadWithPartialName('System.Web') | Out-Null
-            $token = [System.Web.HttpUtility]::HtmlDecode($Matches[1])
+            $token = [System.Net.WebUtility]::HtmlDecode($Matches[1]) | ConvertFrom-SamlMessage
         }
     }
 

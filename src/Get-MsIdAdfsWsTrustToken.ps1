@@ -76,7 +76,7 @@ function Get-MsIdAdfsWsTrustToken
   elseif ($login.StatusCode -ne 200) { Write-Error "HTTP request failed for identifier ""$($identifier)"" and user: $($user). ERROR: HTTP status $($login.StatusCode)" }
   elseif ($login.Headers["Content-Type"].Contains("application/soap+xml")) {
       Write-Host "Login sucessful for identifier ""$($Identifier)"" and user: $($user)"
-      return $login.Content
+      return $login.Content | ConvertFrom-SamlMessage
   }
   else { Write-Warning "Login failed for identifier ""$($Identifier)"" and user: $($user)" }
 

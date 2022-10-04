@@ -4,13 +4,13 @@
 .DESCRIPTION
     This command will generate log activity on the ADFS server, by requesting a SAML token using Windows or forms authentication.
 .EXAMPLE
-    PS > Get-MsIdAdfsSamlToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS > Get-MsIdAdfsSamlToken urn:microsoft:adfs:claimsxray -HostName adfs.contoso.com
 
     Sign in to an application on an AD FS server using logged user credentials using the SAML protocol.
 
 .EXAMPLE
     PS > $credential = Get-Credential
-    PS > Get-MsIdAdfsSamlToken urn:federation:MicrosoftOnline -HostName adfs.contoso.com
+    PS > Get-MsIdAdfsSamlToken urn:microsoft:adfs:claimsxray -HostName adfs.contoso.com
 
     Sign in  to an application on an AD FS server using credentials provided by the user using the SAML endpoint and forms based authentication.
 
