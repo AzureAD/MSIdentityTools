@@ -45,7 +45,10 @@ function Get-MsIdAzureIpRange {
                 [string] $ServiceTag = ''  # Default ServiceTag parameter value
                 if ($fakeBoundParameters.ContainsKey('ServiceTag')) { $ServiceTag = $fakeBoundParameters.ServiceTag }
 
-                [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
+                #$StartPosition = $host.UI.RawUI.CursorPosition
+                #Write-Host '...' -NoNewline
+
+                [array] $AllServiceTagsAndRegions = Get-MsIdAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
                 #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
 
                 $listRegions = New-Object System.Collections.Generic.List[string]
@@ -59,6 +62,9 @@ function Get-MsIdAzureIpRange {
                 if ($listRegions) {
                     $listRegions #| ForEach-Object {$_}
                 }
+
+                #$host.UI.RawUI.CursorPosition = $StartPosition
+                #Write-Host ('   ') -NoNewline
             })]
         [string] $Region,
 
@@ -72,7 +78,8 @@ function Get-MsIdAzureIpRange {
                 [string] $Region = ''  # Default Region parameter value
                 if ($fakeBoundParameters.ContainsKey('Region')) { $Region = $fakeBoundParameters.Region }
 
-                [array] $AllServiceTagsAndRegions = Get-MSIDAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
+                #Write-Host '...' -NoNewline
+                [array] $AllServiceTagsAndRegions = Get-MsIdAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false
                 #$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object { $_ }
 
                 $listServiceTags = New-Object System.Collections.Generic.List[string]
@@ -91,30 +98,46 @@ function Get-MsIdAzureIpRange {
 
         # List all IP ranges catagorized by Service Tag and Region.
         [Parameter(Mandatory = $false, ParameterSetName = 'AllServiceTagsAndRegions')]
-        [switch] $AllServiceTagsAndRegions
+        [switch] $AllServiceTagsAndRegions,
+
+        # Bypass cache and download data again.
+        [Parameter(Mandatory = $false)]
+        [switch] $ForceRefresh
     )
 
-    [hashtable] $MdcIdCloudMapping = @{
-        Public     = 56519
-        Government = 57063
-        Germany    = 57064
-        China      = 57062
+    ## Get data cache
+    if (!(Get-Variable cacheAzureIPRangesAndServiceTags -ErrorAction SilentlyContinue)) { New-Variable -Name cacheAzureIPRangesAndServiceTags -Scope Script -Value (New-Object hashtable) }
+
+    ## Download data and update cache
+    if ($ForceRefresh -or !$cacheAzureIPRangesAndServiceTags.ContainsKey($Cloud)) {
+        Write-Verbose ('Downloading data for Cloud [{0}].' -f $Cloud)
+        [hashtable] $MdcIdCloudMapping = @{
+            Public     = 56519
+            Government = 57063
+            Germany    = 57064
+            China      = 57062
+        }
+
+        [uri] $MdcUri = 'https://www.microsoft.com/en-us/download/confirmation.aspx?id={0}' -f $MdcIdCloudMapping[$Cloud]
+        [uri] $MdcDirectUri = $null  # Example: https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20191111.json
+
+        $MdcResponse = Invoke-WebRequest -UseBasicParsing -Uri $MdcUri
+        if ($MdcResponse -match 'https://download\.microsoft\.com/download/.+?/ServiceTags_.+?_[0-9]{6,8}\.json') {
+            $MdcDirectUri = $Matches[0]
+        }
+
+        if ($MdcDirectUri) {
+            $cacheAzureIPRangesAndServiceTags[$Cloud] = Invoke-RestMethod -UseBasicParsing -Uri $MdcDirectUri -ErrorAction Stop
+        }
     }
-
-    [uri] $MdcUri = 'https://www.microsoft.com/en-us/download/confirmation.aspx?id={0}' -f $MdcIdCloudMapping[$Cloud]
-    [uri] $MdcDirectUri = $null  # Example: https://download.microsoft.com/download/7/1/D/71D86715-5596-4529-9B13-DA13A5DE5B63/ServiceTags_Public_20191111.json
-
-    $MdcResponse = Invoke-WebRequest -UseBasicParsing -Uri $MdcUri
-    if ($MdcResponse -match 'https://download\.microsoft\.com/download/.+?/ServiceTags_.+?_[0-9]{6,8}\.json') {
-        $MdcDirectUri = $Matches[0]
+    else {
+        Write-Verbose ('Using cached data for Cloud [{0}]. Use -ForceRefresh parameter to bypass cache.' -f $Cloud)
     }
+    $AzureServiceTagsAndRegions = $cacheAzureIPRangesAndServiceTags[$Cloud]
 
-    if ($MdcDirectUri) {
-        $AzureIPs = Invoke-RestMethod -UseBasicParsing -Uri $MdcDirectUri -ErrorAction Stop
-    }
-
+    ## Return the data
     if ($AllServiceTagsAndRegions) {
-        return $AzureIPs
+        return $AzureServiceTagsAndRegions
     }
     else {
         [string] $Id = 'AzureCloud'
@@ -125,9 +148,9 @@ function Get-MsIdAzureIpRange {
             $Id += '.{0}' -f $Region
         }
 
-        $OutputIPs = $AzureIPs.values | Where-Object id -EQ $Id
-        if ($OutputIPs) {
-            return $OutputIPs.properties.addressPrefixes
+        $FilteredServiceTagsAndRegions = $AzureServiceTagsAndRegions.values | Where-Object id -EQ $Id
+        if ($FilteredServiceTagsAndRegions) {
+            return $FilteredServiceTagsAndRegions.properties.addressPrefixes
         }
     }
 }

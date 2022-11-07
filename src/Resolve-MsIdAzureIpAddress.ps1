@@ -27,18 +27,27 @@ function Resolve-MsIdAzureIpAddress {
         [object[]] $InputObjects,
         # IP Address of Azure Service
         [Parameter(Mandatory = $true, ParameterSetName = 'IpAddress', Position = 1)]
-        [ipaddress[]] $IpAddresses
+        [ipaddress[]] $IpAddresses,
+        # Name of Azure Cloud. Valid values are: Public, Government, Germany, China
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('Public', 'Government', 'Germany', 'China')]
+        [string[]] $Clouds = @('Public', 'Government', 'Germany', 'China'),
+        # Bypass cache and download data again.
+        [Parameter(Mandatory = $false)]
+        [switch] $ForceRefresh
     )
 
     begin {
-        [string[]] $Clouds = 'Public', 'Government', 'Germany', 'China'
+        #[string[]] $Clouds = 'Public', 'Government', 'Germany', 'China'
         [hashtable] $ServiceTagAndRegions = @{}
         $PreviousProgressPreference = $ProgressPreference
         $ProgressPreference = 'SilentlyContinue'
+        Write-Verbose 'Getting Azure IP Ranges and Service Tag Data...'
         foreach ($Cloud in $Clouds) {
-            $ServiceTagAndRegions.Add($Cloud, (Get-MsIdAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -Verbose:$false))
+            $ServiceTagAndRegions.Add($Cloud, (Get-MsIdAzureIpRange -Cloud $Cloud -AllServiceTagsAndRegions -ForceRefresh:$ForceRefresh -Verbose:$false))
         }
         $ProgressPreference = $PreviousProgressPreference
+        Write-Verbose 'Resolving IP Address to Azure Service Tags...'
     }
 
     process {
@@ -50,8 +59,12 @@ function Resolve-MsIdAzureIpAddress {
                     $listIpAddresses.Add($InputObject)
                 }
                 elseif ($InputObject -is [string]) {
-                    if ($InputObject -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$') {
-                        $listIpAddresses.Add($InputObject)
+                    if ($InputObject -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$' -or $InputObject -match '^(?:(?::{1,2})?[0-9a-fA-F]{1,4}(?::{1,2})?){1,8}$') {
+                        try {
+                            [ipaddress] $IpAddress = $InputObject
+                            $listIpAddresses.Add($IpAddress)
+                        }
+                        catch { throw }
                     }
                     else {
                         $DnsNames = Resolve-DnsName $InputObject -Type A -ErrorAction Stop | Where-Object QueryType -EQ A
