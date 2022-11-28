@@ -38,6 +38,11 @@ else {
     #$strScriptBlock = 'Import-Module {0} -PassThru' -f $ModuleManifestPath
 
     foreach ($Path in $PowerShellPaths) {
-        Start-Process $Path -ArgumentList ('-NoExit', '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlock)))
+        if ($Path -eq 'wsl') {
+            Start-Process $Path -ArgumentList ('pwsh' ,'-NoExit', '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlock)))
+        }
+        else {
+            Start-Process $Path -ArgumentList ('-NoExit', '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlock)))
+        }
     }
 }
