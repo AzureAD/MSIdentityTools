@@ -71,25 +71,8 @@ function Update-MsIdGroupWritebackConfiguration {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        try {
-            ## Import Required Modules
-            Import-Module Microsoft.Graph.Groups -MinimumVersion 1.10.0 -ErrorAction Stop
+        if (!(Test-MgCommandPrerequisites 'Get-MgGroup', 'Update-MgGroup' -ApiVersion beta -MinimumVersion 1.10.0 -ErrorVariable CriticalError)) { return }
 
-            ## Check MgModule Connection
-            $MgContext = Get-MgContext
-            if ($MgContext) {
-                ## Check MgModule Consented Scopes
-                $MgPermissions = Find-MgGraphCommand -Command Update-MgGroup -ApiVersion beta | Select-Object -First 1 -ExpandProperty Permissions
-                if (!(Compare-Object $MgPermissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent)) {
-                    Write-Error "Additional scope needed, call Connect-MgGraph with one of the following scopes: $($MgPermissions.Name -join ', ')" -ErrorAction Stop
-                }
-            }
-            else {
-                Write-Error "Authentication needed, call Connect-MgGraph." -ErrorAction Stop
-            }
-        }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
-        
         ## Save Current MgProfile to Restore at End
         $previousMgProfile = Get-MgProfile
         if ($previousMgProfile.Name -ne 'beta') {

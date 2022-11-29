@@ -54,14 +54,9 @@ function Reset-MsIdExternalUser {
     )
 
     begin {
-        
         ## Initialize Critical Dependencies
-
         $CriticalError = $null
-        try {
-            Import-Module Microsoft.Graph.Identity.SignIns -MinimumVersion 1.9.2 -ErrorAction Stop
-        }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'New-MgInvitation' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
 
         $previousProfile = Get-MgProfile
         if ($previousProfile.Name -ne 'beta') {

@@ -175,38 +175,15 @@ function Get-MsIdCrossTenantAccessActivity {
     )
     
     begin {
-
         ## Initialize Critical Dependencies
-
         $CriticalError = $null
-        try {
-            #Import-Module Microsoft.Graph.Reports -ErrorAction Stop
-            Import-Module Microsoft.Graph.Reports -MinimumVersion 1.9.2 -ErrorAction Stop
+        if (!(Test-MgCommandPrerequisites 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+
+        ## Save Current MgProfile to Restore at End
+        $previousMgProfile = Get-MgProfile
+        if ($previousMgProfile.Name -ne 'beta') {
+            Select-MgProfile -Name 'beta'
         }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
-        
-
-        #Connection and profile check
-
-        Write-Verbose -Message "$(Get-Date -f T) - Checking connection..."
-
-        if ($null -eq (Get-MgContext)) {
-
-            Write-Error "$(Get-Date -f T) - Please connect to MS Graph API with the Connect-MgGraph cmdlet!" -ErrorAction Stop
-        }
-        else {
-
-            Write-Verbose -Message "$(Get-Date -f T) - Checking profile..."
-
-            if ((Get-MgProfile).Name -eq 'v1.0') {
-
-                Write-Error "$(Get-Date -f T) - Current MGProfile is set to v1.0, and some cmdlets may need to use the beta profile. Run 'Select-MgProfile -Name beta' to switch to beta API profile" -ErrorAction Stop
-            }
-
-        }
-
-        Write-Verbose -Message "$(Get-Date -f T) - Connection and profile OK"
-
 
         #External Tenant ID check
 
@@ -557,5 +534,13 @@ function Get-MsIdCrossTenantAccessActivity {
 
 
     }
-       
+    
+    end {
+        if ($CriticalError) { return }
+
+        ## Restore Previous MgProfile
+        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
+            Select-MgProfile -Name $previousMgProfile.Name
+        }
+    }
 }

@@ -1,9 +1,7 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [string] $ModulePath = ".\src\*.psd1",
-    [Parameter(Mandatory = $false)]
-    [switch] $Online
+    [string] $ModulePath = ".\src\*.psd1"
 )
 
 BeforeDiscovery {
@@ -18,7 +16,7 @@ BeforeAll {
 }
 
 ## Perform Tests
-Describe 'Test-MgCommandPrerequisites' {
+Describe 'MgCommand' -Tag 'IntegrationTest' {
     
     BeforeAll {
         ## Stub functions required when actual command is not available
@@ -29,34 +27,8 @@ Describe 'Test-MgCommandPrerequisites' {
         # }
 
         ## Mock commands with external dependancies or unavailable commands
+        # ToDo: Integration test should perform real authentication and module import
         Mock -ModuleName $PSModule.Name Get-MgContext { New-Object Microsoft.Graph.PowerShell.Authentication.AuthContext -Property @{ Scopes = @('email', 'openid', 'profile', 'User.Read', 'User.Read.All'); AppName = 'Microsoft Graph PowerShell'; PSHostVersion = $PSVersionTable['PSVersion'] } } -Verifiable
-        $Online
-        Mock -ModuleName $PSModule.Name Find-MgGraphCommand { 
-            New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphCommand -Property @{
-                Command     = 'Get-MgUser'
-                Module      = 'Users'
-                APIVersion  = 'v1.0'
-                Method      = 'GET'
-                URI         = '/users'
-                Permissions = @(
-                    New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphPermission -Property @{ Name = 'User.Read.All'; IsAdmin = $true; Description = "Read all users' full profiles" }
-                    New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphPermission -Property @{ Name = 'User.ReadBasic.All'; IsAdmin = $false; Description = "Read all users' basic profiles" }
-                    New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphPermission -Property @{ Name = 'User.ReadWrite.All'; IsAdmin = $true; Description = "Read and write all users' full profiles" }
-                )
-            }
-            New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphCommand -Property @{
-                Command     = 'Get-MgUser'
-                Module      = 'Users'
-                APIVersion  = 'v1.0'
-                Method      = 'GET'
-                URI         = '/users/{user-id}'
-                Permissions = @(
-                    New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphPermission -Property @{ Name = 'User.Read'; IsAdmin = $false; Description = "Sign you in and read your profile" }
-                    New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphPermission -Property @{ Name = 'User.ReadWrite'; IsAdmin = $false; Description = "Read and update your profile" }
-                    New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphPermission -Property @{ Name = 'User.Read.All'; IsAdmin = $true; Description = "Read all users' full profiles" }
-                )
-            }
-        } -ParameterFilter { $Command -eq 'Get-MgUser' } -Verifiable
         Mock -ModuleName $PSModule.Name Import-Module { } -Verifiable
 
         ## Test Cases
@@ -85,9 +57,6 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output = Test-MgCommandPrerequisites $Name @params -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -BeExactly $Expected
-                Should -Invoke Find-MgGraphCommand -ParameterFilter {
-                    $Command -eq $Name
-                }
                 $actualErrors | Should -HaveCount 0
             }
         }
@@ -97,9 +66,6 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output = $Name | Test-MgCommandPrerequisites @params -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -BeExactly $Expected
-                Should -Invoke Find-MgGraphCommand -ParameterFilter {
-                    $Command -eq $Name
-                }
                 $actualErrors | Should -HaveCount 0
             }
         }
@@ -112,9 +78,6 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output = Test-MgCommandPrerequisites $TestCases.Name -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -HaveCount 1  # Only pipeline will return multiple outputs
-                Should -Invoke Find-MgGraphCommand -ParameterFilter {
-                    (Compare-Object $Command -DifferenceObject $TestCases.Name -ExcludeDifferent -IncludeEqual).Count -eq $TestCases.Count
-                }
                 $actualErrors | Should -HaveCount 0
             }
         }
@@ -126,9 +89,6 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output | Should -HaveCount $TestCases.Count
                 for ($i = 0; $i -lt $TestCases.Count; $i++) {
                     $Output[$i] | Should -BeExactly $TestCases[$i].Expected
-                    Should -Invoke Find-MgGraphCommand -ParameterFilter {
-                        $Command -eq $TestCases[$i].Name
-                    }
                 }
                 $actualErrors | Should -HaveCount 0
             }
@@ -148,9 +108,6 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output | Should -HaveCount $TestCases.Count
                 for ($i = 0; $i -lt $TestCases.Count; $i++) {
                     $Output[$i] | Should -BeExactly $TestCases[$i].Expected
-                    Should -Invoke Find-MgGraphCommand -ParameterFilter {
-                        $Command -eq $TestCases[$i].Name
-                    }
                 }
                 $actualErrors | Should -HaveCount 0
             }

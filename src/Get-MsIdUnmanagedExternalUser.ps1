@@ -39,7 +39,9 @@ function Get-MsIdUnmanagedExternalUser {
         $Type = "ExternalAzureADViral"
     )
 
-    Import-Module Microsoft.Graph.Users -MinimumVersion 1.9.2 -ErrorAction Stop
+    ## Initialize Critical Dependencies
+    $CriticalError = $null
+    if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
 
     $graphBaseUri = "https://graph.microsoft.com/$((Get-MgProfile).Name)"
     $pageCount = 999
