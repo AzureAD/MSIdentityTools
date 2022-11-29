@@ -64,7 +64,13 @@ steps:
       pwsh: true
 
 - ${{ if ne(parameters.EsrpCodeSigningServiceName,'') }}:
-  - task: EsrpCodeSigning@1
+  # - task: UseDotNet@2
+  #   displayName: Install .NET Core 2 runtime
+  #   inputs:
+  #     packageType: runtime
+  #     version: '2.1.x'
+
+  - task: EsrpCodeSigning@2
     displayName: 'Sign PowerShell Module Files'
     inputs:
       ConnectedServiceName: '${{ parameters.EsrpCodeSigningServiceName }}'
