@@ -13,28 +13,13 @@ function Get-MsIdHasMicrosoftAccount {
 
     param (
         # The email address of the external user.
-        [Parameter(Mandatory = $true,
-            Position = 1,
-            ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false,
-            ParameterSetName = 'Parameter Set 1')]
-        [string]
-        $Mail
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false)]
+        [string] $Mail
     )
 
-    $userRealmUriFormat = "https://login.microsoftonline.com/common/userrealm?user={urlEncodedMail}&api-version=2.1&checkForMicrosoftAccount=true"
-
-    $encodedMail = [System.Web.HttpUtility]::UrlEncode($Mail)
+    $userRealm = Get-MsftUserRealm $Mail
     
-    $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
-    Write-Verbose $userRealmUri
-
-    $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
-    $content = ConvertFrom-Json (Get-ObjectPropertyValue $userRealmResponse 'Content')
-    
-    $isMSA = (Get-ObjectPropertyValue $content 'MicrosoftAccount') -eq "0"
+    $isMSA = (Get-ObjectPropertyValue $userRealm 'MicrosoftAccount') -eq "0"
 
     return $isMSA
 }
- 

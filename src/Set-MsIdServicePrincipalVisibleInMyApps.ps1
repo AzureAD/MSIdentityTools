@@ -111,6 +111,10 @@
     )
 
     begin {
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Update-MgServicePrincipal' -MinimumVersion 1.10.0 -ErrorVariable CriticalError)) { return }
+
         function ConvertTo-ValidGuid {
             Param(
                 [Parameter(ValueFromPipeline=$true, Mandatory=$true)]
@@ -210,28 +214,6 @@
                 New-Item -Path $Path -ItemType "file" > $null
             }
         }
-
-        ## Initialize Critical Dependencies
-        $CriticalError = $null
-        try {
-            ## Import Required Modules
-            Import-Module Microsoft.Graph.Applications -MinimumVersion 1.10.0 -ErrorAction Stop
-
-            ## Check MgModule Connection
-            $MgContext = Get-MgContext
-            if ($MgContext) {
-                ## Check MgModule Consented Scopes
-                $MgPermissions = Find-MgGraphCommand -Command Update-MgServicePrincipal | Select-Object -First 1 -ExpandProperty Permissions
-                if (!(Compare-Object $MgPermissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent)) {
-                    Write-Error "Additional scope needed, call Connect-MgGraph with one of the following scopes: $($MgPermissions.Name -join ', ')" -ErrorAction Stop
-                }
-            }
-            else {
-                Write-Error "Authentication needed, call Connect-MgGraph." -ErrorAction Stop
-            }
-        }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
-
     }
 
     process {

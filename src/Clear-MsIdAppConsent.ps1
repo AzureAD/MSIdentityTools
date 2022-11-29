@@ -32,7 +32,7 @@ function Clear-MsIdAppConsent {
     param (
         # AppId or ObjectId of the service principal
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
-        [string] $ClientId,
+        [string[]] $ClientId,
         # Remove all existing consent to the service principal
         [Parameter(Mandatory = $true, ParameterSetName = 'All')]
         [switch] $All,
@@ -47,34 +47,32 @@ function Clear-MsIdAppConsent {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        try {
-            Import-Module Microsoft.Graph.Identity.SignIns -MinimumVersion 1.9.2 -ErrorAction Stop
-            Import-Module Microsoft.Graph.Applications -MinimumVersion 1.9.2 -ErrorAction Stop
-        }
-        catch { Write-Error -ErrorRecord $_ -ErrorVariable CriticalError; return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Get-MgServicePrincipalOauth2PermissionGrant', 'Remove-MgOauth2PermissionGrant' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
     }
 
     process {
         if ($CriticalError) { return }
 
-        ## Check for service principal by appId
-        $servicePrincipalId = Get-MgServicePrincipal -Filter "appId eq '$AppId'" -Select id | Select-Object -ExpandProperty id
-        ## If nothing is returned, use provided ClientId as servicePrincipalId
-        if (!$servicePrincipalId) { $servicePrincipalId = $Id }
+        foreach ($_ClientId in $ClientId) {
+            ## Check for service principal by appId
+            $servicePrincipalId = Get-MgServicePrincipal -Filter "appId eq '$_ClientId'" -Select id | Select-Object -ExpandProperty id
+            ## If nothing is returned, use provided ClientId as servicePrincipalId
+            if (!$servicePrincipalId) { $servicePrincipalId = $_ClientId }
 
-        ## Get all Oauth2PermissionGrants and remove the requested entries
-        $oauth2PermissionGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $servicePrincipalId 
-        foreach ($oauth2PermissionGrant in $oauth2PermissionGrants) {
-            switch ($PSCmdlet.ParameterSetName) {
-                'All' {
-                    Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId $oauth2PermissionGrant.Id
-                }
-                'Filtered' {
-                    if ($oauth2PermissionGrant.ConsentType -eq 'Principal' -and $oauth2PermissionGrant.PrincipalId -in $PrincipalId) {
+            ## Get all Oauth2PermissionGrants and remove the requested entries
+            $oauth2PermissionGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $servicePrincipalId
+            foreach ($oauth2PermissionGrant in $oauth2PermissionGrants) {
+                switch ($PSCmdlet.ParameterSetName) {
+                    'All' {
                         Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId $oauth2PermissionGrant.Id
                     }
-                    elseif ($oauth2PermissionGrant.ConsentType -eq 'AllPrincipals' -and $TenantWideAdminConsent) {
-                        Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId $oauth2PermissionGrant.Id
+                    'Filtered' {
+                        if ($oauth2PermissionGrant.ConsentType -eq 'Principal' -and $oauth2PermissionGrant.PrincipalId -in $PrincipalId) {
+                            Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId $oauth2PermissionGrant.Id
+                        }
+                        elseif ($oauth2PermissionGrant.ConsentType -eq 'AllPrincipals' -and $TenantWideAdminConsent) {
+                            Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId $oauth2PermissionGrant.Id
+                        }
                     }
                 }
             }

@@ -23,7 +23,7 @@ function Get-MsIdApplicationIdByAppId {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommand 'Get-MgApplication' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgApplication' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
     }
 
     process {

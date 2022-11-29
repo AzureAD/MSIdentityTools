@@ -15,28 +15,13 @@ function Get-MsIdIsViralUser {
 
     param (
         # The email address of the external user.
-        [Parameter(Mandatory = $true,
-            Position = 1,
-            ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false,
-            ParameterSetName = 'Parameter Set 1')]
-        [string]
-        $Mail
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false)]
+        [string] $Mail
     )
 
-    $userRealmUriFormat = "https://login.microsoftonline.com/common/userrealm?user={urlEncodedMail}&api-version=2.1"
+    $userRealm = Get-MsftUserRealm $Mail
 
-
-    $encodedMail = [System.Web.HttpUtility]::UrlEncode($Mail)
-    
-    $userRealmUri = $userRealmUriFormat -replace "{urlEncodedMail}", $encodedMail
-    Write-Verbose $userRealmUri
-
-    $userRealmResponse = Invoke-WebRequest -Uri $userRealmUri
-    $content = ConvertFrom-Json (Get-ObjectPropertyValue $userRealmResponse 'Content')
-    
-    $isExternalAzureADViral = (Get-ObjectPropertyValue $content 'IsViral') -eq "True"
+    $isExternalAzureADViral = (Get-ObjectPropertyValue $userRealm 'IsViral') -eq "True"
 
     return $isExternalAzureADViral
 }

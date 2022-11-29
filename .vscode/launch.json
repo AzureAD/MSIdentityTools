@@ -56,6 +56,20 @@
             ]
         },
         {
+            "name": "PowerShell Test Module in WSL External Console",
+            "type": "PowerShell",
+            "request": "launch",
+            "preLaunchTask": "",
+            "script": "${workspaceFolder}/build/Launch-PSModule.ps1",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-ModuleManifestPath './src/*.psd1'",
+                "-PostImportScriptBlock { &(wslpath '${workspaceFolder}/build/Test-PSModule.ps1') -ModuleManifestPath './src/*.psd1' }",
+                "-PowerShellPaths wsl",
+                "-NoNewWindow:$false"
+            ]
+        },
+        {
             "name": "PowerShell Launch Module in External Console",
             "type": "PowerShell",
             "request": "launch",

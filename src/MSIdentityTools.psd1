@@ -81,6 +81,7 @@
         '.\internal\ConvertTo-PsString.ps1'
         '.\internal\ConvertTo-QueryString.ps1'
         '.\internal\Expand-Data.ps1'
+        '.\internal\Get-MsftUserRealm.ps1'
         '.\internal\Get-ObjectPropertyValue.ps1'
         '.\internal\Get-OpenIdProviderConfiguration.ps1'
         '.\internal\Get-ParsedTokenFromResponse.ps1'
@@ -92,9 +93,10 @@
         '.\internal\Resolve-XmlAttribute.ps1'
         '.\internal\Resolve-XmlElement.ps1'
         '.\internal\Test-IpAddressInSubnet.ps1'
-        '.\internal\Test-MgCommand.ps1'
+        '.\internal\Test-MgCommandPrerequisites.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
+        '.\Clear-MsIdAppConsent.ps1'
         '.\Confirm-MsIdJwtTokenSignature.ps1'
         '.\ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1'
         '.\ConvertFrom-MsIdAadcSourceAnchor.ps1'
@@ -142,6 +144,7 @@
 
     # Functions to export from this module
     FunctionsToExport    = @(
+        'Clear-MsIdAppConsent'
         'Confirm-MsIdJwtTokenSignature'
         'ConvertFrom-MsIdAadcAadConnectorSpaceDn'
         'ConvertFrom-MsIdAadcSourceAnchor'
