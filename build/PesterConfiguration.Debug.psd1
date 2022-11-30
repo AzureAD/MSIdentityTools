@@ -4,7 +4,7 @@
     }
     Filter = @{
         #Tag        = 'Common'
-        #ExcludeTag = 'IntegrationTest'
+        ExcludeTag = 'IntegrationTest'
     }
     Debug = @{
         ShowFullErrors = $false
