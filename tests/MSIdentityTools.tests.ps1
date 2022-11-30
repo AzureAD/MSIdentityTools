@@ -23,8 +23,12 @@ Describe 'MSIdentityTools' -Tag 'Common' {
         $PSModule.CompanyName | Should -BeExactly 'Microsoft Corporation'
     }
 
-    It 'Copyright is Microsoft and Current' {
-        $PSModule.Copyright | Should -BeExactly "(c) $(Get-Date -Format 'yyyy') Microsoft Corporation. All rights reserved."
+    It 'Copyright is Microsoft Corporation and Formatted Properly' {
+        $PSModule.Copyright | Should -BeLikeExactly "(c) * Microsoft Corporation. All rights reserved."
+    }
+
+    It 'Copyright is Current' -Tag 'Deferrable' {
+        $PSModule.Copyright | Should -BeLikeExactly "(c) $(Get-Date -Format 'yyyy') *" -Because 'the copyright year should match the current year'
     }
 
     It 'Contains GUID' {
