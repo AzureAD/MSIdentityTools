@@ -44,7 +44,7 @@ function Get-MsIdInactiveSignInUser {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgUser' -ApiVersion beta -MinimumVersion 1.10.0 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser' -ApiVersion beta -MinimumVersion 1.10.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
 
         ## Save Current MgProfile to Restore at End
         $previousMgProfile = Get-MgProfile

@@ -56,10 +56,11 @@ function Reset-MsIdExternalUser {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'New-MgInvitation' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'New-MgInvitation' -MinimumVersion 1.9.2 -RequireListPermissions -ErrorVariable CriticalError)) { return }
 
-        $previousProfile = Get-MgProfile
-        if ($previousProfile.Name -ne 'beta') {
+        ## Save Current MgProfile to Restore at End
+        $previousMgProfile = Get-MgProfile
+        if ($previousMgProfile.Name -ne 'beta') {
             Select-MgProfile -Name 'beta'
         }
     
@@ -125,8 +126,11 @@ function Reset-MsIdExternalUser {
     }
 
     end {
-        if ($previousProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousProfile.Name
+        if ($CriticalError) { return }
+
+        ## Restore Previous MgProfile
+        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
+            Select-MgProfile -Name $previousMgProfile.Name
         }
     }
 }

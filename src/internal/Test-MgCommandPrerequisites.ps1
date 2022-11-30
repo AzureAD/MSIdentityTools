@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Test Mg Command Availability
+    Test Mg Graph Command Prerequisites
 .EXAMPLE
     PS C:\>Test-MgCommandPrerequisites 'Get-MgUser'
 .INPUTS
@@ -20,7 +20,10 @@ function Test-MgCommandPrerequisites {
         [string] $ApiVersion = 'v1.0',
         # Specifies a minimum version.
         [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
-        [version] $MinimumVersion
+        [version] $MinimumVersion,
+        # Require "list" permissions rather than "get" permissions when Get-Mg* commands are specified.
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true)]
+        [switch] $RequireListPermissions
     )
 
     process {
@@ -28,11 +31,27 @@ function Test-MgCommandPrerequisites {
         $result = $true
 
         ## Get Graph Command Details
-        [array] $MgCommands = Find-MgGraphCommand -Command $Name -ApiVersion $ApiVersion
-
-        ## Remove duplicate commands
         [hashtable] $MgCommandLookup = @{}
-        foreach ($MgCommand in $MgCommands) {
+        foreach ($CommandName in $Name) {
+            [array] $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion
+
+            $MgCommand = $MgCommands[0]
+            if ($MgCommands.Count -gt 1) {
+                ## Resolve from multiple results
+                [array] $MgCommandsWithPermissions = $MgCommands | Where-Object Permissions -NE $null
+                [array] $MgCommandsWithListPermissions = $MgCommandsWithPermissions | Where-Object URI -NotLike "*}"
+                [array] $MgCommandsWithGetPermissions = $MgCommandsWithPermissions | Where-Object URI -Like "*}"
+                if ($MgCommandsWithListPermissions -and $RequireListPermissions) {
+                    $MgCommand = $MgCommandsWithListPermissions[0]
+                }
+                elseif ($MgCommandsWithGetPermissions) {
+                    $MgCommand = $MgCommandsWithGetPermissions[0]
+                }
+                else {
+                    $MgCommand = $MgCommands[0]
+                }
+            }
+
             $MgCommandLookup[$MgCommand.Command] = $MgCommand
         }
 

@@ -41,7 +41,7 @@ function Get-MsIdUnmanagedExternalUser {
 
     ## Initialize Critical Dependencies
     $CriticalError = $null
-    if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+    if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 1.9.2 -RequireListPermissions -ErrorVariable CriticalError)) { return }
 
     $graphBaseUri = "https://graph.microsoft.com/$((Get-MgProfile).Name)"
     $pageCount = 999
