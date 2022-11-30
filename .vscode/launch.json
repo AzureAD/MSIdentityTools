@@ -83,6 +83,19 @@
             ]
         },
         {
+            "name": "PowerShell Launch Module in WSL External Console",
+            "type": "PowerShell",
+            "request": "launch",
+            "preLaunchTask": "",
+            "script": "${workspaceFolder}/build/Launch-PSModule.ps1",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-ModuleManifestPath './src/*.psd1'",
+                "-PowerShellPaths wsl",
+                "-NoNewWindow:$false"
+            ]
+        },
+        {
             "name": "PowerShell Launch Current File",
             "type": "PowerShell",
             "request": "launch",
