@@ -112,8 +112,8 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output = Test-MgCommandPrerequisites $TestCases.Name -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -HaveCount 1  # Only pipeline will return multiple outputs
-                Should -Invoke Find-MgGraphCommand -ParameterFilter {
-                    (Compare-Object $Command -DifferenceObject $TestCases.Name -ExcludeDifferent -IncludeEqual).Count -eq $TestCases.Count
+                Should -Invoke Find-MgGraphCommand -Times 3 -ParameterFilter {
+                    $Command -in $TestCases.Name
                 }
                 $actualErrors | Should -HaveCount 0
             }
