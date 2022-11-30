@@ -78,8 +78,8 @@ stages:
     variables:
       skipComponentGovernanceDetection: false
       moduleName: '$[ dependencies.Prepare.outputs[''ModuleInfo.moduleName''] ]'
-    pool:
-      vmImage: 'windows-latest'
+    # pool:
+    #   vmImage: 'windows-latest'
     steps:
     - download: current
       artifact: '$(artifactModule)'
