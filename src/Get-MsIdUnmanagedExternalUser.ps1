@@ -28,15 +28,9 @@ function Get-MsIdUnmanagedExternalUser {
 
     param (
         # The type of unmanaged user to return
-        [Parameter(Mandatory = $false,
-            Position = 1,
-            ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true,
-            ValueFromRemainingArguments = $false,
-            ParameterSetName = 'Parameter Set 1')]
+        [Parameter(Mandatory = $false, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ValueFromRemainingArguments = $false)]
         [ValidateSet("ExternalAzureADViral", "MicrosoftAccount", "All")]
-        [string]
-        $Type = "ExternalAzureADViral"
+        [string] $Type = "ExternalAzureADViral"
     )
 
     ## Initialize Critical Dependencies

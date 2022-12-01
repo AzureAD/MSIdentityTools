@@ -9,11 +9,13 @@
 function Get-MsftUserRealm {
     [CmdletBinding()]
     [OutputType([PsCustomObject[]])]
-    param
-    (
-        #
+    param (
+        # User Principal Name
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 1)]
         [string[]] $User,
+        # Check For Microsoft Account
+        [Parameter(Mandatory = $false)]
+        [switch] $CheckForMicrosoftAccount,
         # API Version
         [Parameter(Mandatory = $false)]
         [string] $ApiVersion = '2.1'
@@ -24,7 +26,7 @@ function Get-MsftUserRealm {
             $uriUserRealm = New-Object System.UriBuilder 'https://login.microsoftonline.com/common/userrealm'
             $uriUserRealm.Query = ConvertTo-QueryString @{
                 'api-version' = $ApiVersion
-                'checkForMicrosoftAccount' = $true
+                'checkForMicrosoftAccount' = $CheckForMicrosoftAccount
                 'user'        = $_User
             }
 

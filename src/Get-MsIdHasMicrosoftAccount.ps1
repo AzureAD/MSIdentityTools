@@ -17,7 +17,7 @@ function Get-MsIdHasMicrosoftAccount {
         [string] $Mail
     )
 
-    $userRealm = Get-MsftUserRealm $Mail
+    $userRealm = Get-MsftUserRealm $Mail -CheckForMicrosoftAccount
     
     $isMSA = (Get-ObjectPropertyValue $userRealm 'MicrosoftAccount') -eq "0"
 
