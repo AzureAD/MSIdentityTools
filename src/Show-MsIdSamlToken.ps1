@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-   Show Saml Security Token decoded in Web Browser.
+   Show Saml Security Token decoded in Web Browser using diagnostic web app.
    
 .EXAMPLE
     PS > Show-MsIdSamlToken 'Base64String'
@@ -12,7 +12,7 @@
 
 #>
 function Show-MsIdSamlToken {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'High')]
     [Alias('Show-SamlResponse')]
     param (
         # SAML Security Token
@@ -20,11 +20,14 @@ function Show-MsIdSamlToken {
         [string[]] $Tokens,
         # URL Endpoint to send SAML Security Token
         [Parameter(Mandatory = $false)]
-        [string] $SamlEndpoint = 'https://adfshelp.microsoft.com/ClaimsXray/TokenResponse'
+        [string] $SamlEndpoint = 'https://adfshelp.microsoft.com/ClaimsXray/TokenResponse',
+        # Suppress Prompts
+        [Parameter(Mandatory = $false)]
+        [switch] $Force
     )
 
     begin {
-        Write-Warning ('The token is being sent to the following service [{0}]. This command is intended for troubleshooting and should only be used if you trust the service endpoint receiving the token.' -f $SamlEndpoint)
+        if ($Force -and -not (Get-Variable Confirm -ValueOnly -ErrorAction Ignore)) { $ConfirmPreference = 'None' }
 
         function GetAvailableLocalTcpPort {
             $TcpListner = New-Object System.Net.Sockets.TcpListener -ArgumentList ([ipaddress]::Loopback, 0)
@@ -78,6 +81,12 @@ function Show-MsIdSamlToken {
 
     process {
         foreach ($Token in $Tokens) {
+
+            if ($SamlEndpoint -ne 'https://adfshelp.microsoft.com/ClaimsXray/TokenResponse') {
+                Write-Warning ('The token is being sent to the following web service [{0}]. This command is intended for troubleshooting and should only be used if you trust the service endpoint receiving the token.' -f $SamlEndpoint)
+                if (!$PSCmdlet.ShouldProcess($SamlEndpoint, "Send token")) { continue }
+            }
+
             $uriSamlRedirect.Fragment = ConvertTo-QueryString @{
                 SAMLResponse = $Token
                 ReplyURL     = $SamlEndpoint
