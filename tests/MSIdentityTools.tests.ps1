@@ -23,7 +23,7 @@ Describe 'MSIdentityTools' -Tag 'Common' {
         $PSModule.CompanyName | Should -BeExactly 'Microsoft Corporation'
     }
 
-    It 'Copyright is Microsoft Corporation and Formatted Properly' {
+    It 'Copyright is Microsoft Corporation with Proper Formatting' {
         $PSModule.Copyright | Should -BeLikeExactly "(c) * Microsoft Corporation. All rights reserved."
     }
 
@@ -55,6 +55,7 @@ Describe '<_.Name>' -ForEach $PSModule.ExportedFunctions.Values -Tag 'Common' {
         try {
             $Help = Get-Help $_.Name
             $Help.examples.example | ForEach-Object { $_.title = $_.title.Replace('-', '').Trim() }
+            #$Help.parameters.parameter = $Help.parameters.parameter | Where-Object name -NotIn ('WhatIf', 'Confirm')
         }
         catch {}
     }
@@ -85,7 +86,7 @@ Describe '<_.Name>' -ForEach $PSModule.ExportedFunctions.Values -Tag 'Common' {
         #     }
         # }
 
-        It 'Contains Parameter Description: <_.name>' -TestCases $Help.parameters.parameter {
+        It 'Contains Parameter Description: <_.name>' -TestCases ($Help.parameters.parameter | Where-Object name -NotIn ('WhatIf', 'Confirm')) {
             $_.description | Should -Not -BeNullOrEmpty
         }
 
