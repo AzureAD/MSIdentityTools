@@ -1,9 +1,7 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [string] $ModulePath = ".\src\*.psd1",
-    [Parameter(Mandatory = $false)]
-    [switch] $Online
+    [string] $ModulePath = ".\src\*.psd1"
 )
 
 BeforeDiscovery {
@@ -30,7 +28,6 @@ Describe 'Test-MgCommandPrerequisites' {
 
         ## Mock commands with external dependancies or unavailable commands
         Mock -ModuleName $PSModule.Name Get-MgContext { New-Object Microsoft.Graph.PowerShell.Authentication.AuthContext -Property @{ Scopes = @('email', 'openid', 'profile', 'User.Read', 'User.Read.All'); AppName = 'Microsoft Graph PowerShell'; PSHostVersion = $PSVersionTable['PSVersion'] } } -Verifiable
-        $Online
         Mock -ModuleName $PSModule.Name Find-MgGraphCommand { 
             New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphCommand -Property @{
                 Command     = 'Get-MgUser'
@@ -88,7 +85,8 @@ Describe 'Test-MgCommandPrerequisites' {
                 Should -Invoke Find-MgGraphCommand -ParameterFilter {
                     $Command -eq $Name
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
 
@@ -100,7 +98,8 @@ Describe 'Test-MgCommandPrerequisites' {
                 Should -Invoke Find-MgGraphCommand -ParameterFilter {
                     $Command -eq $Name
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
     }
@@ -115,7 +114,8 @@ Describe 'Test-MgCommandPrerequisites' {
                 Should -Invoke Find-MgGraphCommand -Times 3 -ParameterFilter {
                     $Command -in $TestCases.Name
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
 
@@ -130,7 +130,8 @@ Describe 'Test-MgCommandPrerequisites' {
                         $Command -eq $TestCases[$i].Name
                     }
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
 
@@ -152,7 +153,8 @@ Describe 'Test-MgCommandPrerequisites' {
                         $Command -eq $TestCases[$i].Name
                     }
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
     }
@@ -160,13 +162,14 @@ Describe 'Test-MgCommandPrerequisites' {
     Context 'Error Conditions' {
         BeforeAll {
             Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -Verifiable
+            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction Stop } -ParameterFilter { $ErrorAction -eq 'Stop' } -Verifiable
             Mock -ModuleName $PSModule.Name Get-MgContext { } -Verifiable
         }
 
         It 'Missing module' {
             InModuleScope $PSModule.Name -Parameters $_ {
                 $Command = { Test-MgCommandPrerequisites 'Get-MgUser' -ErrorAction SilentlyContinue }
-                $Command | Should -WriteError -ErrorId "Modules_Module*NotFound*" -ExceptionType ([System.IO.FileNotFoundException])
+                $Command | Should -WriteError -ErrorId "MgModule*NotFound*" -ExceptionType ([System.IO.FileNotFoundException])
             }
         }
 

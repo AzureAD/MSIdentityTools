@@ -57,7 +57,8 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
                 $Output = Test-MgCommandPrerequisites $Name @params -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -BeExactly $Expected
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
 
@@ -66,7 +67,8 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
                 $Output = $Name | Test-MgCommandPrerequisites @params -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -BeExactly $Expected
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
     }
@@ -78,7 +80,8 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
                 $Output = Test-MgCommandPrerequisites $TestCases.Name -ErrorVariable actualErrors
                 $Output | Should -BeOfType [bool]
                 $Output | Should -HaveCount 1  # Only pipeline will return multiple outputs
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
 
@@ -90,7 +93,8 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
                 for ($i = 0; $i -lt $TestCases.Count; $i++) {
                     $Output[$i] | Should -BeExactly $TestCases[$i].Expected
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
 
@@ -109,7 +113,8 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
                 for ($i = 0; $i -lt $TestCases.Count; $i++) {
                     $Output[$i] | Should -BeExactly $TestCases[$i].Expected
                 }
-                $actualErrors | Should -HaveCount 0
+                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
+                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
             }
         }
     }
@@ -117,13 +122,14 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
     Context 'Error Conditions' {
         BeforeAll {
             Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -Verifiable
+            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction Stop } -ParameterFilter { $ErrorAction -eq 'Stop' } -Verifiable
             Mock -ModuleName $PSModule.Name Get-MgContext { } -Verifiable
         }
 
         It 'Missing module' {
             InModuleScope $PSModule.Name -Parameters $_ {
                 $Command = { Test-MgCommandPrerequisites 'Get-MgUser' -ErrorAction SilentlyContinue }
-                $Command | Should -WriteError -ErrorId "Modules_Module*NotFound*" -ExceptionType ([System.IO.FileNotFoundException])
+                $Command | Should -WriteError -ErrorId "MgModule*NotFound*" -ExceptionType ([System.IO.FileNotFoundException])
             }
         }
 

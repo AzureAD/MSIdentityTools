@@ -3,7 +3,7 @@
         PassThru = $true
     }
     Filter       = @{
-        Tag        = ''
+        #Tag        = 'Debug'
         ExcludeTag = 'IntegrationTest'
     }
     CodeCoverage = @{
