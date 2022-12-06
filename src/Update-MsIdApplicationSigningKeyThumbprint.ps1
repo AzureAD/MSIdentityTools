@@ -22,10 +22,9 @@
     Get the latest signing key thumbprint and set it as the perferred signing key on the application
 
 #>
-
-function Update-MsIdApplicationSigningKeyThumbprint{
+function Update-MsIdApplicationSigningKeyThumbprint {
     [CmdletBinding()]
-    Param(
+    param (
         # Tenant ID
         $Tenant = "common",
 
@@ -42,7 +41,14 @@ function Update-MsIdApplicationSigningKeyThumbprint{
         [switch]$Default
     )
 
-    process{
+    begin {
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Update-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+    }
+
+    process {
+        if ($CriticalError) { return }
 
         if ($Default) { 
             Write-Verbose "Default flag set. preferredTokenSigningKeyThumbprint will be set to null "
