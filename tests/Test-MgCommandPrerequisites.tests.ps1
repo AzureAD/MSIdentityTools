@@ -85,8 +85,7 @@ Describe 'Test-MgCommandPrerequisites' {
                 Should -Invoke Find-MgGraphCommand -ParameterFilter {
                     $Command -eq $Name
                 }
-                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
-                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
+                $actualErrors | Should -HaveCount 0
             }
         }
 
@@ -98,8 +97,7 @@ Describe 'Test-MgCommandPrerequisites' {
                 Should -Invoke Find-MgGraphCommand -ParameterFilter {
                     $Command -eq $Name
                 }
-                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
-                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
+                $actualErrors | Should -HaveCount 0
             }
         }
     }
@@ -114,8 +112,7 @@ Describe 'Test-MgCommandPrerequisites' {
                 Should -Invoke Find-MgGraphCommand -Times 3 -ParameterFilter {
                     $Command -in $TestCases.Name
                 }
-                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
-                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
+                $actualErrors | Should -HaveCount 0
             }
         }
 
@@ -130,8 +127,7 @@ Describe 'Test-MgCommandPrerequisites' {
                         $Command -eq $TestCases[$i].Name
                     }
                 }
-                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
-                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
+                $actualErrors | Should -HaveCount 0
             }
         }
 
@@ -153,8 +149,7 @@ Describe 'Test-MgCommandPrerequisites' {
                         $Command -eq $TestCases[$i].Name
                     }
                 }
-                if ($PSVersionTable.PSVersion -ge [version]'7.0') { $actualErrors | Should -HaveCount 0 }
-                else { $actualErrors | Where-Object HResult -NE -2146233087 | Should -HaveCount 0 }
+                $actualErrors | Should -HaveCount 0
             }
         }
     }
