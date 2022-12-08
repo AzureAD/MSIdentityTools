@@ -27,7 +27,7 @@ function Test-MgCommandPrerequisites {
     )
 
     begin {
-        $MgAuthenticationModule = Get-Module 'Microsoft.Graph.Authentication' | Select-Object -First 1
+        $MgAuthenticationModule = (Get-Module 'Microsoft.Graph.Authentication')[0]
     }
 
     process {
