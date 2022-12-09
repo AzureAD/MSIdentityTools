@@ -47,12 +47,12 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
     process {
         if ($CriticalError) { return }
 
-        $usersWithRoles = Get-UsersWithRoleAssignments
+        [array]$usersWithRoles = Get-UsersWithRoleAssignments
        
         $TotalUsersCount = $usersWithRoles.count
         Write-Verbose ("Checking {0} users with roles..." -f $TotalUsersCount)
 
-        $checkedUsers = @()
+        [array]$checkedUsers = @()
         $checkUsersCount = 0
         
         foreach ($user in $usersWithRoles) {
@@ -172,7 +172,7 @@ function Get-UserSignInSuccessHistoryAuth ([string]$userId) {
 
     $filter = ("UserId eq '{0}' and status/errorCode eq 0" -f $userId)
     Write-Debug $filter
-    $signins = Get-MgAuditLogSignIn -Filter $filter -all:$True
+    [array]$signins = Get-MgAuditLogSignIn -Filter $filter -all:$True
     Write-Debug $signins.count
 
     if ($signins.count -gt 0) {
@@ -204,14 +204,14 @@ function Get-UserSignInSuccessHistoryAuth ([string]$userId) {
 }
 
 function Get-UsersWithRoleAssignments() {
-    $uniquePrincipals = $null
-    $usersWithRoles = $Null
-    $groupsWithRoles = $null
-    $servicePrincipalsWithRoles = $null
-    $roleAssignments = @()
-    $activeRoleAssignments = $null
-    $eligibleRoleAssignments = $null
-    $AssignmentSchedule = @()
+    [array]$uniquePrincipals = $null
+    [array]$usersWithRoles = $Null
+    [array]$groupsWithRoles = $null
+    [array]$servicePrincipalsWithRoles = $null
+    [array]$roleAssignments = @()
+    [array]$activeRoleAssignments = $null
+    [array]$eligibleRoleAssignments = $null
+    [array]$AssignmentSchedule = @()
 
     Write-Verbose "Retrieving Active Role Assignments..."
     $activeRoleAssignments = Get-MgRoleManagementDirectoryRoleAssignmentSchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Active" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
