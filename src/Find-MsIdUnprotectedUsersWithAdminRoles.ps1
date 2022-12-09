@@ -30,14 +30,13 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'Get-MgUserAuthenticationMethod', 'Get-MgGroupMember', 'Get-MgRoleManagementDirectoryRoleDefinition', 'Get-MgRoleManagementDirectoryRoleAssignmentSchedule', 'Get-MgRoleManagementDirectoryRoleEligibilitySchedule', 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 1.9.2 -RequireListPermissions -ErrorVariable CriticalError)) { return }
-
+        
         ## Save Current MgProfile to Restore at End
         $previousMgProfile = Get-MgProfile
         if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
+            Select-MgProfile -Name 'beta' -Verbose:$false # -Verbose:$false is not suppressing output
         }
 
-        
         if ($VerbosePreference -eq 'SilentlyContinue') {
             Write-Host "NOTE:  This process may take awhile depending on the size of the environment.   Please run with -Verbose switch for more details progress output."
         }
@@ -127,7 +126,7 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
 
         ## Restore Previous MgProfile
         if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
+            Select-MgProfile -Name $previousMgProfile.Name -Verbose:$false # -Verbose:$false is not suppressing output
         }
     }
 }
