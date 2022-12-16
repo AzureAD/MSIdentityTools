@@ -213,17 +213,17 @@ function Get-UsersWithRoleAssignments() {
     [array]$AssignmentSchedule = @()
 
     Write-Verbose "Retrieving Active Role Assignments..."
-    $activeRoleAssignments = Get-MgRoleManagementDirectoryRoleAssignmentSchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Active" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
+    [array]$activeRoleAssignments = Get-MgRoleManagementDirectoryRoleAssignmentSchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Active" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
     Write-Verbose ("{0} Active Role Assignments..." -f $activeRoleAssignments.count)
     $AssignmentSchedule += $activeRoleAssignments
     
     Write-Verbose "Retrieving Eligible Role Assignments..."
-    $eligibleRoleAssignments = Get-MgRoleManagementDirectoryRoleEligibilitySchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Eligible" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
+    [array]$eligibleRoleAssignments = Get-MgRoleManagementDirectoryRoleEligibilitySchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Eligible" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
     Write-Verbose ("{0} Eligible Role Assignments..." -f $eligibleRoleAssignments.count)
     $AssignmentSchedule += $eligibleRoleAssignments
 
     Write-Verbose ("{0} Total Role Assignments to all principals..." -f $AssignmentSchedule.count)
-    $uniquePrincipals = $AssignmentSchedule.PrincipalId | Get-Unique
+    [array]$uniquePrincipals = $AssignmentSchedule.PrincipalId | Get-Unique
     Write-Verbose ("{0} Total Role Assignments to unique principals..." -f $uniquePrincipals.count)
 
     foreach ($type in ($AssignmentSchedule | Group-Object PrincipalType)) {
@@ -266,7 +266,7 @@ function Get-UsersWithRoleAssignments() {
 
     }
         
-    $usersWithRoles = $roleAssignments | Where-Object -FilterScript { $_.PrincipalType -eq 'user' }
+    [array]$usersWithRoles = $roleAssignments | Where-Object -FilterScript { $_.PrincipalType -eq 'user' }
     Write-Verbose ("{0} Total Role Assignments to Users" -f $usersWithRoles.count)
 
     Write-Output $usersWithRoles
