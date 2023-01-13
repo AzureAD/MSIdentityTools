@@ -94,6 +94,7 @@
         '.\internal\Resolve-XmlElement.ps1'
         '.\internal\Test-IpAddressInSubnet.ps1'
         '.\internal\Test-MgCommandPrerequisites.ps1'
+        '.\internal\Test-MgModulePrerequisites.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
         '.\Clear-MsIdAppConsent.ps1'

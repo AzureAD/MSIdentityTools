@@ -88,20 +88,11 @@ function Resolve-MsIdTenant {
 
     begin {
 
-        if ($null -eq (Get-MgContext)) {
-            Write-Error "$(Get-Date -f T) - Please Connect to MS Graph API with the Connect-MgGraph cmdlet from the Microsoft.Graph.Authentication module first before calling functions!" -ErrorAction Stop
-        }
-        else {
-            
-            if ((Get-MgContext).Scopes -notcontains "CrossTenantInformation.ReadBasic.All") {
-                Write-Warning "$(Get-Date -f T) - Please Connect to MS Graph API with the 'Connect-MgGraph -Scopes CrossTenantInformation.ReadBasic.All' to include the CrossTenantInformation.ReadBasic.All scope to read tenant information from MS Graph API."
-            }
-            
-            
-
-        }
-
-        
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        if (!(Test-MgModulePrerequisites -ErrorVariable CriticalError)) { return }
+        try { Test-MgModulePrerequisites 'CrossTenantInformation.ReadBasic.All' -ErrorAction Stop }
+        catch { Write-Warning $_.Exception.Message }
 
         $GraphEndPoint = (Get-MgEnvironment -Name $Environment).GraphEndpoint
         $AzureADEndpoint = (Get-MgEnvironment -Name $Environment).AzureADEndpoint
@@ -111,6 +102,9 @@ function Resolve-MsIdTenant {
     }
 
     process {
+        ## Return Immediately On Critical Error
+        if ($CriticalError) { return }
+
         $i = 0
         foreach ($value in $TenantValue) {
 
