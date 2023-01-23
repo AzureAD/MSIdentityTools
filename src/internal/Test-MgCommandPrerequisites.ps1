@@ -27,7 +27,12 @@ function Test-MgCommandPrerequisites {
     )
 
     begin {
-        $MgAuthenticationModule = (Get-Module 'Microsoft.Graph.Authentication')[0]
+        [array] $MgAuthenticationModule = Get-Module 'Microsoft.Graph.Authentication'
+        [version] $MgAuthenticationModuleVersion = $null
+        if ($MgAuthenticationModule) {
+            $MgAuthenticationModule = Import-Module 'Microsoft.Graph.Authentication' -PassThru -Verbose:$false
+            $MgAuthenticationModuleVersion = $MgAuthenticationModule[0].Version
+        }
     }
 
     process {
@@ -66,19 +71,38 @@ function Test-MgCommandPrerequisites {
                 $MgModules += $MgCommand.Module
                 [string] $ModuleName = "Microsoft.Graph.$($MgCommand.Module)"
                 try {
-                    Import-Module $ModuleName -MinimumVersion $MinimumVersion -ErrorAction Stop -Verbose:$false
-                }
-                catch [System.IO.FileNotFoundException] {
-                    Write-Error -Exception $_.Exception -Category ResourceUnavailable -ErrorId 'MgModuleWithVersionNotFound' -Message ("The module '{0}' with version '{1}' not found. To resolve, try installing module '{0}' with version '{1}' to match currently loaded modules. For example: Install-Module {0} -RequiredVersion {1}" -f $ModuleName, $MgAuthenticationModule.Version) -TargetObject $ModuleName -RecommendedAction ('Install-Module {0} -RequiredVersion {1}' -f $ModuleName, $MgAuthenticationModule.Version)
-                    $result = $false
-                }
-                catch [System.IO.FileLoadException] {
-                    Write-Error -Exception $_.Exception -Category ResourceUnavailable -ErrorId 'MgModuleOutOfDate' -Message ("The module '{0}' was found but is not a compatible version. To resolve, try updating module '{0}' to version '{1}' to match currently loaded modules. For example: Update-Module {0} -RequiredVersion {1}" -f $ModuleName, $MgAuthenticationModule.Version) -TargetObject $ModuleName -RecommendedAction ('Update-Module {0} -RequiredVersion {1}' -f $ModuleName, $MgAuthenticationModule.Version)
-                    $result = $false
+                    if ($MgAuthenticationModuleVersion -lt $MinimumVersion) {
+                        ## Check for newer module but load will likely fail due to old Microsoft.Graph.Authentication module
+                        try {
+                            Import-Module $ModuleName -MinimumVersion $MinimumVersion -ErrorAction Stop -Verbose:$false
+                        }
+                        catch [System.IO.FileLoadException] {
+                            $result = $false
+                            Write-Error -Exception $_.Exception -Category ResourceUnavailable -ErrorId 'MgModuleOutOfDate' -Message ("The module '{0}' with minimum version '{1}' was found but currently loaded 'Microsoft.Graph.Authentication' module is version '{2}'. To resolve, try opening a new PowerShell session and running the command again." -f $ModuleName, $MinimumVersion, $MgAuthenticationModuleVersion) -TargetObject $ModuleName -RecommendedAction ("Import-Module {0} -MinimumVersion '{1}'" -f $ModuleName, $MinimumVersion)
+                        }
+                        catch [System.IO.FileNotFoundException] {
+                            $result = $false
+                            Write-Error -Exception $_.Exception -Category ResourceUnavailable -ErrorId 'MgModuleWithVersionNotFound' -Message ("The module '{0}' with minimum version '{1}' not found. To resolve, try installing module '{0}' with the latest version. For example: Install-Module {0} -MinimumVersion '{1}'" -f $ModuleName, $MinimumVersion) -TargetObject $ModuleName -RecommendedAction ("Install-Module {0} -MinimumVersion '{1}'" -f $ModuleName, $MinimumVersion)
+                        }
+                    }
+                    else {
+                        ## Load module to match currently loaded Microsoft.Graph.Authentication module
+                        try {
+                            Import-Module $ModuleName -RequiredVersion $MgAuthenticationModuleVersion -ErrorAction Stop -Verbose:$false
+                        }
+                        catch [System.IO.FileLoadException] {
+                            $result = $false
+                            Write-Error -Exception $_.Exception -Category ResourceUnavailable -ErrorId 'MgModuleOutOfDate' -Message ("The module '{0}' was found but is not a compatible version. To resolve, try updating module '{0}' to version '{1}' to match currently loaded modules. For example: Update-Module {0} -RequiredVersion '{1}'" -f $ModuleName, $MgAuthenticationModuleVersion) -TargetObject $ModuleName -RecommendedAction ("Update-Module {0} -RequiredVersion '{1}'" -f $ModuleName, $MgAuthenticationModuleVersion)
+                        }
+                        catch [System.IO.FileNotFoundException] {
+                            $result = $false
+                            Write-Error -Exception $_.Exception -Category ResourceUnavailable -ErrorId 'MgModuleWithVersionNotFound' -Message ("The module '{0}' with version '{1}' not found. To resolve, try installing module '{0}' with version '{1}' to match currently loaded modules. For example: Install-Module {0} -RequiredVersion '{1}'" -f $ModuleName, $MgAuthenticationModuleVersion) -TargetObject $ModuleName -RecommendedAction ("Install-Module {0} -RequiredVersion '{1}'" -f $ModuleName, $MgAuthenticationModuleVersion)
+                        }
+                    }
                 }
                 catch {
-                    Write-Error -ErrorRecord $_
                     $result = $false
+                    Write-Error -ErrorRecord $_
                 }
             }
         }
