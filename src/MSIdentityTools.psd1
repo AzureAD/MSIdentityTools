@@ -97,7 +97,7 @@
         '.\internal\Test-MgModulePrerequisites.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
-        '.\Clear-MsIdAppConsent.ps1'
+        '.\Clear-MsIdServicePrincipalConsent.ps1'
         '.\Confirm-MsIdJwtTokenSignature.ps1'
         '.\ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1'
         '.\ConvertFrom-MsIdAadcSourceAnchor.ps1'
@@ -146,7 +146,7 @@
 
     # Functions to export from this module
     FunctionsToExport    = @(
-        'Clear-MsIdAppConsent'
+        'Clear-MsIdServicePrincipalConsent'
         'Confirm-MsIdJwtTokenSignature'
         'ConvertFrom-MsIdAadcAadConnectorSpaceDn'
         'ConvertFrom-MsIdAadcSourceAnchor'
@@ -201,6 +201,7 @@
 
     # Aliases to export from this module
     AliasesToExport      = @(
+        'Clear-MsIdApplicationConsent'
         'ConvertFrom-MsIdAzureAdImmutableId'
         'Get-MsIdWsFedFederationMetadata'
         'ConvertFrom-MsIdSamlRequest'
