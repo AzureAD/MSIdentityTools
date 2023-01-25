@@ -29,7 +29,7 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
         ## Mock commands with external dependancies or unavailable commands
         # ToDo: Integration test should perform real authentication and module import
         Mock -ModuleName $PSModule.Name Get-MgContext { New-Object Microsoft.Graph.PowerShell.Authentication.AuthContext -Property @{ Scopes = @('email', 'openid', 'profile', 'User.Read', 'User.Read.All'); AppName = 'Microsoft Graph PowerShell'; PSHostVersion = $PSVersionTable['PSVersion'] } } -Verifiable
-        Mock -ModuleName $PSModule.Name Import-Module { } -Verifiable
+        Mock -ModuleName $PSModule.Name Import-Module { } -ParameterFilter { $Name -ne 'Microsoft.Graph.Authentication' } -Verifiable
 
         ## Test Cases
         $TestCases = @(
@@ -121,8 +121,8 @@ Describe 'MgCommand' -Tag 'IntegrationTest' {
 
     Context 'Error Conditions' {
         BeforeAll {
-            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -Verifiable
-            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction Stop } -ParameterFilter { $ErrorAction -eq 'Stop' } -Verifiable
+            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -ParameterFilter { $Name -ne 'Microsoft.Graph.Authentication' } -Verifiable
+            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction Stop } -ParameterFilter { $ErrorAction -eq 'Stop' -and $Name -ne 'Microsoft.Graph.Authentication' } -Verifiable
             Mock -ModuleName $PSModule.Name Get-MgContext { } -Verifiable
         }
 
