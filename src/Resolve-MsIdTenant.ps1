@@ -91,7 +91,7 @@ function Resolve-MsIdTenant {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgModulePrerequisites -ErrorVariable CriticalError)) { return }
-        try { Test-MgModulePrerequisites 'CrossTenantInformation.ReadBasic.All' -ErrorAction Stop }
+        try { Test-MgModulePrerequisites 'CrossTenantInformation.ReadBasic.All' -ErrorAction Stop | Out-Null }
         catch { Write-Warning $_.Exception.Message }
 
         $GraphEndPoint = (Get-MgEnvironment -Name $Environment).GraphEndpoint
