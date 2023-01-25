@@ -97,7 +97,6 @@
         '.\internal\Test-MgModulePrerequisites.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
-        '.\Clear-MsIdServicePrincipalConsent.ps1'
         '.\Confirm-MsIdJwtTokenSignature.ps1'
         '.\ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1'
         '.\ConvertFrom-MsIdAadcSourceAnchor.ps1'
@@ -125,6 +124,7 @@
         '.\New-MsIdWsTrustRequest.ps1'
         '.\Reset-MsIdExternalUser.ps1'
         '.\Resolve-MsIdAzureIpAddress.ps1'
+        '.\Revoke-MsIdServicePrincipalConsent.ps1'
         '.\Show-MsIdJwtToken.ps1'
         '.\Show-MsIdSamlToken.ps1'
         '.\Test-MsIdAzureAdDeviceRegConnectivity.ps1'
@@ -146,7 +146,6 @@
 
     # Functions to export from this module
     FunctionsToExport    = @(
-        'Clear-MsIdServicePrincipalConsent'
         'Confirm-MsIdJwtTokenSignature'
         'ConvertFrom-MsIdAadcAadConnectorSpaceDn'
         'ConvertFrom-MsIdAadcSourceAnchor'
@@ -174,6 +173,7 @@
         'New-MsIdTemporaryUserPassword'
         'Reset-MsIdExternalUser'
         'Resolve-MsIdTenant'
+        'Revoke-MsIdServicePrincipalConsent'
         'Set-MsIdWindowsTlsSettings'
         'Resolve-MsIdAzureIpAddress'
         'Show-MsIdJwtToken'
@@ -201,7 +201,7 @@
 
     # Aliases to export from this module
     AliasesToExport      = @(
-        'Clear-MsIdApplicationConsent'
+        'Revoke-MsIdApplicationConsent'
         'ConvertFrom-MsIdAzureAdImmutableId'
         'Get-MsIdWsFedFederationMetadata'
         'ConvertFrom-MsIdSamlRequest'

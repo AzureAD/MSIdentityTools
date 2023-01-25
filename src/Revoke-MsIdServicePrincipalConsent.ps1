@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Remove Existing Consent to an Azure AD Service Principal.
+    Revoke Existing Consent to an Azure AD Service Principal.
     
 .DESCRIPTION
     This command requires the MS Graph SDK PowerShell Module to have a minimum of the following consented scopes:
@@ -8,37 +8,37 @@
     DelegatedPermissionGrant.ReadWrite.All or AppRoleAssignment.ReadWrite.All
     
 .EXAMPLE
-    PS > Clear-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -All
+    PS > Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -All
 
-    Remove all consent for servicePrincipal '10000000-0000-0000-0000-000000000001'.
-
-.EXAMPLE
-    PS > Get-MgServicePrincipal -ServicePrincipalId '10000000-0000-0000-0000-000000000001' | Clear-MsIdServicePrincipalConsent -Scope User.Read.All -All
-
-    Remove all consent of 'User.Read.All' scope for piped in servicePrincipal '10000000-0000-0000-0000-000000000001'.
+    Revoke all consent for servicePrincipal '10000000-0000-0000-0000-000000000001'.
 
 .EXAMPLE
-    PS > Clear-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -UserId '20000000-0000-0000-0000-000000000002'
+    PS > Get-MgServicePrincipal -ServicePrincipalId '10000000-0000-0000-0000-000000000001' | Revoke-MsIdServicePrincipalConsent -Scope User.Read.All -All
 
-    Remove existing consent for servicePrincipal '10000000-0000-0000-0000-000000000001' by user '20000000-0000-0000-0000-000000000002'.
-
-.EXAMPLE
-    PS > Clear-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -Scope User.Read.All -UserConsent -AdminConsentDelegated
-
-    Remove 'User.Read.All' scope from all user consent and tenant-wide admin consent of delegated permissions for servicePrincipal '10000000-0000-0000-0000-000000000001'.
+    Revoke all consent of 'User.Read.All' scope for piped in servicePrincipal '10000000-0000-0000-0000-000000000001'.
 
 .EXAMPLE
-    PS > Clear-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -Scope 'User.Read.All','User.ReadWrite.All' -AdminConsentApplication
+    PS > Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -UserId '20000000-0000-0000-0000-000000000002'
 
-    Remove 'User.Read.All' scope from tenant-wide admin consent of application permissions for servicePrincipal '10000000-0000-0000-0000-000000000001'.
+    Revoke existing consent for servicePrincipal '10000000-0000-0000-0000-000000000001' by user '20000000-0000-0000-0000-000000000002'.
+
+.EXAMPLE
+    PS > Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -Scope User.Read.All -UserConsent -AdminConsentDelegated
+
+    Revoke 'User.Read.All' scope from all user consent and tenant-wide admin consent of delegated permissions for servicePrincipal '10000000-0000-0000-0000-000000000001'.
+
+.EXAMPLE
+    PS > Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -Scope 'User.Read.All','User.ReadWrite.All' -AdminConsentApplication
+
+    Revoke 'User.Read.All' scope from tenant-wide admin consent of application permissions for servicePrincipal '10000000-0000-0000-0000-000000000001'.
 
 .INPUTS
     System.String
 
 #>
-function Clear-MsIdServicePrincipalConsent {
+function Revoke-MsIdServicePrincipalConsent {
     [CmdletBinding(DefaultParameterSetName = 'Granular')]
-    [Alias('Clear-MsIdApplicationConsent')]
+    [Alias('Revoke-MsIdApplicationConsent')]
     [OutputType()]
     param (
         # AppId or ObjectId of service principal
@@ -48,20 +48,20 @@ function Clear-MsIdServicePrincipalConsent {
         # Limit which scopes are cleared to specified list
         [Parameter(Mandatory = $false)]
         [string[]] $Scope,
-        # Remove all existing consent for service principal
+        # Revoke all existing consent for service principal
         [Parameter(Mandatory = $true, ParameterSetName = 'All')]
         [switch] $All,
-        # Remove user consent for service principal
+        # Revoke user consent for service principal
         [Parameter(Mandatory = $false, ParameterSetName = 'Granular')]
         [switch] $UserConsent,
-        # Remove user consent for service principal for specified users
+        # Revoke user consent for service principal for specified users
         [Parameter(Mandatory = $false, ParameterSetName = 'Granular')]
         [Alias('PrincipalId')]
         [string[]] $UserId,
-        # Remove tenant-wide admin consent of user delegated permissions for service principal
+        # Revoke tenant-wide admin consent of user delegated permissions for service principal
         [Parameter(Mandatory = $false, ParameterSetName = 'Granular')]
         [switch] $AdminConsentDelegated,
-        # Remove tenant-wide admin consent of application permissions for service principal
+        # Revoke tenant-wide admin consent of application permissions for service principal
         [Parameter(Mandatory = $false, ParameterSetName = 'Granular')]
         [switch] $AdminConsentApplication
     )
@@ -74,7 +74,7 @@ function Clear-MsIdServicePrincipalConsent {
 
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError) -and $CriticalError.CategoryInfo.Reason -Contains 'AuthenticationException') { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError) -and $CriticalError[-1].CategoryInfo.Reason -Contains 'AuthenticationException') { return }
         
         if ($All -or $UserConsent -or $UserId -or $AdminConsentDelegated) {
             if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipalOauth2PermissionGrant', 'Update-MgOauth2PermissionGrant', 'Remove-MgOauth2PermissionGrant' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
@@ -100,7 +100,7 @@ function Clear-MsIdServicePrincipalConsent {
                 
                 if ($All -or $AdminConsentApplication) {
 
-                    ## Remove Application Permissions with Tenant-Wide Admin Consent
+                    ## Revoke Application Permissions with Tenant-Wide Admin Consent
                     foreach ($appRoleAssignment in $servicePrincipal.AppRoleAssignments) {
                         $spResource = Get-MgServicePrincipal -ServicePrincipalId $appRoleAssignment.ResourceId -Select id, appRoles
                         $ScopeValue = $spResource.AppRoles | Where-Object Id -EQ $appRoleAssignment.AppRoleId | Select-Object -ExpandProperty Value
@@ -132,7 +132,7 @@ function Clear-MsIdServicePrincipalConsent {
                             }
                         }
                         else {
-                            ## Remove all scopes for requested entries
+                            ## Revoke all scopes for requested entries
                             if ($oauth2PermissionGrant.ConsentType -eq 'Principal' -and ($All -or ($UserConsent -and !$UserId) -or ($oauth2PermissionGrant.PrincipalId -in $UserId))) {
                                 Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId $oauth2PermissionGrant.Id
                             }
