@@ -54,7 +54,7 @@ Describe 'Test-MgCommandPrerequisites' {
                 )
             }
         } -ParameterFilter { $Command -eq 'Get-MgUser' } -Verifiable
-        Mock -ModuleName $PSModule.Name Import-Module { } -Verifiable
+        Mock -ModuleName $PSModule.Name Import-Module { } -ParameterFilter { $Name -ne 'Microsoft.Graph.Authentication' } -Verifiable
 
         ## Test Cases
         $TestCases = @(
@@ -156,8 +156,8 @@ Describe 'Test-MgCommandPrerequisites' {
 
     Context 'Error Conditions' {
         BeforeAll {
-            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -Verifiable
-            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction Stop } -ParameterFilter { $ErrorAction -eq 'Stop' } -Verifiable
+            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction SilentlyContinue } -ParameterFilter { $Name -ne 'Microsoft.Graph.Authentication' } -Verifiable
+            Mock -ModuleName $PSModule.Name Import-Module { Import-Module 'Microsoft.Graph.ModuleNotFound' -ErrorAction Stop } -ParameterFilter { $ErrorAction -eq 'Stop' -and $Name -ne 'Microsoft.Graph.Authentication' } -Verifiable
             Mock -ModuleName $PSModule.Name Get-MgContext { } -Verifiable
         }
 
