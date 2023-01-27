@@ -28,11 +28,11 @@ function Test-MgCommandPrerequisites {
 
     begin {
         [array] $MgAuthenticationModule = Get-Module 'Microsoft.Graph.Authentication'
-        [version] $MgAuthenticationModuleVersion = $null
-        if ($MgAuthenticationModule) {
+        if (!$MgAuthenticationModule) {
             $MgAuthenticationModule = Import-Module 'Microsoft.Graph.Authentication' -PassThru -Verbose:$false
-            $MgAuthenticationModuleVersion = $MgAuthenticationModule[0].Version
         }
+        [version] $MgAuthenticationModuleVersion = $MgAuthenticationModule[0].Version
+        Write-Debug "Microsoft.Graph.Authentication module version loaded: $MgAuthenticationModuleVersion"
     }
 
     process {
