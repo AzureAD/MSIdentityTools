@@ -50,7 +50,7 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules      = @(
-        @{ ModuleName = 'Microsoft.Graph.Authentication'; Guid = '883916f2-9184-46ee-b1f8-b6a2fb784cee'; ModuleVersion = '1.9.2' }
+        @{ ModuleName = 'Microsoft.Graph.Authentication'; Guid = '883916f2-9184-46ee-b1f8-b6a2fb784cee'; ModuleVersion = '1.9.2'; MaximumVersion = '1.999.0' }
     )
 
     # Assemblies that must be loaded prior to importing this module
