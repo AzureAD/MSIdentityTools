@@ -40,13 +40,6 @@ function Get-MsIdUnredeemedInvitedUser {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 1.10.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
-
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'v1.0') {
-            Select-MgProfile -Name 'v1.0'
-        }
-
     }
 
     process {
@@ -105,14 +98,5 @@ function Get-MsIdUnredeemedInvitedUser {
             }
         }
 
-    }
-
-    end {
-        if ($CriticalError) { return }
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
-        }
     }
 }
