@@ -120,12 +120,22 @@ function Test-MgCommandPrerequisites {
         ## Check MgModule Connection
         $MgContext = Get-MgContext
         if ($MgContext) {
-            ## Check MgModule Consented Scopes
-            foreach ($MgCommand in $MgCommandLookup.Values) {
-                if ($MgCommand.Permissions -and !(Compare-Object $MgCommand.Permissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent -IncludeEqual)) {
-                    $Exception = New-Object System.Security.SecurityException -ArgumentList "Additional scope needed for command '$($MgCommand.Command)', call Connect-MgGraph with one of the following scopes: $($MgCommand.Permissions.Name -join ', ')"
-                    Write-Error -Exception $Exception -Category ([System.Management.Automation.ErrorCategory]::PermissionDenied) -ErrorId 'MgScopePermissionRequired'
-                    $result = $false
+            if ($MgContext.AuthType -eq 'Delegated') {
+                ## Check MgModule Consented Scopes
+                foreach ($MgCommand in $MgCommandLookup.Values) {
+                    if ($MgCommand.Permissions -and (!$MgContext.Scopes -or !(Compare-Object $MgCommand.Permissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent -IncludeEqual))) {
+                        $Exception = New-Object System.Security.SecurityException -ArgumentList "Additional scope required for command '$($MgCommand.Command)', call Connect-MgGraph with one of the following scopes: $($MgCommand.Permissions.Name -join ', ')"
+                        Write-Error -Exception $Exception -Category ([System.Management.Automation.ErrorCategory]::PermissionDenied) -ErrorId 'MgScopePermissionRequired'
+                        $result = $false
+                    }
+                }
+            }
+            else {
+                ## Check MgModule Consented Scopes
+                foreach ($MgCommand in $MgCommandLookup.Values) {
+                    if ($MgCommand.Permissions -and (!$MgContext.Scopes -or !(Compare-Object $MgCommand.Permissions.Name -DifferenceObject $MgContext.Scopes -ExcludeDifferent -IncludeEqual))) {
+                        Write-Warning "Additional scope may be required for command '$($MgCommand.Command), add and consent ClientId '$($MgContext.ClientId)' to one of the following app scopes: $($MgCommand.Permissions.Name -join ', ')"
+                    }
                 }
             }
         }
