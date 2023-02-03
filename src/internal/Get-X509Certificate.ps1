@@ -62,18 +62,42 @@ function Get-X509Certificate {
                 elseif ($InputObject -is [byte[]]) {
                     $inputBytes = $InputObject
                 }
-                elseif ($InputObject -is [SecureString]) {
-                    Write-Verbose 'Decrypting SecureString and decoding Base64 string to byte array.'
-                    if ($PSVersionTable.PSVersion -ge [version]'7.0') {
-                        $inputBytes = [System.Convert]::FromBase64String((ConvertFrom-SecureString $InputObject -AsPlainText))
+                elseif ($InputObject -is [string] -or $InputObject -is [SecureString]) {
+                    if ($InputObject -is [SecureString]) {
+                        Write-Verbose 'Decrypting SecureString and decoding Base64 string to byte array.'
+                        if ($PSVersionTable.PSVersion -ge [version]'7.0') {
+                            $inputString = ConvertFrom-SecureString $InputObject -AsPlainText
+                        }
+                        else {
+                            $inputString = ConvertFrom-SecureStringAsPlainText $InputObject -Force
+                        }
                     }
                     else {
-                        $inputBytes = [System.Convert]::FromBase64String((ConvertFrom-SecureStringAsPlainText $InputObject -Force))
+                        $inputString = $InputObject
                     }
-                }
-                elseif ($InputObject -is [string]) {
-                    Write-Verbose 'Decoding Base64 string to byte array.'
-                    $inputBytes = [System.Convert]::FromBase64String($InputObject)
+                    
+                    switch -Regex ($inputString) {
+                        '^[A-Fa-f0-9\r\n]+$' {
+                            Write-Verbose 'Decoding hex string to byte array.'
+                            $inputBytes = ConvertFrom-HexString $inputString -RawBytes
+                        }
+                        '^(?:[A-Za-z0-9+/\r\n]{4})*(?:[A-Za-z0-9+/\r\n]{2}==|[A-Za-z0-9+/\r\n]{3}=)?$' {
+                            Write-Verbose 'Decoding Base64 string to byte array.'
+                            $inputBytes = [System.Convert]::FromBase64String($inputString)
+                        }
+                        '.*\.(cer)$' {
+                            Write-Verbose 'Decoding hex string to byte array.'
+                            if ($PSVersionTable.PSVersion -ge [version]'6.0') {
+                                $inputBytes = Get-Content $inputString.FullName -Raw -AsByteStream
+                            }
+                            else {
+                                $inputBytes = Get-Content $inputString.FullName -Raw -Encoding Byte
+                            }
+                        }
+                        default {
+                            $inputBytes = [Text.Encoding]::Default.GetBytes($inputString)
+                        }
+                    }
                 }
                 elseif ($InputObject -is [System.IO.FileSystemInfo]) {
                     Write-Verbose 'Decoding file content to byte array.'
