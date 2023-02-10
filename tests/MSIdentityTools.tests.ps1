@@ -10,6 +10,7 @@ BeforeDiscovery {
 
 BeforeAll {
     $PSModule = Import-Module $ModulePath -Force -PassThru -ErrorAction Stop
+    $ModulePrefix = "MsId"
 }
 
 ## Perform Tests
@@ -35,6 +36,10 @@ Describe 'MSIdentityTools' -Tag 'Common' {
         $PSModule.Guid | Should -Not -BeNullOrEmpty
     }
 
+    It 'Does Not Contain Default Prefix' {
+        $PSModule.Prefix | Should -BeNullOrEmpty
+    }
+
     It 'Contains Description' {
         $PSModule.Description | Should -Not -BeNullOrEmpty
     }
@@ -58,6 +63,15 @@ Describe '<_.Name>' -ForEach $PSModule.ExportedFunctions.Values -Tag 'Common' {
             #$Help.parameters.parameter = $Help.parameters.parameter | Where-Object name -NotIn ('WhatIf', 'Confirm')
         }
         catch {}
+    }
+
+    It 'Approved Command Verb' {
+        $Verbs = Get-Verb
+        $_.Verb | Should -BeIn $Verbs.Verb -Because 'it should be an approved PowerShell verb (See Get-Verb)'
+    }
+
+    It "Proper Command Prefix" {
+        $_.Noun | Should -BeLikeExactly "$ModulePrefix*"
     }
 
     Context 'Help Content' {
