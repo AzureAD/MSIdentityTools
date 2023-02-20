@@ -1,0 +1,10 @@
+# Tooling Configuration
+.*/*       @AzureAD/identity-cxp-code-admins
+.github/*  @AzureAD/identity-cxp-code-admins
+.vscode/*  @AzureAD/identity-cxp-code-admins
+
+# Automation
+build/*    @AzureAD/identity-cxp-code-admins
+
+# Documentation
+*.md       @AzureAD/identity-cxp-code
