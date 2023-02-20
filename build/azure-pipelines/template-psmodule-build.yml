@@ -36,6 +36,13 @@ steps:
     TargetFolder: '$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}'
     preserveTimestamp: true
 
+- task: PowerShell@2
+  displayName: 'Merge PowerShell Module Nested Module Scripts'
+  inputs:
+    filePath: '$(System.DefaultWorkingDirectory)/build/Merge-PSModuleNestedModuleScripts.ps1'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}.psd1" -MergeWithRootModule -RemoveNestedModuleScriptFiles'
+    pwsh: true
+
 - task: CopyFiles@2
   displayName: 'Copy LICENSE to Staging'
   inputs:
@@ -81,7 +88,14 @@ steps:
   displayName: 'Update PowerShell Module Manifest'
   inputs:
     filePath: '$(System.DefaultWorkingDirectory)/build/Update-PSModuleManifest.ps1'
-    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}.psd1" -Guid "${{ parameters.moduleGuid }}" -ModuleVersion "${{ parameters.moduleVersion }}" -Prerelease "${{ parameters.prereleaseTag }}" -SkipRequiredAssemblies'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}.psd1" -Guid "${{ parameters.moduleGuid }}" -ModuleVersion "${{ parameters.moduleVersion }}" -Prerelease "${{ parameters.prereleaseTag }}" -SkipRequiredAssembliesDetection'
+    pwsh: true
+
+- task: PowerShell@2
+  displayName: 'Add PowerShell Module Comment Header'
+  inputs:
+    filePath: '$(System.DefaultWorkingDirectory)/build/Add-PSModuleCommentHeader.ps1'
+    arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}.psd1"'
     pwsh: true
 
 - ${{ if parameters.GenerateManifest }}:
