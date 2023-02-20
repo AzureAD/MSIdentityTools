@@ -191,6 +191,7 @@ function Get-PathInfo {
                     return
                 }
 
+                [string] $AbsolutePath = $null
                 ## If path could not be found and there are no wildcards, then create a FileSystemInfo object for the path.
                 if (!$OutputPath -and $Path -notmatch '[*?]') {
                     ## Get Absolute Path
@@ -221,7 +222,8 @@ function Get-PathInfo {
 
                 if (!$OutputPath -or !$OutputPath.Exists) {
                     if ($OutputPath) { Write-Error -Exception (New-Object System.Management.Automation.ItemNotFoundException -ArgumentList ('Cannot find path ''{0}'' because it does not exist.' -f $OutputPath.FullName)) -TargetObject $OutputPath.FullName -ErrorId 'PathNotFound' -Category ObjectNotFound -ErrorAction $ErrorActionPreference }
-                    else { Write-Error -Exception (New-Object System.Management.Automation.ItemNotFoundException -ArgumentList ('Cannot find path ''{0}'' because it does not exist.' -f $AbsolutePath)) -TargetObject $AbsolutePath -ErrorId 'PathNotFound' -Category ObjectNotFound -ErrorAction $ErrorActionPreference }
+                    elseif ($AbsolutePath) { Write-Error -Exception (New-Object System.Management.Automation.ItemNotFoundException -ArgumentList ('Cannot find path ''{0}'' because it does not exist.' -f $AbsolutePath)) -TargetObject $AbsolutePath -ErrorId 'PathNotFound' -Category ObjectNotFound -ErrorAction $ErrorActionPreference }
+                    else { Write-Error -Exception (New-Object System.Management.Automation.ItemNotFoundException -ArgumentList ('Cannot find path ''{0}'' because it does not exist.' -f $Path)) -TargetObject $Path -ErrorId 'PathNotFound' -Category ObjectNotFound -ErrorAction $ErrorActionPreference }
                 }
             }
 
