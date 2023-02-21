@@ -92,9 +92,9 @@ steps:
     pwsh: true
 
 - task: PowerShell@2
-  displayName: 'Add PowerShell Module Comment Header'
+  displayName: 'Add PowerShell Module Header'
   inputs:
-    filePath: '$(System.DefaultWorkingDirectory)/build/Add-PSModuleCommentHeader.ps1'
+    filePath: '$(System.DefaultWorkingDirectory)/build/Add-PSModuleHeader.ps1'
     arguments: '-ModuleManifestPath "$(Pipeline.Workspace)/${{ parameters.artifactOutput }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}/${{ coalesce(parameters.moduleRename,parameters.moduleName) }}.psd1"'
     pwsh: true
 

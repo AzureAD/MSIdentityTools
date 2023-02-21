@@ -82,7 +82,7 @@ if ($PackagesConfigFileInfo.Exists) {
 ## Update Module Manifest in Module Output Directory
 &$PSScriptRoot\Update-PSModuleManifest.ps1 -ModuleManifestPath $OutputModuleManifestFileInfo.FullName
 if (!$SkipMergingNestedModuleScripts) {
-    &$PSScriptRoot\Add-PSModuleCommentHeader.ps1 -ModuleManifestPath $OutputModuleManifestFileInfo.FullName
+    &$PSScriptRoot\Add-PSModuleHeader.ps1 -ModuleManifestPath $OutputModuleManifestFileInfo.FullName
 }
 
 ## Sign Module

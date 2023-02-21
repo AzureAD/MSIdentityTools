@@ -55,5 +55,16 @@ if ($OutputModuleFileInfo.Extension -eq ".psm1") {
         $RootModuleContent = $null
     }
 
-    $CommentHeader, $RootModuleContent | Set-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
+    ## Add Requires Statements
+    $RequiresStatements = ""
+    if ($ModuleManifest.PowerShellVersion) { $RequiresStatements += "#Requires -Version {0}`r`n" -f $ModuleManifest.PowerShellVersion }
+    if ($ModuleManifest.CompatiblePSEditions) { $RequiresStatements += "#Requires -PSEdition {0}`r`n" -f ($ModuleManifest.CompatiblePSEditions -join ',') }
+    foreach ($RequiredAssembly in $ModuleManifest.RequiredAssemblies) {
+        $RequiresStatements += "#Requires -Assembly $_`r`n"
+    }
+    foreach ($RequiredModule in $ModuleManifest.RequiredModules) {
+        $RequiresStatements += ConvertTo-PsString $ModuleManifest.RequiredModules -Compact -RemoveTypes ([hashtable], [string]) | ForEach-Object { "#Requires -Module $_`r`n" }
+    }
+
+    $CommentHeader, $RequiresStatements, $RootModuleContent | Set-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
 }

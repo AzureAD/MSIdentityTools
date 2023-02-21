@@ -29,6 +29,7 @@ if ($OutputModulePath) {
 }
 else {
     [System.IO.FileInfo] $OutputModuleFileInfo = Get-PathInfo $ModuleManifest.RootModule -InputPathType File -DefaultDirectory $ModuleManifestFileInfo.DirectoryName -ErrorAction SilentlyContinue
+    if (!$PSBoundParameters.ContainsKey('MergeWithRootModule')) { $MergeWithRootModule = $true }
 }
 
 if ($OutputModuleFileInfo.Extension -eq ".psm1") {
@@ -38,37 +39,21 @@ if ($OutputModuleFileInfo.Extension -eq ".psm1") {
     [System.IO.FileInfo[]] $ScriptsToProcessFileInfo = $ModuleManifest.ScriptsToProcess | Get-PathInfo -InputPathType File -DefaultDirectory $ModuleManifestFileInfo.DirectoryName -ErrorAction SilentlyContinue
 
     if ($MergeWithRootModule) {
-        [string] $RootModulePreamble = @()
-
-        ## Add Module Manifest as Comment
-        #$RootModulePreamble += "<#`r`n{0}`r`n#>`r`n`r`n" -f (Get-Content $ModuleManifestFileInfo.FullName -Raw)
-
-        ## Add Requires Statements
-        if ($ModuleManifest.PowerShellVersion) { $RootModulePreamble += "#Requires -Version {0}`r`n" -f $ModuleManifest.PowerShellVersion }
-        if ($ModuleManifest.CompatiblePSEditions) { $RootModulePreamble += "#Requires -PSEdition {0}`r`n" -f ($ModuleManifest.CompatiblePSEditions -join ',') }
-        foreach ($RequiredAssembly in $ModuleManifest.RequiredAssemblies) {
-            $RootModulePreamble += "#Requires -Assembly $_`r`n"
-        }
-        foreach ($RequiredModule in $ModuleManifest.RequiredModules) {
-            $RootModulePreamble += ConvertTo-PsString -Compact -RemoveTypes ([hashtable], [string]) | ForEach-Object { "#Requires -Module $_`r`n" }
-        }
-        $RootModulePreamble += "`r`n"
-
         ## Split module parameters from the rest of the module content
+        [string] $RootModuleParameters = $null
         [string] $RootModuleContent = $null
-        if ($RootModuleFileInfo.Extension -eq ".psm1" -and (Get-Content $RootModuleFileInfo.FullName -Raw) -match "(?s)^(.*\n\s*param\s*[(](?:[^()]|(?'Nested'[(])|(?'-Nested'[)]))*[)]\s*)?(.*)$") {
-            $RootModulePreamble += $Matches[1]
-            if ($Matches[1]) { $RootModulePreamble += "`r`n" }
+        if ($RootModuleFileInfo.Extension -eq ".psm1" -and (Get-Content $RootModuleFileInfo.FullName -Raw) -match "(?s)^(.*\n?\s*param\s*[(](?:[^()]|(?'Nested'[(])|(?'-Nested'[)]))*[)]\s*)?(.*)$") {
+            $RootModuleParameters = $Matches[1]
             $RootModuleContent = $Matches[2]
         }
 
-        $RootModulePreamble += "#region NestedModule Scripts`r`n"
+        $NestedModuleRegion = "#region NestedModules Script(s)`r`n"
 
-        Set-Content $OutputModuleFileInfo.FullName -Value $RootModulePreamble -Encoding utf8BOM
+        $RootModuleParameters, $NestedModuleRegion | Set-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
     }
 
     ## Add Nested Module Scripts
-    $NestedModulesFileInfo | Where-Object Extension -EQ '.ps1' | Get-Content -Raw | Add-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
+    $NestedModulesFileInfo | Where-Object Extension -EQ '.ps1' | ForEach-Object { "#region $($_.Name)`r`n$(Get-Content $_ -Raw)`r`n#endregion`r`n" } | Add-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
 
     if ($MergeWithRootModule) {
         function Join-ModuleMembers ([string[]]$Members) {
