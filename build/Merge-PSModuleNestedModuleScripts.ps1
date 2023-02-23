@@ -53,7 +53,7 @@ if ($OutputModuleFileInfo.Extension -eq ".psm1") {
     }
 
     ## Add Nested Module Scripts
-    $NestedModulesFileInfo | Where-Object Extension -EQ '.ps1' | ForEach-Object { "#region $($_.Name)`r`n$(Get-Content $_ -Raw)`r`n#endregion`r`n" } | Add-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
+    $NestedModulesFileInfo | Where-Object Extension -EQ '.ps1' | ForEach-Object { "#region $($_.Name)`r`n`r`n$(Get-Content $_ -Raw)`r`n#endregion`r`n" } | Add-Content $OutputModuleFileInfo.FullName -Encoding utf8BOM
 
     if ($MergeWithRootModule) {
         function Join-ModuleMembers ([string[]]$Members) {
