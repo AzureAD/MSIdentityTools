@@ -3,17 +3,17 @@
     Return groups with an expiration date via lifecycle policy.
     
 .EXAMPLE
-    PS > Get-MsIdGroupWithExpiration | Select-Object Id,DisplayName,ExpirationDateTime,RenewedDateTime
+    PS > Get-MsIdGroupWithExpiration | ft Id,DisplayName,ExpirationDateTime,RenewedDateTime
 
     Return all groups with an expiration date.
 
 .EXAMPLE
-    PS > Get-MsIdGroupWithExpiration -After (Get-Date).AddDays(-30) -Before (Get-Date).AddDays(30) | Select-Object Id,DisplayName,ExpirationDateTime,RenewedDateTime
+    PS > Get-MsIdGroupWithExpiration -After (Get-Date).AddDays(-30) -Before (Get-Date).AddDays(30) | ft Id,DisplayName,ExpirationDateTime,RenewedDateTime
 
     Return all groups with an expiration date between 30 days before today and 30 days after today.
 
 .EXAMPLE
-    PS > Get-MsIdGroupWithExpiration -Days 30 | Select-Object Id,DisplayName,ExpirationDateTime,RenewedDateTime
+    PS > Get-MsIdGroupWithExpiration -Days 30 | ft Id,DisplayName,ExpirationDateTime,RenewedDateTime
 
     Return all groups with an expiration date between now and 30 days from now.
     
