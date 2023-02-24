@@ -2,6 +2,9 @@
     // File Formatting
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
+    "files.associations": {
+        "CODEOWNERS": "properties"
+    },
 
     // PowerShell Code Formatting
     "powershell.codeFormatting.addWhitespaceAroundPipe": true,
