@@ -1,12 +1,3 @@
----
-name: Pull Request Template
-about: Create a pull request to help us improve
-title: ''
-labels: ToTriage
-reviewers: jasoth
-assignees: jasoth
----
-
 <!-- Add any issue numbers fixed by this PR. If this only partially fixes the issue, remove the word "Fixes" above to keep the issue open. -->
 Fixes #
 
