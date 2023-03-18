@@ -27,10 +27,13 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 ### Environment (please complete the following information)
+<!-- If possible, execute this command in the same session where the bug occurred and paste the result here.
+& ([scriptblock]::Create((irm 'https://aka.ms/PsEnvMd'))) MSIdentityTools,Microsoft.Graph.Authentication,Microsoft.Graph | Set-Clipboard
+-->
 
 - Operating System: [e.g. Windows, MacOS, Linux]
 - PowerShell Version: [e.g. Windows PowerShell 5.1, PowerShell 7.2 ]
-- MS Graph PowerShell SDK Module Version: [e.g. 1.6.2, 1.9.3, 2.0]
+- MS Graph PowerShell SDK Module Version: [e.g. 1.6.2, 1.9.3, 2.0.0]
 
 ### Additional context
 
