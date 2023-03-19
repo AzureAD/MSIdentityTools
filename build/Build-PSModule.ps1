@@ -39,14 +39,14 @@ Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction Silentl
 
 ## Read Module Manifest
 $ModuleManifest = Import-PowerShellDataFile $ModuleManifestFileInfo.FullName
-[System.IO.DirectoryInfo] $ModuleOutputDirectoryInfo = Join-Path $OutputDirectoryInfo.FullName (Join-Path $ModuleManifestFileInfo.BaseName $ModuleManifest.ModuleVersion)
+[System.IO.DirectoryInfo] $ModuleOutputDirectoryInfo = Join-Path $OutputDirectoryInfo.FullName (Join-Path $ModuleManifestFileInfo.BaseName $ModuleManifest['ModuleVersion'])
 [System.IO.FileInfo] $OutputModuleManifestFileInfo = Join-Path $ModuleOutputDirectoryInfo.FullName $ModuleManifestFileInfo.Name
 
 ## Copy Source Module Code to Module Output Directory
 Assert-DirectoryExists $ModuleOutputDirectoryInfo -ErrorAction Stop | Out-Null
 Copy-Item ("{0}\*" -f $SourceDirectoryInfo.FullName) -Destination $ModuleOutputDirectoryInfo.FullName -Recurse -Force
 if (!$SkipMergingNestedModuleScripts) {
-    [System.IO.FileInfo] $OutputRootModuleFileInfo = (Join-Path $ModuleOutputDirectoryInfo.FullName $ModuleManifest.RootModule)
+    [System.IO.FileInfo] $OutputRootModuleFileInfo = (Join-Path $ModuleOutputDirectoryInfo.FullName $ModuleManifest['RootModule'])
     &$PSScriptRoot\Merge-PSModuleNestedModuleScripts.ps1 -ModuleManifestPath $OutputModuleManifestFileInfo.FullName -OutputModulePath $OutputRootModuleFileInfo.FullName -MergeWithRootModule -RemoveNestedModuleScriptFiles
 }
 if ($LicenseFileInfo.Exists) {

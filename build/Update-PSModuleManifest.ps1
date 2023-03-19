@@ -26,10 +26,10 @@ Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction Silentl
 
 ## Read Module Manifest
 $ModuleManifest = Import-PowerShellDataFile $ModuleManifestFileInfo.FullName
-$paramUpdateModuleManifest['NestedModules'] = $ModuleManifest.NestedModules | Where-Object { $null -ne $_ -and (Get-PathInfo $_ -DefaultDirectory $ModuleManifestFileInfo.DirectoryName -ErrorAction Ignore).Exists }
-$paramUpdateModuleManifest['FunctionsToExport'] = $ModuleManifest.FunctionsToExport
-$paramUpdateModuleManifest['CmdletsToExport'] = $ModuleManifest.CmdletsToExport
-$paramUpdateModuleManifest['AliasesToExport'] = $ModuleManifest.AliasesToExport
+$paramUpdateModuleManifest['NestedModules'] = $ModuleManifest['NestedModules'] | Where-Object { $null -ne $_ -and (Get-PathInfo $_ -DefaultDirectory $ModuleManifestFileInfo.DirectoryName -ErrorAction Ignore).Exists }
+$paramUpdateModuleManifest['FunctionsToExport'] = $ModuleManifest['FunctionsToExport']
+$paramUpdateModuleManifest['CmdletsToExport'] = $ModuleManifest['CmdletsToExport']
+$paramUpdateModuleManifest['AliasesToExport'] = $ModuleManifest['AliasesToExport']
 if ($ModuleManifest.PrivateData.PSData['Prerelease'] -eq 'source') { $paramUpdateModuleManifest['Prerelease'] = " " }
 
 ## Override from Parameters
@@ -47,7 +47,7 @@ $ModuleFileList = $ModuleFileList -replace '\\net45\\', '\!!!\' -replace '\\netc
 $paramUpdateModuleManifest['FileList'] = $ModuleFileList
 
 ## Generate RequiredAssemblies list based on existing items and file list
-$paramUpdateModuleManifest['RequiredAssemblies'] = $ModuleManifest.RequiredAssemblies | Where-Object { $_ -notin $ModuleFileListFileInfo.Name }
+$paramUpdateModuleManifest['RequiredAssemblies'] = $ModuleManifest['RequiredAssemblies'] | Where-Object { $_ -notin $ModuleFileListFileInfo.Name }
 if (!$SkipRequiredAssembliesDetection -and $ModuleRequiredAssembliesFileInfo) {
     $ModuleRequiredAssemblies = Get-RelativePath $ModuleRequiredAssembliesFileInfo.FullName -WorkingDirectory $ModuleManifestFileInfo.DirectoryName -ErrorAction Stop
     $paramUpdateModuleManifest['RequiredAssemblies'] += $ModuleRequiredAssemblies
@@ -67,7 +67,7 @@ if ($paramUpdateModuleManifest.ContainsKey('FileList')) {
 }
 
 ## Install Module Dependencies
-foreach ($Module in $ModuleManifest.RequiredModules) {
+foreach ($Module in $ModuleManifest['RequiredModules']) {
     if ($Module -is [hashtable]) { $ModuleName = $Module.ModuleName }
     else { $ModuleName = $Module }
     if ($ModuleName -notin $ModuleManifest.PrivateData.PSData['ExternalModuleDependencies'] -and !(Get-Module $ModuleName -ListAvailable)) {

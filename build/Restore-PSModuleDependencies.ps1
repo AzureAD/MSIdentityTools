@@ -28,13 +28,13 @@ $ModuleManifest = Import-PowerShellDataFile $ModuleManifestFileInfo.FullName
 #.\build\Restore-NugetPackages.ps1 -BaseDirectory ".\" -Verbose:$false
 
 ## Create directory
-if ($ModuleManifest.RequiredModules) {
+if ($ModuleManifest['RequiredModules']) {
     Assert-DirectoryExists $PSModuleCacheDirectoryInfo.FullName -ErrorAction Stop | Out-Null
     if (!$env:PSModulePath.Contains($PSModuleCacheDirectoryInfo.FullName)) { $env:PSModulePath += '{0}{1}' -f [IO.Path]::PathSeparator, $PSModuleCacheDirectoryInfo.FullName }
 }
 
 ## Save Module Dependencies
-foreach ($Module in $ModuleManifest.RequiredModules) {
+foreach ($Module in $ModuleManifest['RequiredModules']) {
     if (!(Get-Module -FullyQualifiedName $Module -ListAvailable -ErrorAction SilentlyContinue)) {
         $paramSaveModule = @{}
         if ($Module -is [hashtable]) {

@@ -27,7 +27,7 @@ else { $SigningCertificate = Get-X509Certificate $SigningCertificate -EndEntityC
 ## Read Module Manifest
 $ModuleManifest = Import-PowerShellDataFile $ModuleManifestFileInfo.FullName
 
-$FileList = $ModuleManifest.FileList -like "*.ps*1*"
+$FileList = $ModuleManifest['FileList'] -like "*.ps*1*"
 for ($i = 0; $i -lt $FileList.Count; $i++) {
     $FileList[$i] = Join-Path $ModuleManifestFileInfo.DirectoryName $FileList[$i] -Resolve
 }

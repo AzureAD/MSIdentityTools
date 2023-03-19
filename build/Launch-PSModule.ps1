@@ -28,9 +28,12 @@ if ($NoNewWindow) {
 else {
     [scriptblock] $ScriptBlock = {
         param ([string]$ModulePath, [string]$PSModuleCacheDirectory, [scriptblock]$PostImportScriptBlock)
-        ## Force WindowsPowerShell to load correct version of built-in modules when launched from PowerShell 6+
-        if ($PSVersionTable.PSEdition -eq 'Desktop') { Import-Module 'Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility', 'CimCmdlets' -MaximumVersion 5.9.9.9 }
+        ## Reset PSModulePath environment variable to default value because starting powershell.exe from pwsh.exe (or vice versa) will inherit environment variables for the wrong version of PowerShell.
+        $PSModulePathDefault = [System.Management.Automation.ModuleIntrinsics]::GetModulePath($null, [System.Environment]::GetEnvironmentVariable('PSMODULEPATH', [EnvironmentVariableTarget]::Machine), [System.Environment]::GetEnvironmentVariable('PSMODULEPATH', [EnvironmentVariableTarget]::User))
+        [Environment]::SetEnvironmentVariable("PSMODULEPATH", $PSModulePathDefault)
+        ## Add PSModuleCacheDirectory to PSModulePath environment variable
         if (!$env:PSModulePath.Contains($PSModuleCacheDirectory)) { $env:PSModulePath += '{0}{1}' -f [IO.Path]::PathSeparator, $PSModuleCacheDirectory }
+        ## Import Module and Execute Post-Import ScriptBlock
         Import-Module $ModulePath -PassThru
         Invoke-Command -ScriptBlock $PostImportScriptBlock -NoNewScope
     }
@@ -39,7 +42,7 @@ else {
 
     foreach ($Path in $PowerShellPaths) {
         if ($Path -eq 'wsl') {
-            Start-Process $Path -ArgumentList ('pwsh' ,'-NoExit', '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlock)))
+            Start-Process $Path -ArgumentList ('pwsh' , '-NoExit', '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlock)))
         }
         else {
             Start-Process $Path -ArgumentList ('-NoExit', '-NoProfile', '-EncodedCommand', [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($strScriptBlock)))
