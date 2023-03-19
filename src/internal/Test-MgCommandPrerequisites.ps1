@@ -83,7 +83,7 @@ function Test-MgCommandPrerequisites {
                     if ($MgAuthenticationModuleVersion -lt $MinimumVersion) {
                         ## Check for newer module but load will likely fail due to old Microsoft.Graph.Authentication module
                         try {
-                            Import-Module $ModuleName -MinimumVersion $MinimumVersion -ErrorAction Stop -Verbose:$false
+                            Import-Module $ModuleName -MinimumVersion $MinimumVersion -Scope Global -ErrorAction Stop -Verbose:$false
                         }
                         catch [System.IO.FileLoadException] {
                             $result = $false
@@ -97,7 +97,7 @@ function Test-MgCommandPrerequisites {
                     else {
                         ## Load module to match currently loaded Microsoft.Graph.Authentication module
                         try {
-                            Import-Module $ModuleName -RequiredVersion $MgAuthenticationModuleVersion -ErrorAction Stop -Verbose:$false
+                            Import-Module $ModuleName -RequiredVersion $MgAuthenticationModuleVersion -Scope Global -ErrorAction Stop -Verbose:$false
                         }
                         catch [System.IO.FileLoadException] {
                             $result = $false
