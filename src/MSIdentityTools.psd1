@@ -97,6 +97,7 @@
         '.\internal\Test-MgModulePrerequisites.ps1'
         '.\internal\Test-PsElevation.ps1'
         '.\internal\Write-HostPrompt.ps1'
+        '.\Add-MsIdServicePrincipal.ps1'
         '.\Confirm-MsIdJwtTokenSignature.ps1'
         '.\ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1'
         '.\ConvertFrom-MsIdAadcSourceAnchor.ps1'
@@ -149,6 +150,7 @@
 
     # Functions to export from this module
     FunctionsToExport    = @(
+        'Add-MsIdServicePrincipal'
         'Confirm-MsIdJwtTokenSignature'
         'ConvertFrom-MsIdAadcAadConnectorSpaceDn'
         'ConvertFrom-MsIdAadcSourceAnchor'
