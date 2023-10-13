@@ -6,6 +6,11 @@ Split elements of one or more Azure AD entitlement management connected organiza
 .Inputs
 Microsoft.Graph.PowerShell.Models.MicrosoftGraphConnectedOrganization
 
+.EXAMPLE
+    PS > Get-MgEntitlementManagementConnectedOrganization -All |  Split-MsIdEntitlementManagementConnectedOrganization -ByIdentitySource | ft ConnectedOrganizationId,tenantId,domainName
+
+    Display one row for each identity source in all the connected organizations with the tenant id or domain name of the identity source.
+
 #>
 function Split-MsIdEntitlementManagementConnectedOrganization {
 [CmdletBinding(DefaultParameterSetName='SplitByIdentitySource', PositionalBinding=$false, ConfirmImpact='Medium')]
