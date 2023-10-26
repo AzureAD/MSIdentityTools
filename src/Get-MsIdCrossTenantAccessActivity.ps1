@@ -177,7 +177,7 @@ function Get-MsIdCrossTenantAccessActivity {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgAuditLogSignIn' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
 
         #External Tenant ID check
 

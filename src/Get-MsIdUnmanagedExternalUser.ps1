@@ -59,7 +59,7 @@ function Get-MsIdUnmanagedExternalUser {
             Write-Progress -Activity "Checking Guest Users" -PercentComplete $percentCompleted
 
             foreach ($userObject in (Get-ObjectPropertyValue $results 'value')) {
-                [Microsoft.Graph.PowerShell.Models.MicrosoftGraphUser1]$user = $userObject
+                $user = $userObject
 
                 Write-Verbose "$userIndex / $count"
                 $userIndex += 1

@@ -57,7 +57,7 @@ function Get-MsIdGroupWritebackConfiguration {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgGroup' -ApiVersion beta -MinimumVersion 1.10.0 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgGroup' -ApiVersion beta -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
     }
 
     process {

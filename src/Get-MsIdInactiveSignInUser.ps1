@@ -44,7 +44,7 @@ function Get-MsIdInactiveSignInUser {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgUser' -ApiVersion beta -MinimumVersion 1.10.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 2.8.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
     }
 
     process {
