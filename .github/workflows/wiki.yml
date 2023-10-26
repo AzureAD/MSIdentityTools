@@ -17,7 +17,7 @@ jobs:
       uses: actions/Checkout@v2
     - name: "Generate Pages"
       run: |
-        Install-Module -Name "Microsoft.Graph.Authentication" -RequiredVersion "1.9.2" -Force
+        Install-Module -Name "Microsoft.Graph.Authentication" -RequiredVersion "2.8.0" -Force
         ./Build-Wiki.ps1
       shell: pwsh
       working-directory: ./build

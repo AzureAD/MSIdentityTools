@@ -5,24 +5,24 @@
 .DESCRIPTION
     Gets user sign-in activity associated with external tenants. By default, shows both connections
     from local users access an external tenant (outbound), and external users accessing the local
-    tenant (inbound). 
-    
-    Has a parameter, -AccessDirection, to further refine results, using the following values: 
+    tenant (inbound).
+
+    Has a parameter, -AccessDirection, to further refine results, using the following values:
 
       * Outboud - lists sign-in events of external tenant IDs accessed by local users
       * Inbound - list sign-in events of external tenant IDs of external users accessing local tenant
 
     Has a parameter, -ExternalTenantId, to target a single external tenant ID.
 
-    Has a switch, -SummaryStats, to show summary statistics for each external tenant. This also works 
-    when targeting a single tenant. It is best to use this with Format-Table and Out-Gridview to ensure 
+    Has a switch, -SummaryStats, to show summary statistics for each external tenant. This also works
+    when targeting a single tenant. It is best to use this with Format-Table and Out-Gridview to ensure
     a table is produced.
 
     Has a switch, -ResolvelTenantId, to return additional details on the external tenant ID.
 
     -Verbose will give insight into the cmdlets activities.
 
-    Requires AuditLog.Read.All scope (to access logs) and CrossTenantInfo.ReadBasic.All scope 
+    Requires AuditLog.Read.All scope (to access logs) and CrossTenantInfo.ReadBasic.All scope
     (for -ResolveTenantId), i.e. Connect-MgGraph -Scopes AuditLog.Read.All
 
 
@@ -58,16 +58,16 @@
 .EXAMPLE
     Get-MsIdCrossTenantAccessActivity -ExternalTenantId 3ce14667-9122-45f5-bcd4-f618957d9ba1
 
-    Gets all available sign-in events for local users accessing resources in the external tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1, 
+    Gets all available sign-in events for local users accessing resources in the external tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1,
     and external users from tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1 accessing resources in the local tenant.
 
     Lists by targeted external tenant.
 
-    
+
 .EXAMPLE
     Get-MsIdCrossTenantAccessActivity -AccessDirection Outbound
 
-    Gets all available sign-in events for local users accessing resources in an external tenant. 
+    Gets all available sign-in events for local users accessing resources in an external tenant.
 
     Lists by unique external tenant.
 
@@ -75,7 +75,7 @@
 .EXAMPLE
     Get-MsIdCrossTenantAccessActivity -AccessDirection Outbound -Verbose
 
-    Gets all available sign-in events for local users accessing resources in an external tenant. 
+    Gets all available sign-in events for local users accessing resources in an external tenant.
 
     Lists by unique external tenant.
 
@@ -101,7 +101,7 @@
 .EXAMPLE
     Get-MsIdCrossTenantAccessActivity -AccessDirection Inbound
 
-    Gets all available sign-in events for external users accessing resources in the local tenant. 
+    Gets all available sign-in events for external users accessing resources in the local tenant.
 
     Lists by unique external tenant.
 
@@ -109,7 +109,7 @@
 .EXAMPLE
     Get-MsIdCrossTenantAccessActivity -AccessDirection Inbound -Verbose
 
-    Gets all available sign-in events for external users accessing resources in the local tenant. 
+    Gets all available sign-in events for external users accessing resources in the local tenant.
 
     Lists by unique external tenant.
 
@@ -134,21 +134,21 @@
 
 
 .NOTES
-    THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
-    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR 
+    THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
     FITNESS FOR A PARTICULAR PURPOSE.
 
-    This sample is not supported under any Microsoft standard support program or service. 
+    This sample is not supported under any Microsoft standard support program or service.
     The script is provided AS IS without warranty of any kind. Microsoft further disclaims all
     implied warranties including, without limitation, any implied warranties of merchantability
     or of fitness for a particular purpose. The entire risk arising out of the use or performance
     of the sample and documentation remains with you. In no event shall Microsoft, its authors,
-    or anyone else involved in the creation, production, or delivery of the script be liable for 
-    any damages whatsoever (including, without limitation, damages for loss of business profits, 
-    business interruption, loss of business information, or other pecuniary loss) arising out of 
-    the use of or inability to use the sample or documentation, even if Microsoft has been advised 
-    of the possibility of such damages, rising out of the use of or inability to use the sample script, 
-    even if Microsoft has been advised of the possibility of such damages.   
+    or anyone else involved in the creation, production, or delivery of the script be liable for
+    any damages whatsoever (including, without limitation, damages for loss of business profits,
+    business interruption, loss of business information, or other pecuniary loss) arising out of
+    the use of or inability to use the sample or documentation, even if Microsoft has been advised
+    of the possibility of such damages, rising out of the use of or inability to use the sample script,
+    even if Microsoft has been advised of the possibility of such damages.
 
 
 #>
@@ -159,7 +159,7 @@ function Get-MsIdCrossTenantAccessActivity {
 
         #Return events based on external tenant access direction, either 'Inbound', 'Outbound', or 'Both'
         [Parameter(Position = 0)]
-        [ValidateSet('Inbound', 'Outbound')] 
+        [ValidateSet('Inbound', 'Outbound')]
         [string]$AccessDirection,
 
         #Return events for the supplied external tenant ID
@@ -173,17 +173,11 @@ function Get-MsIdCrossTenantAccessActivity {
         [switch]$ResolveTenantId
 
     )
-    
+
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
-
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
-        }
+        if (!(Test-MgCommandPrerequisites 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
 
         #External Tenant ID check
 
@@ -204,7 +198,7 @@ function Get-MsIdCrossTenantAccessActivity {
         }
 
     }
-    
+
     process {
         ## Return Immediately On Critical Error
         if ($CriticalError) { return }
@@ -217,7 +211,7 @@ function Get-MsIdCrossTenantAccessActivity {
 
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Outbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting sign-ins for local users accessing external tenant ID - $ExternalTenantId"
-            
+
                 $SignIns = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All | Group-Object ResourceTenantID
 
             }
@@ -257,7 +251,7 @@ function Get-MsIdCrossTenantAccessActivity {
 
                 Write-Verbose -Message "$(Get-Date -f T) - Default access direction 'Both'"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting sign-ins for local users accessing external tenant ID - $ExternalTenantId"
-            
+
                 $Outbound = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All | Group-Object ResourceTenantID
 
 
@@ -298,7 +292,7 @@ function Get-MsIdCrossTenantAccessActivity {
         Write-Verbose -Message "$(Get-Date -f T) - Checking for sign-ins..."
 
         if ($SignIns) {
-            
+
             Write-Verbose -Message "$(Get-Date -f T) - Sign-ins obtained"
             Write-Verbose -Message "$(Get-Date -f T) - Iterating Sign-ins..."
 
@@ -335,9 +329,9 @@ function Get-MsIdCrossTenantAccessActivity {
                             $DefaultDomainName = $ResolvedTenant.Result
 
                         }
- 
+
                         if ($ResolvedTenant.oidcMetadataResult -eq 'Resolved') {
-    
+
                             $oidcMetadataTenantRegionScope = $ResolvedTenant.oidcMetadataTenantRegionScope
 
                         }
@@ -436,7 +430,7 @@ function Get-MsIdCrossTenantAccessActivity {
 
                     Write-Verbose -Message "$(Get-Date -f T) - Getting individual sign-in events for external tenant - $($TenantId.Name)"
 
-                    
+
                     foreach ($Event in $TenantID.group) {
 
 
@@ -455,7 +449,7 @@ function Get-MsIdCrossTenantAccessActivity {
                                 UserType                  = $Event.UserType
                                 CrossTenantAccessType     = $Event.CrossTenantAccessType
                                 AppDisplayName            = $Event.AppDisplayName
-                                AppId                     = $Event.AppId 
+                                AppId                     = $Event.AppId
                                 ResourceDisplayName       = $Event.ResourceDisplayName
                                 ResourceId                = $Event.ResourceId
                                 SignInId                  = $Event.Id
@@ -481,7 +475,7 @@ function Get-MsIdCrossTenantAccessActivity {
                                 UserType              = $Event.UserType
                                 CrossTenantAccessType = $Event.CrossTenantAccessType
                                 AppDisplayName        = $Event.AppDisplayName
-                                AppId                 = $Event.AppId 
+                                AppId                 = $Event.AppId
                                 ResourceDisplayName   = $Event.ResourceDisplayName
                                 ResourceId            = $Event.ResourceId
                                 SignInId              = $Event.Id
@@ -498,7 +492,7 @@ function Get-MsIdCrossTenantAccessActivity {
 
 
                     }
-                    
+
 
                 }
 
@@ -520,13 +514,13 @@ function Get-MsIdCrossTenantAccessActivity {
             Write-Verbose -Message "$(Get-Date -f T) - Displaying total analysis object"
 
             if (!$AccessDirection) {
-            
-                $TotalAnalysis | Sort-Object ExternalTenantId 
-            
+
+                $TotalAnalysis | Sort-Object ExternalTenantId
+
             }
             else {
-           
-                $TotalAnalysis | Sort-Object SignIns -Descending 
+
+                $TotalAnalysis | Sort-Object SignIns -Descending
 
             }
 
@@ -534,13 +528,8 @@ function Get-MsIdCrossTenantAccessActivity {
 
 
     }
-    
+
     end {
         if ($CriticalError) { return }
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
-        }
     }
 }

@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Create service principal for existing application registration
-    
+
 .EXAMPLE
     PS > Add-MsIdServicePrincipal 10000000-0000-0000-0000-000000000001
 
@@ -23,7 +23,7 @@ function Add-MsIdServicePrincipal {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'New-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'New-MgServicePrincipal' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
     }
 
     process {

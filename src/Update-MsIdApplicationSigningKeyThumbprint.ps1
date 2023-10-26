@@ -13,7 +13,7 @@
 
 .EXAMPLE
     PS > Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -Default
-    
+
     Update Application's preferred signing key to default value null
 
 .EXAMPLE
@@ -44,22 +44,22 @@ function Update-MsIdApplicationSigningKeyThumbprint {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Update-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Update-MgServicePrincipal' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
     }
 
     process {
         if ($CriticalError) { return }
 
-        if ($Default) { 
+        if ($Default) {
             Write-Verbose "Default flag set. preferredTokenSigningKeyThumbprint will be set to null "
-            $KeyThumbprint = $null 
+            $KeyThumbprint = $null
         }
 
         if ($null -ne $KeyThumbprint) {
             $KeyThumbprint = $KeyThumbprint.Replace(" ", "").ToLower()
         }
 
-        $body = @{preferredTokenSigningKeyThumbprint = $KeyThumbprint } | ConvertTo-Json 
+        $body = @{preferredTokenSigningKeyThumbprint = $KeyThumbprint } | ConvertTo-Json
         $body = $body.replace('""','null')
 
         Write-Verbose "Retrieving Service Principal"

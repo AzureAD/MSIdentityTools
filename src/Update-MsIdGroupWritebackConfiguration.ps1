@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Update an Azure AD cloud group settings to writeback as an AD on-premises group
-    
+
 .EXAMPLE
     PS > Update-MsIdGroupWritebackConfiguration -GroupId <GroupId> -WriteBackEnabled $false
 
@@ -22,20 +22,20 @@
 .NOTES
     - Updating Role Assignable Groups or Privileged Access Groups require PrivilegedAccess.ReadWrite.AzureADGroup permission scope
 
-    THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
-    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR 
+    THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
     FITNESS FOR A PARTICULAR PURPOSE.
-    This sample is not supported under any Microsoft standard support program or service. 
+    This sample is not supported under any Microsoft standard support program or service.
     The script is provided AS IS without warranty of any kind. Microsoft further disclaims all
     implied warranties including, without limitation, any implied warranties of merchantability
     or of fitness for a particular purpose. The entire risk arising out of the use or performance
     of the sample and documentation remains with you. In no event shall Microsoft, its authors,
-    or anyone else involved in the creation, production, or delivery of the script be liable for 
-    any damages whatsoever (including, without limitation, damages for loss of business profits, 
-    business interruption, loss of business information, or other pecuniary loss) arising out of 
-    the use of or inability to use the sample or documentation, even if Microsoft has been advised 
-    of the possibility of such damages, rising out of the use of or inability to use the sample script, 
-    even if Microsoft has been advised of the possibility of such damages.   
+    or anyone else involved in the creation, production, or delivery of the script be liable for
+    any damages whatsoever (including, without limitation, damages for loss of business profits,
+    business interruption, loss of business information, or other pecuniary loss) arising out of
+    the use of or inability to use the sample or documentation, even if Microsoft has been advised
+    of the possibility of such damages, rising out of the use of or inability to use the sample script,
+    even if Microsoft has been advised of the possibility of such damages.
 
 #>
 function Update-MsIdGroupWritebackConfiguration {
@@ -67,19 +67,13 @@ function Update-MsIdGroupWritebackConfiguration {
         [ValidateSet("universalDistributionGroup", "universalSecurityGroup", "universalMailEnabledSecurityGroup")]
         [string] $WriteBackOnPremGroupType
     )
-    
+
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-MgGroup', 'Update-MgGroup' -ApiVersion beta -MinimumVersion 1.10.0 -ErrorVariable CriticalError)) { return }
-
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
-        }
     }
-    
+
     process {
         if ($CriticalError) { return }
 
@@ -99,22 +93,22 @@ function Update-MsIdGroupWritebackConfiguration {
             $mgGroup = Get-MgGroup -GroupId $gid
             Write-Debug ($mgGroup | Select-Object -Property Id, DisplayName, GroupTypes, SecurityEnabled, OnPremisesSyncEnabled -Expand WritebackConfiguration | Select-Object -Property Id, DisplayName, GroupTypes, SecurityEnabled, OnPremisesSyncEnabled, IsEnabled, OnPremisesGroupType | Out-String)
 
-            
+
             $currentOnPremGroupType = $mgGroup.WritebackConfiguration.OnPremisesGroupType
-           
+
             $currentIsEnabled = $mgGroup.WritebackConfiguration.IsEnabled
             $cloudGroupType = $null
-            
+
             if ($mggroup.GroupTypes -contains 'Unified') {
                 $cloudGroupType = "M365"
             }
             else {
-                
+
                 if ($mgGroup.SecurityEnabled -eq $true) {
                     $cloudGroupType = "Security"
 
                     if ($null -notlike $mgGroup.ProxyAddresses) {
-                        $cloudGroupType = "Mail-Enabled Security" 
+                        $cloudGroupType = "Mail-Enabled Security"
                     }
                 }
                 else {
@@ -146,7 +140,7 @@ function Update-MsIdGroupWritebackConfiguration {
 
 
                         Write-Verbose ("Group {0} is a Security Group with current IsEnabled of {1} and onPremisesGroupType of {2}." -f $gid, $currentIsEnabled, $currentOnPremGroupType)
-                       
+
                         if ($currentIsEnabled -eq $WriteBackEnabled) {
                             $skipUpdate = $true
                             Write-Verbose "WriteBackEnabled $WriteBackEnabled already set for Security Group!"
@@ -159,22 +153,22 @@ function Update-MsIdGroupWritebackConfiguration {
                                 if ($null -ne $WriteBackOnPremGroupType -and $WriteBackOnPremGroupType -ne 'universalSecurityGroup') {
                                     $skipUpdate = $true
                                     Write-Error ("{0} is not a cloud security group and can only be written back as a univeralSecurityGroup type which is not currently set for this group!" -f $gid)
-                            
+
                                 }
                                 else {
-                           
-                                    
+
+
                                     if ($null -eq $currentOnPremGroupType -ne $WriteBackOnPremGroupType) {
                                         $wbc.onPremisesGroupType = $WriteBackOnPremGroupType
                                     }
                                 }
                             }
-                    
+
                         }
                     }
 
                     "M365" {
-                         
+
                         Write-Verbose ("Group {0} is an M365 Group with current IsEnabled of {1} and onPremisesGroupType of {2}." -f $gid, $currentIsEnabled, $currentOnPremGroupType)
                         if ($currentIsEnabled -eq $WriteBackEnabled) {
                             $skipUpdate = $true
@@ -186,11 +180,11 @@ function Update-MsIdGroupWritebackConfiguration {
 
                             if ($currentOnPremGroupType -ne $WriteBackOnPremGroupType) {
 
-                               
+
                                 $wbc.onPremisesGroupType = $WriteBackOnPremGroupType
-                                
+
                             }
-                    
+
                         }
 
                     }
@@ -217,11 +211,11 @@ function Update-MsIdGroupWritebackConfiguration {
                     else {
                         Update-MgGroup -GroupId $gid -writeBackConfiguration $wbc -ErrorAction Stop
                     }
-                    
+
                     Write-Verbose ("Group Updated!")
                 }
                 else {
-                
+
                     Write-Verbose ("No effective updates to group applied!")
                 }
 
@@ -231,10 +225,5 @@ function Update-MsIdGroupWritebackConfiguration {
 
     end {
         if ($CriticalError) { return }
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
-        }
     }
 }

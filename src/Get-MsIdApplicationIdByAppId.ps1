@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Lookup Application Registration by AppId
-    
+
 .EXAMPLE
     PS > Get-MsIdApplicationIdByAppId 10000000-0000-0000-0000-000000000001
 
@@ -23,7 +23,7 @@ function Get-MsIdApplicationIdByAppId {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgApplication' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgApplication' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
     }
 
     process {

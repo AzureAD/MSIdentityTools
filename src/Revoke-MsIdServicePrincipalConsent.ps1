@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
     Revoke Existing Consent to an Azure AD Service Principal.
-    
+
 .DESCRIPTION
     This command requires the MS Graph SDK PowerShell Module to have a minimum of the following consented scopes:
     Application.Read.All
     DelegatedPermissionGrant.ReadWrite.All or AppRoleAssignment.ReadWrite.All
-    
+
 .EXAMPLE
     PS > Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -All
 
@@ -74,13 +74,13 @@ function Revoke-MsIdServicePrincipalConsent {
 
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal' -MinimumVersion 1.9.2 -ErrorVariable CriticalError) -and $CriticalError[-1].CategoryInfo.Reason -Contains 'AuthenticationException') { return }
-        
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal' -MinimumVersion 2.8.0 -ErrorVariable CriticalError) -and $CriticalError[-1].CategoryInfo.Reason -Contains 'AuthenticationException') { return }
+
         if ($All -or $UserConsent -or $UserId -or $AdminConsentDelegated) {
-            if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipalOauth2PermissionGrant', 'Update-MgOauth2PermissionGrant', 'Remove-MgOauth2PermissionGrant' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+            if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipalOauth2PermissionGrant', 'Update-MgOauth2PermissionGrant', 'Remove-MgOauth2PermissionGrant' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
         }
         elseif ($All -or $AdminConsentApplication) {
-            if (!(Test-MgCommandPrerequisites 'Remove-MgServicePrincipalAppRoleAssignment' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+            if (!(Test-MgCommandPrerequisites 'Remove-MgServicePrincipalAppRoleAssignment' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
         }
     }
 
@@ -97,7 +97,7 @@ function Revoke-MsIdServicePrincipalConsent {
             ## Get Service Principal details
             $servicePrincipal = Get-MgServicePrincipal -ServicePrincipalId $servicePrincipalId -Select id -Expand appRoleAssignments
             if ($servicePrincipal) {
-                
+
                 if ($All -or $AdminConsentApplication) {
 
                     ## Revoke Application Permissions with Tenant-Wide Admin Consent

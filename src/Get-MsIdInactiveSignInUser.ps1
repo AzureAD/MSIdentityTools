@@ -45,13 +45,6 @@ function Get-MsIdInactiveSignInUser {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-MgUser' -ApiVersion beta -MinimumVersion 1.10.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
-
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
-        }
-
     }
 
     process {
@@ -118,10 +111,5 @@ function Get-MsIdInactiveSignInUser {
 
     end {
         if ($CriticalError) { return }
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
-        }
     }
 }

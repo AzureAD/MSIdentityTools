@@ -40,7 +40,7 @@ function Reset-MsIdExternalUser {
         # User object of external user
         [Parameter(Mandatory = $true, ParameterSetName = 'GraphUser', Position = 0, ValueFromPipeline = $true)]
         [psobject] $User,
-        
+
         # The url to redirect the user to after they redeem the link
         # Defaults to My Apps page of the inviter's home tenant. https://myapps.microsoft.com?tenantId={tenantId}
         [Parameter(Mandatory = $false, ParameterSetName = 'ObjectId', Position = 1, ValueFromPipeline = $false)]
@@ -56,14 +56,8 @@ function Reset-MsIdExternalUser {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'New-MgInvitation' -MinimumVersion 1.9.2 -RequireListPermissions -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'New-MgInvitation' -MinimumVersion 2.8.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
 
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
-        }
-    
         if (!$InviteRedirectUrl) {
             $tenantId = (Get-MgContext).TenantId
             $InviteRedirectUrl = "https://myapps.microsoft.com?tenantId=$tenantId"
@@ -82,10 +76,10 @@ function Reset-MsIdExternalUser {
             # check that object has requried properties
             if ($GraphUser.psobject.Properties.Name -inotcontains "id") {
                 Write-Error "No provided user id"
-            } 
+            }
             if ($GraphUser.psobject.Properties.Name -inotcontains "mail") {
                 Write-Error "No provided user mail"
-            } 
+            }
             # check that values are not empty
             if ([string]::IsNullOrWhiteSpace($GraphUser.Id)) {
                 Write-Error "Provided user id is empty"
@@ -115,7 +109,7 @@ function Reset-MsIdExternalUser {
                 }
                 else {
                     Write-Error "User not found."
-                }    
+                }
                 break
             }
             "GraphUser" {
@@ -127,10 +121,5 @@ function Reset-MsIdExternalUser {
 
     end {
         if ($CriticalError) { return }
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
-        }
     }
 }

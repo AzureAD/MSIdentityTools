@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Return groups with an expiration date via lifecycle policy.
-    
+
 .EXAMPLE
     PS > Get-MsIdGroupWithExpiration | ft Id,DisplayName,ExpirationDateTime,RenewedDateTime
 
@@ -16,7 +16,7 @@
     PS > Get-MsIdGroupWithExpiration -Days 30 | ft Id,DisplayName,ExpirationDateTime,RenewedDateTime
 
     Return all groups with an expiration date between now and 30 days from now.
-    
+
 .INPUTS
     None
 
@@ -36,7 +36,7 @@ function Get-MsIdGroupWithExpiration {
     )
 
     ## Initialize Critical Dependencies
-    if (!(Test-MgCommandPrerequisites 'Get-MgGroup' -MinimumVersion 1.9.2 -ErrorVariable CriticalError)) { return }
+    if (!(Test-MgCommandPrerequisites 'Get-MgGroup' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
 
     if ($PSCmdlet.ParameterSetName -eq 'Days') {
         [datetime] $After = Get-Date

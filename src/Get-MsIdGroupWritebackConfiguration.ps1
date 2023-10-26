@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Gets the group writeback configuration for the group ID
-    
+
 .EXAMPLE
     PS > Get-MsIdGroupWritebackConfiguration -GroupId <GroupId>
 
@@ -14,24 +14,24 @@
 
 .EXAMPLE
     PS > Get-mggroup -filter "groupTypes/any(c:c eq 'Unified')"|Get-MsIdGroupWritebackConfiguration -verbose
-    
+
     Get the WritebackConfiguration for all M365 Groups in the tenant
 
 .NOTES
-    THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED 
-    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR 
+    THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
     FITNESS FOR A PARTICULAR PURPOSE.
-    This sample is not supported under any Microsoft standard support program or service. 
+    This sample is not supported under any Microsoft standard support program or service.
     The script is provided AS IS without warranty of any kind. Microsoft further disclaims all
     implied warranties including, without limitation, any implied warranties of merchantability
     or of fitness for a particular purpose. The entire risk arising out of the use or performance
     of the sample and documentation remains with you. In no event shall Microsoft, its authors,
-    or anyone else involved in the creation, production, or delivery of the script be liable for 
-    any damages whatsoever (including, without limitation, damages for loss of business profits, 
-    business interruption, loss of business information, or other pecuniary loss) arising out of 
-    the use of or inability to use the sample or documentation, even if Microsoft has been advised 
-    of the possibility of such damages, rising out of the use of or inability to use the sample script, 
-    even if Microsoft has been advised of the possibility of such damages.   
+    or anyone else involved in the creation, production, or delivery of the script be liable for
+    any damages whatsoever (including, without limitation, damages for loss of business profits,
+    business interruption, loss of business information, or other pecuniary loss) arising out of
+    the use of or inability to use the sample or documentation, even if Microsoft has been advised
+    of the possibility of such damages, rising out of the use of or inability to use the sample script,
+    even if Microsoft has been advised of the possibility of such damages.
 #>
 function Get-MsIdGroupWritebackConfiguration {
     [CmdletBinding(DefaultParameterSetName = 'ObjectId')]
@@ -48,24 +48,18 @@ function Get-MsIdGroupWritebackConfiguration {
                 }
             })]
         [string[]] $GroupId,
-        
+
         # Group Object
         [Parameter(Mandatory = $true, ParameterSetName = 'GraphGroup', Position = 1, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
         [Object[]] $Group
     )
-    
+
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-MgGroup' -ApiVersion beta -MinimumVersion 1.10.0 -ErrorVariable CriticalError)) { return }
-
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta'
-        }
     }
-    
+
     process {
         if ($CriticalError) { return }
 
@@ -93,12 +87,12 @@ function Get-MsIdGroupWritebackConfiguration {
                 $cloudGroupType = "M365"
             }
             else {
-                
+
                 if ($mgGroup.SecurityEnabled -eq $true) {
                     $cloudGroupType = "Security"
 
                     if ($null -notlike $mgGroup.ProxyAddresses) {
-                        $cloudGroupType = "Mail-Enabled Security" 
+                        $cloudGroupType = "Mail-Enabled Security"
                     }
                 }
                 else {
@@ -106,7 +100,7 @@ function Get-MsIdGroupWritebackConfiguration {
                 }
             }
 
-            
+
             $checkedGroup.Type = $cloudGroupType
 
             if ($checkedGroup.SourceOfAuthority -eq 'On-Premises') {
@@ -115,7 +109,7 @@ function Get-MsIdGroupWritebackConfiguration {
                 $checkedGroup.EffectiveWriteBack = "On-Premises is Source Of Authority for Group"
             }
             else {
-            
+
                 switch ($checkedGroup.Type) {
                     "Distribution" {
                         $checkedGroup.WriteBackEnabled = "N/A"
@@ -131,7 +125,7 @@ function Get-MsIdGroupWritebackConfiguration {
 
                     }
                     Default {
-        
+
                         $writebackEnabled = $null
 
                         switch ($mgGroup.writebackConfiguration.isEnabled) {
@@ -139,8 +133,8 @@ function Get-MsIdGroupWritebackConfiguration {
                             $false { $writebackEnabled = "FALSE" }
                             $null { $writebackEnabled = "NOTSET" }
                         }
-            
-            
+
+
                         if ($null -ne ($mgGroup.writebackConfiguration.onPremisesGroupType)) {
                             $WriteBackOnPremGroupType = $mgGroup.writebackConfiguration.onPremisesGroupType
                         }
@@ -180,13 +174,8 @@ function Get-MsIdGroupWritebackConfiguration {
 
         }
     }
-    
+
     end {
         if ($CriticalError) { return }
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name
-        }
     }
 }

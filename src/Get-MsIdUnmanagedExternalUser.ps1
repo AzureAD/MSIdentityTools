@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Returns a list of all the external users in the tenant that are unmanaged (viral users).
-    
+
 .EXAMPLE
     PS > Get-MsIdUnmanagedExternalUser
 
@@ -20,7 +20,7 @@
 .EXAMPLE
     PS > Get-MsIdUnmanagedExternalUser -Type All
 
-    Gets a list of all the external users that are from an unmanaged/viral tenant or have a personal Microsoft Account. 
+    Gets a list of all the external users that are from an unmanaged/viral tenant or have a personal Microsoft Account.
 
 #>
 function Get-MsIdUnmanagedExternalUser {
@@ -35,9 +35,9 @@ function Get-MsIdUnmanagedExternalUser {
 
     ## Initialize Critical Dependencies
     $CriticalError = $null
-    if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 1.9.2 -RequireListPermissions -ErrorVariable CriticalError)) { return }
+    if (!(Test-MgCommandPrerequisites 'Get-MgUser' -MinimumVersion 2.8.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
 
-    $graphBaseUri = "https://graph.microsoft.com/$((Get-MgProfile).Name)"
+    $graphBaseUri = "https://graph.microsoft.com/beta"
     $pageCount = 999
     $guestUserUri = $graphBaseUri + "/users?`$filter=userType eq 'Guest'&`$select=id,userPrincipalName,mail,displayName,identities&`$count=true&`$top=$pageCount"
 
@@ -53,14 +53,14 @@ function Get-MsIdUnmanagedExternalUser {
         Write-Host "No guest users in this tenant."
     }
     elseif ($count -gt 0) {
-        while ($hasMoreData) {     
+        while ($hasMoreData) {
             $percentCompleted = $currentPage * $pageCount / $count * 100
             $currentPage += 1
             Write-Progress -Activity "Checking Guest Users" -PercentComplete $percentCompleted
-            
+
             foreach ($userObject in (Get-ObjectPropertyValue $results 'value')) {
                 [Microsoft.Graph.PowerShell.Models.MicrosoftGraphUser1]$user = $userObject
-                
+
                 Write-Verbose "$userIndex / $count"
                 $userIndex += 1
 
@@ -81,7 +81,7 @@ function Get-MsIdUnmanagedExternalUser {
                 if($Type -eq 'ExternalAzureADViral' -or $Type -eq 'All')
                 {
                     if ($isAzureAdUser) {
-                        
+
                         Write-Verbose "Checking if user $($mail) is viral user. [$($user.userPrincipalName)]"
 
                         if (![string]::IsNullOrEmpty($mail)) {
@@ -108,7 +108,7 @@ function Get-MsIdUnmanagedExternalUser {
                 }
 
             }
-        
+
             $nextLink = Get-ObjectPropertyValue $results '@odata.nextLink'
             if ($nextLink) {
                 $results = Invoke-MgGraphRequest -Uri $nextLink -Headers @{ ConsistencyLevel = 'eventual' }
@@ -116,8 +116,8 @@ function Get-MsIdUnmanagedExternalUser {
             else {
                 $hasMoreData = $false
             }
-            
-        } 
+
+        }
         Write-Progress -Activity "Checking Guest Users" -Completed
     }
 }

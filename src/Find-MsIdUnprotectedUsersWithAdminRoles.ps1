@@ -14,9 +14,8 @@
 .NOTES
      - Eligible users for roles may not have active assignments showing in their directoryrolememberships, but they have the potential to elevate to assigned roles
      - Large amounts of role assignments may take time process.
-     - Must be connected to MS Graph with appropriate scopes for reading user, group, application, role, an sign in information and selected the beta profile before running.
+     - Must be connected to MS Graph with appropriate scopes for reading user, group, application, role, an sign in information .
       --  Connect-MgGraph -scopes RoleManagement.Read.Directory,UserAuthenticationMethod.Read.All,AuditLog.Read.All,User.Read.All,Group.Read.All,Application.Read.All
-      --  Select-MgProfile -name Beta
 #>
 function Find-MsIdUnprotectedUsersWithAdminRoles {
     [CmdletBinding()]
@@ -25,35 +24,30 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
         # Include Sign In log activity -  Note this can cause the query to run slower in larger active environments
         [switch] $IncludeSignIns
     )
-    
+
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'Get-MgUserAuthenticationMethod', 'Get-MgGroupMember', 'Get-MgRoleManagementDirectoryRoleDefinition', 'Get-MgRoleManagementDirectoryRoleAssignmentSchedule', 'Get-MgRoleManagementDirectoryRoleEligibilitySchedule', 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 1.9.2 -RequireListPermissions -ErrorVariable CriticalError)) { return }
-        
-        ## Save Current MgProfile to Restore at End
-        $previousMgProfile = Get-MgProfile
-        if ($previousMgProfile.Name -ne 'beta') {
-            Select-MgProfile -Name 'beta' -Verbose:$false # -Verbose:$false is not suppressing output
-        }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'Get-MgUserAuthenticationMethod', 'Get-MgGroupMember', 'Get-MgRoleManagementDirectoryRoleDefinition', 'Get-MgRoleManagementDirectoryRoleAssignmentSchedule', 'Get-MgRoleManagementDirectoryRoleEligibilitySchedule', 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 2.8.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
+
 
         if ($VerbosePreference -eq 'SilentlyContinue') {
             Write-Host "NOTE:  This process may take awhile depending on the size of the environment.   Please run with -Verbose switch for more details progress output."
         }
 
     }
-    
+
     process {
         if ($CriticalError) { return }
 
         [array]$usersWithRoles = Get-UsersWithRoleAssignments
-       
+
         $TotalUsersCount = $usersWithRoles.count
         Write-Verbose ("Checking {0} users with roles..." -f $TotalUsersCount)
 
         [array]$checkedUsers = @()
         $checkUsersCount = 0
-        
+
         foreach ($user in $usersWithRoles) {
 
             $checkUsersCount++
@@ -74,7 +68,7 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
                 $checkedUser = [ordered] @{}
                 $checkedUser.UserID = $userObject.Id
                 $checkedUser.UserPrincipalName = $userObject.UserPrincipalName
-            
+
                 If ($null -eq $userObject.signInActivity.LastSignInDateTime) {
                     $checkedUser.LastSignInDateTime = "Unknown"
                     $checkedUser.LastSigninDaysAgo = "Unknown"
@@ -107,7 +101,7 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
                 $checkedUsers += ([pscustomobject]$checkedUser)
             }
             else {
-                
+
                 $checkedUser = [ordered] @{}
                 $checkedUser.UserID = $userObject.Id
                 $checkedUser.Status = "Not Exists"
@@ -116,18 +110,13 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
         }
 
     }
-    
+
     end {
         if ($CriticalError) { return }
 
         Write-Verbose ("{0} Users Evaluated!" -f $checkedUsers.count)
         Write-Verbose ("{0} Users with roles who are NOT registered for MFA!" -f ($checkedUsers | Where-Object -FilterScript { $_.isMfaRegistered -eq $false }).count)
         Write-Output $checkedUsers
-
-        ## Restore Previous MgProfile
-        if ($previousMgProfile -and $previousMgProfile.Name -ne (Get-MgProfile).Name) {
-            Select-MgProfile -Name $previousMgProfile.Name -Verbose:$false # -Verbose:$false is not suppressing output
-        }
     }
 }
 
@@ -140,7 +129,7 @@ function Get-UserMfaRegisteredStatus ([string]$UserId) {
         AuthMethodsRegistered = $null
         status = $null
     }
-    
+
     try {
         $authMethods = (Get-MgUserAuthenticationMethod -UserId $UserId).AdditionalProperties."@odata.type"
 
@@ -150,7 +139,7 @@ function Get-UserMfaRegisteredStatus ([string]$UserId) {
         $results.IsMfaRegistered = $isMfaRegistered
         $results.AuthMethodsRegistered = $authMethods
         $results.status = "Checked"
-        
+
     }
     catch {
         $results.status = "Unknown"
@@ -216,7 +205,7 @@ function Get-UsersWithRoleAssignments() {
     [array]$activeRoleAssignments = Get-MgRoleManagementDirectoryRoleAssignmentSchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Active" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
     Write-Verbose ("{0} Active Role Assignments..." -f $activeRoleAssignments.count)
     $AssignmentSchedule += $activeRoleAssignments
-    
+
     Write-Verbose "Retrieving Eligible Role Assignments..."
     [array]$eligibleRoleAssignments = Get-MgRoleManagementDirectoryRoleEligibilitySchedule -All:$true -ExpandProperty Principal | Add-Member -MemberType NoteProperty -Name AssignmentScope -Value "Eligible" -Force -PassThru | Add-Member -MemberType ScriptProperty -Name PrincipalType -Value { $this.Principal.AdditionalProperties."@odata.type".split('.')[2] } -Force -PassThru
     Write-Verbose ("{0} Eligible Role Assignments..." -f $eligibleRoleAssignments.count)
@@ -229,9 +218,9 @@ function Get-UsersWithRoleAssignments() {
     foreach ($type in ($AssignmentSchedule | Group-Object PrincipalType)) {
         Write-Verbose ("{0} assignments to {1} type" -f $type.count, $type.name)
     }
-    
+
     foreach ($assignment in ($AssignmentSchedule)) {
-        
+
         if ($assignment.PrincipalType -eq 'user') {
             $roleAssignment = @{}
             $roleAssignment.PrincipalId = $assignment.PrincipalId
@@ -242,7 +231,7 @@ function Get-UsersWithRoleAssignments() {
             $roleAssignment.RoleName = [array](Get-MgRoleManagementDirectoryRoleDefinition -UnifiedRoleDefinitionId $assignment.RoleDefinitionId | Select-Object -ExpandProperty displayName)
             $roleAssignments += ([pscustomobject]$roleAssignment)
         }
-       
+
         if ($assignment.PrincipalType -eq 'group') {
             Write-Verbose ("Expanding Group Members for Role Assignable Group {0}" -f $assignment.PrincipalId)
             $groupMembers = Get-MgGroupMember -GroupId $assignment.PrincipalId | Select-Object -ExpandProperty Id
@@ -251,7 +240,7 @@ function Get-UsersWithRoleAssignments() {
 
             foreach ($member in $groupMembers) {
                 Write-Verbose ("Adding Group Member {0} for Role Assignable Group {0}" -f $member, $assignment.PrincipalId)
-               
+
                 $roleAssignment = @{}
                 $roleAssignment.PrincipalId = $member
                 $roleAssignment.PrincipalType = "user"
@@ -265,7 +254,7 @@ function Get-UsersWithRoleAssignments() {
         }
 
     }
-        
+
     [array]$usersWithRoles = $roleAssignments | Where-Object -FilterScript { $_.PrincipalType -eq 'user' }
     Write-Verbose ("{0} Total Role Assignments to Users" -f $usersWithRoles.count)
 
