@@ -12,7 +12,7 @@ BeforeAll {
 
 ## Perform Tests
 Describe 'Get-MsIdServicePrincipalIdByAppId' {
-    
+
     BeforeAll {
         ## Stub functions required when actual command is not available
         InModuleScope $PSModule.Name {
@@ -98,5 +98,5 @@ Describe 'Get-MsIdServicePrincipalIdByAppId' {
             $actualErrors | Should -HaveCount 0
         }
     }
-    
+
 }
