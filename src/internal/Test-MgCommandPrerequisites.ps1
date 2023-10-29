@@ -42,12 +42,6 @@ function Test-MgCommandPrerequisites {
         ## Initialize
         $result = $true
 
-        ## Temporary Error when Mg Module v2 is loaded. Remove once all commands have been updated and increase module dependancy minimum to v2.
-        if ($MgAuthenticationModuleVersion -ge [version]'2.0.0' -and $ApiVersion -eq 'beta') {
-            Write-Error -Category ResourceUnavailable -ErrorId 'MgModuleNotSupported' -Message ("This command is not yet compatible with Microsoft Graph SDK Module v2 and the currently loaded 'Microsoft.Graph.Authentication' module is version '{0}'. To resolve, try opening a new PowerShell session, importing an older version of the module, and running the command again." -f $MgAuthenticationModuleVersion) -RecommendedAction ("Import-Module Microsoft.Graph.Authentication -MinimumVersion '{0}' -MaximumVersion '1.99.0'" -f $MinimumVersion)
-            return $false
-        }
-
         ## Get Graph Command Details
         [hashtable] $MgCommandLookup = @{}
         foreach ($CommandName in $Name) {
@@ -116,7 +110,7 @@ function Test-MgCommandPrerequisites {
             }
         }
         Write-Verbose ('Required Microsoft Graph Modules: {0}' -f (($MgModules | ForEach-Object { "Microsoft.Graph.$_" }) -join ', '))
-        
+
         ## Check MgModule Connection
         $MgContext = Get-MgContext
         if ($MgContext) {

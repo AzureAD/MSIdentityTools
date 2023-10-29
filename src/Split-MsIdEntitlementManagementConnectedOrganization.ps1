@@ -13,48 +13,48 @@ Microsoft.Graph.PowerShell.Models.MicrosoftGraphConnectedOrganization
 
 #>
 function Split-MsIdEntitlementManagementConnectedOrganization {
-[CmdletBinding(DefaultParameterSetName='SplitByIdentitySource', PositionalBinding=$false, ConfirmImpact='Medium')]
-param(
+    [CmdletBinding(DefaultParameterSetName = 'SplitByIdentitySource', PositionalBinding = $false, ConfirmImpact = 'Medium')]
+    param(
 
-    [Parameter(ValueFromPipeline=$true,ParameterSetName='SplitByIdentitySource')]
-    [Microsoft.Graph.PowerShell.Models.MicrosoftGraphConnectedOrganization[]]
-    # The connected organization.
-    ${ConnectedOrganization},
+        [Parameter(ValueFromPipeline = $true, ParameterSetName = 'SplitByIdentitySource')]
+        [Microsoft.Graph.PowerShell.Models.MicrosoftGraphConnectedOrganization[]]
+        # The connected organization.
+        ${ConnectedOrganization},
+        # Flag to indicate that the output should be split by identity source.
+        [Parameter(Mandatory = $true, ParameterSetName = 'SplitByIdentitySource')]
+        [switch]
+        ${ByIdentitySource}
 
-    [Parameter(Mandatory=$true, ParameterSetName='SplitByIdentitySource')]
-    [switch]
-    ${ByIdentitySource}
+    )
 
-)
+    begin {
 
-begin {
+    }
 
-}
+    process {
+        if ($ByIdentitySource) {
 
-process {
-    if ($ByIdentitySource) {
+            if ($null -ne $ConnectedOrganization.IdentitySources) {
+                foreach ($is in $ConnectedOrganization.IdentitySources) {
+                    # identity sources, as an abstract class, does not have any properties
 
-        if ($null -ne $ConnectedOrganization.IdentitySources) {
-            foreach ($is in $ConnectedOrganization.IdentitySources) {
-                # identity sources, as an abstract class, does not have any properties
+                    $aObj = [pscustomobject]@{
+                        ConnectedOrganizationId = $ConnectedOrganization.Id
+                    }
 
-                $aObj = [pscustomobject]@{
-                    ConnectedOrganizationId = $ConnectedOrganization.Id
+                    $addl = $is.AdditionalProperties
+                    foreach ($k in $addl.Keys) {
+                        $isk = $k
+                        $aObj | Add-Member -MemberType NoteProperty -Name $isk -Value $addl[$k] -Force
+                    }
+
+                    Write-Output $aObj
                 }
-            
-                $addl = $is.AdditionalProperties
-                foreach ($k in $addl.Keys) {
-                    $isk = $k
-                    $aObj | Add-Member -MemberType NoteProperty -Name $isk -Value $addl[$k] -Force
-                }
-
-                write-output $aObj
             }
         }
     }
-}
 
-end {
+    end {
 
-}
+    }
 }
