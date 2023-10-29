@@ -146,6 +146,7 @@
         '.\Get-MsIdAdfsSampleApp.ps1'
         '.\Get-MsIdInactiveSignInUser.ps1'
         '.\Set-MsIdServicePrincipalVisibleInMyApps.ps1'
+        '.\Split-MsIdEntitlementManagementConnectedOrganization.ps1'
     )
 
     # Functions to export from this module
@@ -199,6 +200,7 @@
         'Import-MsIdAdfsSamplePolicy'
         'Get-MsIdInactiveSignInUser'
         'Set-MsIdServicePrincipalVisibleInMyApps'
+        'Split-MsIdEntitlementManagementConnectedOrganization'
     )
 
     # Cmdlets to export from this module
