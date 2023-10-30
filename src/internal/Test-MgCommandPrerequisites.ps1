@@ -17,7 +17,7 @@ function Test-MgCommandPrerequisites {
         # The service API version.
         [Parameter(Mandatory = $false, Position = 2)]
         [ValidateSet('v1.0', 'beta')]
-        [string] $ApiVersion = 'v1.0',
+        [string] $ApiVersion = 'beta',
         # Specifies a minimum version.
         [Parameter(Mandatory = $false)]
         [version] $MinimumVersion,

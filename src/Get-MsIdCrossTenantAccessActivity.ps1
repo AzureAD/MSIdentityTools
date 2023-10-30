@@ -177,7 +177,7 @@ function Get-MsIdCrossTenantAccessActivity {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgAuditLogSignIn' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgBetaAuditLogSignIn' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
 
         #External Tenant ID check
 
@@ -212,7 +212,7 @@ function Get-MsIdCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Outbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting sign-ins for local users accessing external tenant ID - $ExternalTenantId"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All | Group-Object ResourceTenantID
+                $SignIns = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All | Group-Object ResourceTenantID
 
             }
             else {
@@ -220,7 +220,7 @@ function Get-MsIdCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Outbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting external tenant IDs accessed by local users"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All | Group-Object ResourceTenantID
+                $SignIns = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All | Group-Object ResourceTenantID
 
             }
 
@@ -232,7 +232,7 @@ function Get-MsIdCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Inbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting sign-ins for users accessing local tenant from external tenant ID - $ExternalTenantId"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -All | Group-Object HomeTenantID
+                $SignIns = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -All | Group-Object HomeTenantID
 
             }
             else {
@@ -240,7 +240,7 @@ function Get-MsIdCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Access direction 'Inbound' selected"
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting external tenant IDs for external users accessing local tenant"
 
-                $SignIns = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -All | Group-Object HomeTenantID
+                $SignIns = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -All | Group-Object HomeTenantID
 
             }
 
@@ -252,12 +252,12 @@ function Get-MsIdCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Default access direction 'Both'"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting sign-ins for local users accessing external tenant ID - $ExternalTenantId"
 
-                $Outbound = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All | Group-Object ResourceTenantID
+                $Outbound = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId eq '{0}'" -f $ExternalTenantId) -All | Group-Object ResourceTenantID
 
 
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting sign-ins for users accessing local tenant from external tenant ID - $ExternalTenantId"
 
-                $Inbound = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -All | Group-Object HomeTenantID
+                $Inbound = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId eq '{0}' and TokenIssuerType eq 'AzureAD'" -f $ExternalTenantId) -All | Group-Object HomeTenantID
 
 
             }
@@ -266,12 +266,12 @@ function Get-MsIdCrossTenantAccessActivity {
                 Write-Verbose -Message "$(Get-Date -f T) - Default access direction 'Both'"
                 Write-Verbose -Message "$(Get-Date -f T) - Outbound: getting external tenant IDs accessed by local users"
 
-                $Outbound = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All | Group-Object ResourceTenantID
+                $Outbound = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and ResourceTenantId ne '{0}'" -f (Get-MgContext).TenantId) -All | Group-Object ResourceTenantID
 
 
                 Write-Verbose -Message "$(Get-Date -f T) - Inbound: getting external tenant IDs for external users accessing local tenant"
 
-                $Inbound = Get-MgAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -All | Group-Object HomeTenantID
+                $Inbound = Get-MgBetaAuditLogSignIn -Filter ("CrossTenantAccessType ne 'none' and HomeTenantId ne '{0}' and TokenIssuerType eq 'AzureAD'" -f (Get-MgContext).TenantId) -All | Group-Object HomeTenantID
 
 
 
