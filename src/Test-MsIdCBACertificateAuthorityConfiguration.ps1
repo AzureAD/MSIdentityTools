@@ -234,3 +234,4 @@ Else {
 }##ForEach CA
     }
 }
+Test-MsIdCBATrustStoreConfiguration
