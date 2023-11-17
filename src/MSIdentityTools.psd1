@@ -132,7 +132,7 @@
         '.\Show-MsIdJwtToken.ps1'
         '.\Show-MsIdSamlToken.ps1'
         '.\Test-MsIdAzureAdDeviceRegConnectivity.ps1'
-        '.\Test-MsIdCBATrustStoreConfiguration'
+        '.\Test-MsIdCBATrustStoreConfiguration.ps1'
         '.\Resolve-MsIdTenant.ps1'
         '.\Set-MsIdWindowsTlsSettings.ps1'
         '.\Get-MsIdSigningKeyThumbprint.ps1'
