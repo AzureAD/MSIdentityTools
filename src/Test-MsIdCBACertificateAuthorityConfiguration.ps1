@@ -10,12 +10,12 @@
     Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID. It is best to run this script from outside
     a corporate network on an internet connected Windows device.   
 .EXAMPLE
-    Test-MsIdEntraIDCertificateTrustStoreConfiguration
+    Test-MsIdCBATrustStoreConfiguration
 .LINK
     https://aka.ms/aadcba
 
 #>
-function Test-MsIdEntraIDCertificateTrustStoreConfiguration {
+function Test-MsIdCBATrustStoreConfiguration {
 
     begin {
             ## Due to Certutil Dependency will only run on Windows.
