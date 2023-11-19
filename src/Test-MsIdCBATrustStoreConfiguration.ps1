@@ -10,12 +10,12 @@
     Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID. It is best to run this script from outside
     a corporate network on an internet connected Windows device.   
 .EXAMPLE
-    Test-MsIdEntraIDCertificateTrustStoreConfiguration
+    Test-MsIdCBATrustStoreConfiguration
 .LINK
     https://aka.ms/aadcba
 
 #>
-function Test-MsIdEntraIDCertificateTrustStoreConfiguration {
+function Test-MsIdCBATrustStoreConfiguration {
 
     begin {
             ## Due to Certutil Dependency will only run on Windows.
@@ -28,6 +28,30 @@ function Test-MsIdEntraIDCertificateTrustStoreConfiguration {
             Write-Host Certutil not found. This cmdlet can only run on Windows -ForegroundColor Red
             Break
             }
+            try {
+            if (-not(get-module -Name Microsoft.Graph.Identity.DirectoryManagement)) {
+                    import-module Microsoft.Graph.Identity.DirectoryManagement
+                }
+                if (-not(get-module -Name Microsoft.Graph.Identity.SignIns)) {
+                    import-module Microsoft.Graph.Identity.SignIns
+                }
+            }
+            catch {
+                Write-Host Microsoft Graph SDK not found. Install the Microwsoft Graph SDK -ForegroundColor Red
+                Break
+            }
+            try {
+                $context = Get-MgContext
+                if ($context -eq $null) {
+                                         Connect-MgGraph -NoWelcome
+                                        }
+                }
+            catch {
+                Write-Host Unable to Sign-in to MSGraph -ForegroundColor Red
+                Break
+            }            
+                
+            
         }
 
     process {
@@ -234,3 +258,4 @@ Else {
 }##ForEach CA
     }
 }
+Test-MsIdCBATrustStoreConfiguration
