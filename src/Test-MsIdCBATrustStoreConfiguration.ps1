@@ -61,6 +61,13 @@ $OrgInfo = Get-MgOrganization
 # Get the list of trusted certificate authorities
 $trustedCAs = (Get-MgOrganizationCertificateBasedAuthConfiguration -OrganizationId $OrgInfo.Id).CertificateAuthorities
 
+# Check for a single CA 
+If($trustedCAs.count -eq 0)
+{
+    Write-Host "No Certificate Authorities are present in $($OrgInfo.DisplayName - $($OrgInfo.Id))" -ForegroundColor Red
+    Break
+}
+
 # Loop through each trusted CA
 $CompletedResult = @()
 foreach ($ca in $trustedCAs) {
