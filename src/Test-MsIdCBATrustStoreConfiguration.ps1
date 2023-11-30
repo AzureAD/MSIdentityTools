@@ -286,6 +286,13 @@ Else ## Non-Empty AKI
     } Else {
         Write-Host "      " Cert SKI matches CRL AKI -ForegroundColor Green
     }
+    # Check CRL Time Validity
+    Write-Host "    CRL Time Validity Test"
+    if ($now -lt $crlTU -or $now -gt $crlNU) {
+        Write-Host "    CRL for $($cert.Subject) downloaded from $($ca.CertificateRevocationListUrl) is not yet valid or expired" -ForegroundColor Red
+    } Else {
+        Write-Host "      Passed" -ForegroundColor Green
+    }
 
     # Display CRL Lifetime Information 
     Write-Host "    Additional CRL Information"
