@@ -101,6 +101,19 @@ $($description.Trim())
 
 "@
     }
+
+    # Notes
+    $notes = $help.Notes | Out-String
+    if (![string]::IsNullOrWhiteSpace($notes)) {
+        $md += @"
+## Notes
+
+$($notes.Trim())
+
+
+"@
+    }
+
     # examples
     if($help.examples.example.Count -gt 0) {
         $md += @"
@@ -128,7 +141,7 @@ $remarks
 
 "@
             }
-        } 
+        }
     }
     # Parameters
     if($help.parameters.parameter.count -gt 0) {
@@ -146,7 +159,7 @@ $remarks
             $md += @"
 ### -$($param.name.Trim())
 
-  $($param.description.Text.Trim())
+    $($param.description.Text)
 
 ``````yaml
 Type: $($param.type.name.Trim())
@@ -175,7 +188,7 @@ $($inputType)
 
 
 "@
-        }        
+        }
     }
     # result types
     if($help.returnValues.returnValue.type.name.Count -gt 0) {
@@ -192,7 +205,7 @@ $($returnValue)
 
 
 "@
-        }        
+        }
     }
     # aliases
     $aliases = $(get-alias -definition $help.Name -ErrorAction SilentlyContinue)

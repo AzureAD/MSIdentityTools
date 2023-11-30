@@ -2,14 +2,7 @@
 .SYNOPSIS
     Test & report for common mis-configuration issues with the Entra ID Certificate Trust Store
 
-.INPUTS
-    None
-.NOTES
-    This Powershell cmdlet require Windows command line utility Certutil. This cmdlet can only be run from Windows device.
-
-    Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID. It is best to run this script from outside
-    a corporate network on an internet connected Windows device.
-
+.DESCRIPTION
     The following is a list of checks performed by this cmdlet.
 
     * CertificateRevocationListUrl Format Validation Test: Checks for a correctly formatted CRL Distribution Point (CDP) URL
@@ -20,6 +13,14 @@
     * CRL Authority Test: Checks that the CRL downloaded from the configured CA lists the CA certificate being evaluated as the its authority.
     * CRL Time Validity Test: Checks that the CRL being evaluated is time valid
     * Additional CRL Information: This include properties of the tested CRL including thisUpdate(Issued), nextPublish, nextUpdate(Expiry) and amount of time remaining
+
+    This Powershell cmdlet require Windows command line utility Certutil. This cmdlet can only be run from Windows device.
+
+    Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID. It is best to run this script from outside
+    a corporate network on an internet connected Windows device.
+
+.INPUTS
+    None
 
 .EXAMPLE
     Test-MsIdCBATrustStoreConfiguration
