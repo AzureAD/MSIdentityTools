@@ -42,7 +42,7 @@ function Test-MsIdCBATrustStoreConfiguration {
             }
             try {
                 $context = Get-MgContext
-                if ($context -eq $null) {
+                if ($null -eq $context) {
                                          Connect-MgGraph -NoWelcome
                                         }
                 }
@@ -61,6 +61,13 @@ $OrgInfo = Get-MgOrganization
 # Get the list of trusted certificate authorities
 $trustedCAs = (Get-MgOrganizationCertificateBasedAuthConfiguration -OrganizationId $OrgInfo.Id).CertificateAuthorities
 
+# Check for a single CA 
+If($trustedCAs.count -eq 0)
+{
+    Write-Host "No Certificate Authorities are present in $($OrgInfo.DisplayName - $($OrgInfo.Id))" -ForegroundColor Red
+    Break
+}
+
 # Loop through each trusted CA
 $CompletedResult = @()
 foreach ($ca in $trustedCAs) {
@@ -72,15 +79,16 @@ foreach ($ca in $trustedCAs) {
 
     Write-Host "Processing $($ca.Issuer)"
     ### High Level Check for correctly formatted CDP URL
-    Write-Host "    CertificateRevocationListUrl Format Validation Test"
+    
     If($ca.CertificateRevocationListUrl)
     {
-    $pattern = '^http:\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])\/[^\/]+\.[^\/]+$'
-    $crlURLCheckPass = $false
-    if ($ca.CertificateRevocationListUrl -match $pattern) {
+     Write-Host "    CertificateRevocationListUrl Format Validation Test"
+     $pattern = '^http:\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])\/[^\/]+\.[^\/]+$'
+     $crlURLCheckPass = $false
+     if ($ca.CertificateRevocationListUrl -match $pattern) {
         Write-Host "      Passed" -ForegroundColor Green
         $crlURLCheckPass = $true
-    } elseif ($ca.CertificateRevocationListUrl -match '^https:\/\/') {
+     } elseif ($ca.CertificateRevocationListUrl -match '^https:\/\/') {
         Write-Host "     HTTPS is not allowed" -ForegroundColor Red
     } else {
         Write-Host "     Invalid CDP URL" -ForegroundColor Red
@@ -166,29 +174,68 @@ foreach ($ca in $trustedCAs) {
 
 # Validate CA Cert AKI--> SKI Mapping Logic
 Write-Host "    Certificate Trust Chain Test"
-If($null -eq $FullCert.'Authority-Key-Identifier') {
-    If($ca.IsRootAuthority) {
-        Write-Host "      CA is configured as a Root Authority --> No Parent Issuer expected in store"
-    } Else {
-        Write-Host "      CA is not configured as a Root CA but certificate does not contain Authority Key Identifier(AKI) --> This is unexpected" -ForegroundColor Red
-    }
-} ## Close Without AKI 
-Else {
-    Write-Host "    Expected Issuer Subject Key Identifier (SKI) : $($FullCert.'Authority-Key-Identifier')"
-    If(!$ca.IsRootAuthority) {
-        If($FullCert.'Authority-Key-Identifier' -eq $FullCert.'Subject-Key-Identifier') {
-            Write-Host "      CA Authority Key Identifier (AKI) and Subject Key Identifier(SKI) are the same and Cert is not marked as isRootAuthority --> This is unexpected"
-        } Else {
-            If($trustedCAs.IssuerSKI -notcontains $FullCert.'Authority-Key-Identifier') {
-                Write-Host "      Certificate issuer $($FullCert.'Authority-Key-Identifier') is not present in the tenant certificate store" -ForegroundColor Red
-            } Else {
-                Write-Host "      Passed" -ForegroundColor Green
-            }
+If(($FullCert | Get-Member).name -contains 'Authority-Key-Identifier')
+ {
+  If([string]::IsNullOrEmpty($FullCert.'Authority-Key-Identifier')) ##Check for Empty AKI
+  {
+    If($ca.IsRootAuthority)
+        {
+         Write-Host "      CA is configured as a Root Authority --> No Parent Issuer expected in store(AKI Present and Empty)"
         }
-    } Else {
-        Write-Host "      CA is configured as a Root Authority --> No Parent Issuer expected in store"
-    }
-    }## Close with AKI and the AKI --> SKI Validation Test
+   Else {
+        Write-Host "      CA is not configured as a Root CA and certificate contains empty Authority Key Identifier(AKI) --> This is unexpected" -ForegroundColor Red
+        }
+  } ## Close Present but Empty AKI 
+Else ## Non-Empty AKI
+  {
+    Write-Host "    Expected Issuer Subject Key Identifier (SKI) : $($FullCert.'Authority-Key-Identifier')"
+    If(!$ca.IsRootAuthority) 
+        {
+         If($FullCert.'Authority-Key-Identifier' -eq $FullCert.'Subject-Key-Identifier')
+            {
+             Write-Host "      CA Authority Key Identifier (AKI) and Subject Key Identifier(SKI) are the same and Cert is not marked as isRootAuthority --> This is unexpected"
+            } 
+         Else
+            { ## Non-Empty AKI Non-Root
+             If($trustedCAs.IssuerSKI -notcontains $FullCert.'Authority-Key-Identifier') 
+                {
+                 Write-Host "      Certificate issuer $($FullCert.'Authority-Key-Identifier') is not present in the tenant certificate store" -ForegroundColor Red
+                }
+            Else 
+                {
+                 Write-Host "      Passed" -ForegroundColor Green
+                }
+            }
+        } ##Close Non Empty NonRoot    
+    Else 
+        {
+         #Non Empty Root
+         If($FullCert.'Authority-Key-Identifier' -eq $FullCert.'Subject-Key-Identifier') 
+               {
+                 Write-Host "      Passed" -ForegroundColor Green
+               } 
+        elseif([string]::IsNullOrEmpty($FullCert.'Authority-Key-Identifier'))
+            ##Check for Empty AKI
+               {
+                Write-Host "      Passed Certificate issuer is marked as Root and contains empty AKI" -ForegroundColor Green
+               }
+           Else{
+                Write-Host "      Certificate issuer is marked as Root but contains AKI that does not match SKI --> This is unexpected"
+               }
+    }   
+  }##Close Non-Empty AKI
+ }## Close with AKI 
+ else ## Handle No AKI in Cert at all
+     {
+        If($ca.IsRootAuthority) 
+        {
+            Write-Host "      Passed" -ForegroundColor Green
+        } 
+         Else
+        {
+            Write-Host "      CA Certificate is not marked as Root and doesnot contain AKI --> This is unexpected"            
+        }
+     }## Close No AKI
 
     # Dump the CRL file using certutil
     Write-Host "   "Running Certutil commands and parsing output *** Can be Slow for Big CRL *** -ForegroundColor White
@@ -239,6 +286,13 @@ Else {
     } Else {
         Write-Host "      " Cert SKI matches CRL AKI -ForegroundColor Green
     }
+    # Check CRL Time Validity
+    Write-Host "    CRL Time Validity Test"
+    if ($now -lt $crlTU -or $now -gt $crlNU) {
+        Write-Host "    CRL for $($cert.Subject) downloaded from $($ca.CertificateRevocationListUrl) is not yet valid or expired" -ForegroundColor Red
+    } Else {
+        Write-Host "      Passed" -ForegroundColor Green
+    }
 
     # Display CRL Lifetime Information 
     Write-Host "    Additional CRL Information"
@@ -256,6 +310,6 @@ Else {
     Write-Host "      " CRL is valid for $TimeLeft.Days Days $TimeLeft.Hours Hours
     # TODO Verify the CRL signature
 }##ForEach CA
-    }
-}
-Test-MsIdCBATrustStoreConfiguration
+}##Close Process
+}## Close Function
+#Test-MsIdCBATrustStoreConfiguration
