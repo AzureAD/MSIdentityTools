@@ -17,7 +17,7 @@ function Split-MsIdEntitlementManagementConnectedOrganization {
     param(
 
         [Parameter(ValueFromPipeline = $true, ParameterSetName = 'SplitByIdentitySource')]
-        [Microsoft.Graph.PowerShell.Models.MicrosoftGraphConnectedOrganization[]]
+        [object[]]
         # The connected organization.
         ${ConnectedOrganization},
         # Flag to indicate that the output should be split by identity source.
