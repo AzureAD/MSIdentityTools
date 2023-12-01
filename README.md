@@ -7,14 +7,13 @@ The Microsoft Identity Tools PowerShell module provides various tools for perfor
 ## What is contained in the MSIdentityTools module?
 A collection of cmdlets that use the MS Graph SDK PowerShell module to simplify common tasks for administrators of Azure AD tenants.
 
-You can find a description of each cmdlet and it's usage documentation in the repo [wiki](https://github.com/AzureAD/MSIdentityTools/wiki)
-  
+ 
 ## How do I install the module?
  
 The module can be found and installed from the PowerShell gallery at [PowerShell Gallery: MSIdentity Tools](https://www.powershellgallery.com/packages/MSIdentityTools) or can be downloaded from the releases page on this repo.
 
 ## What are the cmdlets in this module?
-
+View the latest list of cmdlets on the [cmdlet summary](../../wiki/Cmdlets) page.
 | Command | Synopsys |
 | --- | --- |
 | [Confirm-MsIdJwtTokenSignature](../../wiki/Confirm-MsIdJwtTokenSignature) | Validate the digital signature for JSON Web Token. |
