@@ -274,14 +274,23 @@ Else ## Non-Empty AKI
     }
 
     ## Shorted CRLDump output for faster parsing
-    $i = 0
-    ForEach($Line in $crldump) {
-        If ($Line -match "CRL Entries:") {
-            $crldump = $crldump[0..$i]
-            break
-        }
-        $i++
-    }
+    ## Removed due to inconsistent certutil output. AKI is sometimes after the CRL Entries
+    #$i = 0
+    #ForEach($Line in $crldump) {
+    #    If ($Line -match "CRL Entries:") {
+    #        $crldump = $crldump[0..$i]
+    #        break
+    #    }
+    #    $i++
+    #}
+    #Clear crl values
+    $crlAKI = $null
+    $crlAKI = $null
+    $crlTU = $null
+    $crlTU = $null
+    $crlNU = $null
+    $crlNU = $null
+    $MatchingCRL = $false
 
     $crlAKI = $crldump -match 'KeyID='
     $crlAKI = $crlAKI -replace '        KeyID=',''
@@ -291,23 +300,35 @@ Else ## Non-Empty AKI
     $crlNU = $crlNU -replace ' NextUpdate: ','' | get-Date
 
     # Verify CRL/CERT AKI Match
+    Write-Host "    CRL AKI matches CA SKI Test"
     If($crlAKI -ne $FullCert.'Subject-Key-Identifier') {
+        If($null -eq $crlAKI)
+        {
+            Write-Host "      Unable to determine CRL AKI from Certutul output" -ForegroundColor Red
+        }
+        else 
+        {
+              
         # Downloaded CRL AKI does not match expected SKI of CA Certificate
         Write-Host "      CRL Authority Key Identifier(AKI) Mismatch" -ForegroundColor Red
         Write-Host "        CRL AKI      : " $crlAKI -ForegroundColor Red
         Write-Host "        Expected AKI : " $FullCert.'Subject-Key-Identifier' -ForegroundColor Red
+        }
 
         ## See if the CRL downloaded AKI matches other CA in Store
         If($trustedCAs.IssuerSKI -contains $crlAKI) {
             $MatchedCA = @()
             $MatchedCA = $trustedCAs | Where-Object {$crlAKI -eq $_.IssuerSki}
             If($MatchedCA) {
-                Write-Host "      Downloaded CRL AKI matches another CA certificate in the trusted store : $($MatchedCA.Issuer)" -ForegroundColor Red
-            }
+                            Write-Host "      Downloaded CRL AKI matches another CA certificate in the trusted store : $($MatchedCA.Issuer) & SKI of $($MatchedCA.IssuerSki)" -ForegroundColor Red
+                           }
         }
     } Else {
+        $MatchingCRL = $true
         Write-Host "      " Cert SKI matches CRL AKI -ForegroundColor Green
     }
+    If($MatchingCRL)
+    {
     # Check CRL Time Validity
     Write-Host "    CRL Time Validity Test"
     if ($now -lt $crlTU -or $now -gt $crlNU) {
@@ -330,6 +351,7 @@ Else ## Non-Empty AKI
     Write-Host "      " CRL expires on $crlNU
     $TimeLeft = New-TimeSpan -Start $now -End $crlNU
     Write-Host "      " CRL is valid for $TimeLeft.Days Days $TimeLeft.Hours Hours
+    }
     # TODO Verify the CRL signature
 }##ForEach CA
 }##Close Process
