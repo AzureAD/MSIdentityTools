@@ -43,37 +43,15 @@ function Test-MsIdCBATrustStoreConfiguration {
             try {
                 $context = Get-MgContext
                 if ($null -eq $context) {
-                                            $UPN = Read-Host "Enter UserPrincipalName"
-                                            $UPNRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                                            
-                                            if ($UPN -match $UPNRegex) 
-                                            {
-                                                #Write-Host "The UPN '$UPN' is in the correct format."
-                                                $AzureEnvs = Get-MgEnvironment
-                                                $CloudName = $null
-                                                $TenantName = $UPN.Split('@')[1]
-                                                $URL = "https://login.microsoftonline.com/$TenantName/v2.0/.well-known/openid-configuration"
-                                                $JSON = Invoke-WebRequest -Uri $URL | ConvertFrom-Json
-                                                $CloudName = ($AzureEnvs | Where-Object{($_.GraphEndpoint -split "//")[1] -eq  $JSON.msgraph_host}).name
-                                                If($CloudName)
-                                                {
-                                                    Connect-MgGraph -Environment $CloudName -NoWelcome
-                                                }else
-                                                {
-                                                    Write-Error "Unable to determine Azure Cloud Environment. Run Connect-MgGraph prior to this Powershell Cmdlet"
-                                                }
-                                            }else 
-                                            {
-                                                Write-Error "The UPN '$UPN' is not in the correct format."
-                                            }               
+                                         Write-Host "Unable to connect to MSGraph. Run Connect-MgGraph prior to this Powershell Cmdlet" -ForegroundColor Red
+                                         Break
                                         }
                 }
             catch {
-                Write-Host Unable to Sign-in to MSGraph -ForegroundColor Red
+                Write-Host "Unable to determine MgContext (Get-MgContext). Resolve issues with Get-MgContext and try again" -ForegroundColor Red
                 Break
             }            
-                
-            
+                           
         }
 
     process {
