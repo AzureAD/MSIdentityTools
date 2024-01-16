@@ -1,14 +1,27 @@
-﻿<#
+<#
 .SYNOPSIS
     Test & report for common mis-configuration issues with the Entra ID Certificate Trust Store
 
+.DESCRIPTION
+    The following is a list of checks performed by this cmdlet.
+
+    * CertificateRevocationListUrl Format Validation Test: Checks for a correctly formatted CRL Distribution Point (CDP) URL
+    * Certificate Time Validity Test: Checks that the CA certificate being evaluated is time valid
+    * CRL Download and Latency Test: Checks to make sure the Certificate Revocation List (CRL) can be downloaded from the configured CRL and that the download completes in less then 12 seconds
+    * CRL Size Test: Checks that the CRL is less then 44MB
+    * Certificate Trust Chain Test: Checks that any certificate that is not marked as a root has its issuer also present in the certificate store.
+    * CRL Authority Test: Checks that the CRL downloaded from the configured CA lists the CA certificate being evaluated as the its authority.
+    * CRL Time Validity Test: Checks that the CRL being evaluated is time valid
+    * Additional CRL Information: This include properties of the tested CRL including thisUpdate(Issued), nextPublish, nextUpdate(Expiry) and amount of time remaining
+
+    This Powershell cmdlet require Windows command line utility Certutil. This cmdlet can only be run from Windows device.
+
+    Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID. It is best to run this script from outside
+    a corporate network on an internet connected Windows device.
+
 .INPUTS
     None
-.NOTES
-    This Powershell cmdlet require Windows command line utility Certutil. This cmdlet can only be run from Windows device.
-    
-    Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID. It is best to run this script from outside
-    a corporate network on an internet connected Windows device.   
+
 .EXAMPLE
     Test-MsIdCBATrustStoreConfiguration
 .LINK
@@ -50,8 +63,7 @@ function Test-MsIdCBATrustStoreConfiguration {
             catch {
                 Write-Host "Unable to determine MgContext (Get-MgContext). Resolve issues with Get-MgContext and try again" -ForegroundColor Red
                 Break
-            }            
-                           
+            }
         }
 
     process {
@@ -61,7 +73,7 @@ $OrgInfo = Get-MgOrganization
 # Get the list of trusted certificate authorities
 $trustedCAs = (Get-MgOrganizationCertificateBasedAuthConfiguration -OrganizationId $OrgInfo.Id).CertificateAuthorities
 
-# Check for a single CA 
+# Check for a single CA
 If($trustedCAs.count -eq 0)
 {
     Write-Host "No Certificate Authorities are present in $($OrgInfo.DisplayName - $($OrgInfo.Id))" -ForegroundColor Red
@@ -75,11 +87,11 @@ foreach ($ca in $trustedCAs) {
     $crldump = $Null
     $crlAKI = $Null
     $crlTU = $Null
-    $crlNU = $null    
+    $crlNU = $null
 
     Write-Host "Processing $($ca.Issuer)"
     ### High Level Check for correctly formatted CDP URL
-    
+
     If($ca.CertificateRevocationListUrl)
     {
      Write-Host "    CertificateRevocationListUrl Format Validation Test"
@@ -132,18 +144,18 @@ foreach ($ca in $trustedCAs) {
 
     # Download the CRL
     $TempDir = [System.IO.Path]::GetTempPath()
-    
+
     If($ca.CertificateRevocationListUrl) {
        Try {
-            $crlDLTime = Measure-Command {Invoke-WebRequest -Uri $ca.CertificateRevocationListUrl -OutFile ($TempDir + "crl.crl")}              
-        } Catch {}    
+            $crlDLTime = Measure-Command {Invoke-WebRequest -Uri $ca.CertificateRevocationListUrl -OutFile ($TempDir + "crl.crl")}
+        } Catch {}
 
         # Check if the CRL was downloaded successfully
         Write-Host "    CRL Download & Latency Test"
         if ($null -eq $crlDLTime) {
             Write-Host "      Failed to download CRL for $($cert.Subject)" -ForegroundColor Red
             continue
-        } Else {     
+        } Else {
             if($crlDLTime.TotalSeconds -gt 12) {
                 Write-Host "      Slow CRL Download (>12 Seconds) for $($cert.Subject)" -ForegroundColor Red
             } Else {
@@ -153,7 +165,7 @@ foreach ($ca in $trustedCAs) {
     } Else {
         Write-Host $cert.Subject is not configured with a CRL - Entra ID will not perform CRL check for this CA -ForegroundColor Yellow
         Continue
-    }   
+    }
 
     ## Check CRL Size
     Write-Host "    CRL Size Test"
@@ -185,35 +197,35 @@ If(($FullCert | Get-Member).name -contains 'Authority-Key-Identifier')
    Else {
         Write-Host "      CA is not configured as a Root CA and certificate contains empty Authority Key Identifier(AKI) --> This is unexpected" -ForegroundColor Red
         }
-  } ## Close Present but Empty AKI 
+  } ## Close Present but Empty AKI
 Else ## Non-Empty AKI
   {
     Write-Host "    Expected Issuer Subject Key Identifier (SKI) : $($FullCert.'Authority-Key-Identifier')"
-    If(!$ca.IsRootAuthority) 
+    If(!$ca.IsRootAuthority)
         {
          If($FullCert.'Authority-Key-Identifier' -eq $FullCert.'Subject-Key-Identifier')
             {
              Write-Host "      CA Authority Key Identifier (AKI) and Subject Key Identifier(SKI) are the same and Cert is not marked as isRootAuthority --> This is unexpected"
-            } 
+            }
          Else
             { ## Non-Empty AKI Non-Root
-             If($trustedCAs.IssuerSKI -notcontains $FullCert.'Authority-Key-Identifier') 
+             If($trustedCAs.IssuerSKI -notcontains $FullCert.'Authority-Key-Identifier')
                 {
                  Write-Host "      Certificate issuer $($FullCert.'Authority-Key-Identifier') is not present in the tenant certificate store" -ForegroundColor Red
                 }
-            Else 
+            Else
                 {
                  Write-Host "      Passed" -ForegroundColor Green
                 }
             }
-        } ##Close Non Empty NonRoot    
-    Else 
+        } ##Close Non Empty NonRoot
+    Else
         {
          #Non Empty Root
-         If($FullCert.'Authority-Key-Identifier' -eq $FullCert.'Subject-Key-Identifier') 
+         If($FullCert.'Authority-Key-Identifier' -eq $FullCert.'Subject-Key-Identifier')
                {
                  Write-Host "      Passed" -ForegroundColor Green
-               } 
+               }
         elseif([string]::IsNullOrEmpty($FullCert.'Authority-Key-Identifier'))
             ##Check for Empty AKI
                {
@@ -222,18 +234,18 @@ Else ## Non-Empty AKI
            Else{
                 Write-Host "      Certificate issuer is marked as Root but contains AKI that does not match SKI --> This is unexpected"
                }
-    }   
+    }
   }##Close Non-Empty AKI
- }## Close with AKI 
+ }## Close with AKI
  else ## Handle No AKI in Cert at all
      {
-        If($ca.IsRootAuthority) 
+        If($ca.IsRootAuthority)
         {
             Write-Host "      Passed" -ForegroundColor Green
-        } 
+        }
          Else
         {
-            Write-Host "      CA Certificate is not marked as Root and doesnot contain AKI --> This is unexpected"            
+            Write-Host "      CA Certificate is not marked as Root and doesnot contain AKI --> This is unexpected"
         }
      }## Close No AKI
 
@@ -315,7 +327,7 @@ Else ## Non-Empty AKI
         Write-Host "      Passed" -ForegroundColor Green
     }
 
-    # Display CRL Lifetime Information 
+    # Display CRL Lifetime Information
     Write-Host "    Additional CRL Information"
     Write-Host "      " CRL was Issued on $crlTU
     If($crlNP)
