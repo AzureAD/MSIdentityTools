@@ -27,7 +27,6 @@ function Export-MsIdAppConsentGrantReport {
     [CmdletBinding(DefaultParameterSetName = 'Download Permissions Table Data',
         SupportsShouldProcess = $true,
         PositionalBinding = $false,
-        HelpUri = 'http://www.microsoft.com/',
         ConfirmImpact = 'Medium')]
     [Alias()]
     [OutputType([String])]
@@ -59,6 +58,8 @@ function Export-MsIdAppConsentGrantReport {
                 $evaluatedData,
                 $Path
             )
+
+            $autoSize = $IsWindows # AutoSize of columns only works on Windows
 
             # Delete the existing output file if it already exists
             $OutputFileExists = Test-Path $Path
@@ -134,23 +135,23 @@ function Export-MsIdAppConsentGrantReport {
 
             $excel = $data | Export-Excel -Path $Path -WorksheetName ConsentGrantData `
                 -PivotTableDefinition $pt `
-                -AutoSize `
+                -AutoSize:$autoSize `
                 -Activate `
                 -HideSheet "None" `
                 -UnHideSheet "PermissionsByPrivilegeRating" `
                 -PassThru
 
-            # Create temporary Excel file and add High Privilege Users sheet
-            $xlTempFile = "$env:TEMP\ImportExcelTempFile.xlsx"
-            Remove-Item $xlTempFile -ErrorAction Ignore
-            $exceltemp = $highprivilegeusers | Export-Excel $xlTempFile -PassThru
-            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeUsers -CopySource $exceltemp.Workbook.Worksheets["Sheet1"]
 
-            # Create temporary Excel file and add High Privilege Apps sheet
-            $xlTempFile = "$env:TEMP\ImportExcelTempFile.xlsx"
+            $xlTempFile = [system.io.path]::GetTempFileName()
+            $exceltemp = $highprivilegeusers | Export-Excel $xlTempFile -PassThru
+            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeUsers -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] | Out-Null
             Remove-Item $xlTempFile -ErrorAction Ignore
+
+            Write-Verbose "Create temporary Excel file and add High Privilege Apps sheet"
+            $xlTempFile = [system.io.path]::GetTempFileName()
             $exceltemp = $highprivilegeapps | Export-Excel $xlTempFile -PassThru
-            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeApps -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] -Activate
+            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeApps -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] -Activate | Out-Null
+            Remove-Item $xlTempFile -ErrorAction Ignore
 
             $sheet = $excel.Workbook.Worksheets["ConsentGrantData"]
             Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "High" -ForeGroundColor White -BackgroundColor Red -Bold -Underline
@@ -159,11 +160,11 @@ function Export-MsIdAppConsentGrantReport {
 
             $sheet = $excel.Workbook.Worksheets["HighPrivilegeUsers"]
             Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForeGroundColor White -BackgroundColor Red -Bold -Underline
-            Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize
+            Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
             $sheet = $excel.Workbook.Worksheets["HighPrivilegeApps"]
             Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForeGroundColor White -BackgroundColor Red -Bold -Underline
-            Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize
+            Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
             Export-Excel -ExcelPackage $excel | Out-Null
             Write-Verbose ("Excel workbook {0}" -f $ExcelWorkbookPath)
@@ -207,6 +208,7 @@ function Export-MsIdAppConsentGrantReport {
 
             # Get all ServicePrincipal objects and add to the cache
             Write-Verbose "Retrieving ServicePrincipal objects..."
+            Write-Progress -Activity "Retrieving ServicePrincipal objects..."
             $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo"  -All:$true
             $Oauth2PermGrants = @()
 
@@ -216,7 +218,7 @@ function Export-MsIdAppConsentGrantReport {
                 $spPermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $sp.Id -All:$true
                 $Oauth2PermGrants += $spPermGrants
                 $count++
-                Write-Progress -Activity "Retrieving Delegate Permissions..." -Status "Cached: $count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
+                Write-Progress -Activity "Retrieving Delegate Permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
             }
 
             # Get one page of User objects and add to the cache
@@ -275,7 +277,7 @@ function Export-MsIdAppConsentGrantReport {
             }
 
             # Iterate over all ServicePrincipal objects and get app permissions
-            Write-Progress -Activity "Processing Application Permission Grants..."
+            Write-Progress -Activity "Retrieving Application Permissions..."
             $servicePrincipals | ForEach-Object {
                 $sp = $_
 
@@ -402,8 +404,7 @@ function Export-MsIdAppConsentGrantReport {
 
             if ($null -like $PermissionsTableCsvPath) {
                 # Create hash table of permissions and permissions privilege
-                Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/AzureAD/MSIdentityTools/main/assets/aadconsentgrantpermissiontable.csv' -OutFile .\aadconsentgrantpermissiontable.csv
-                $permstable = Import-Csv .\aadconsentgrantpermissiontable.csv -Delimiter ','
+                $permstable = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/AzureAD/MSIdentityTools/main/assets/aadconsentgrantpermissiontable.csv' | ConvertFrom-Csv -Delimiter ','
             }
             else {
 
@@ -411,7 +412,6 @@ function Export-MsIdAppConsentGrantReport {
             }
 
             Write-Output $permstable
-
         }
 
         if ("ExcelWorkbook" -eq $ReportOutputType) {
