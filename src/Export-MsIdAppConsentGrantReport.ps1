@@ -179,16 +179,6 @@ function Export-MsIdAppConsentGrantReport {
             $script:ObjectByObjectClassId = @{}
             $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
 
-            # Get Microsoft Graph SPN, appRoles, appRolesAssignedTo and generate hashtable for quick lookups
-            $servicePrincipalMsGraph = Get-MgServicePrincipal -Filter "AppId eq '00000003-0000-0000-c000-000000000000'"
-            [array] $msGraphAppRoles = $servicePrincipalMsGraph.AppRoles
-            $script:msGraphAppRolesHashTableId = $msGraphAppRoles | Group-Object -Property Id -AsHashTable
-
-            # Get Azure AD Graph SPN, appRoles, appRolesAssignedTo and generate hashtable for quick lookups
-            $servicePrincipalAadGraph = Get-MgServicePrincipal -Filter "AppId eq '00000002-0000-0000-c000-000000000000'"
-            [array] $aadGraphAppRoles = $servicePrincipalAadGraph.AppRoles
-            $script:aadGraphAppRolesHashTableId = $aadGraphAppRoles | Group-Object -Property Id -AsHashTable
-
             # Function to add an object to the cache
             function CacheObject($Object) {
                 if ($Object) {
@@ -205,7 +195,7 @@ function Export-MsIdAppConsentGrantReport {
                 if (-not $script:ObjectByObjectId.ContainsKey($ObjectId)) {
                     Write-Verbose ("Querying Entra ID for object '{0}'" -f $ObjectId)
                     try {
-                        $object = (Get-MgDirectoryObjectById -Ids $ObjectId).AdditionalProperties
+                        $object = (Get-MgDirectoryObjectById -Ids $ObjectId)
                         CacheObject -Object $object
                     }
                     catch {
@@ -217,7 +207,7 @@ function Export-MsIdAppConsentGrantReport {
 
             # Get all ServicePrincipal objects and add to the cache
             Write-Verbose "Retrieving ServicePrincipal objects..."
-            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo" -All:$true
+            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo"  -All:$true
             $Oauth2PermGrants = @()
 
             $count = 0
@@ -226,7 +216,7 @@ function Export-MsIdAppConsentGrantReport {
                 $spPermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $sp.Id -All:$true
                 $Oauth2PermGrants += $spPermGrants
                 $count++
-                Write-Progress -Activity "Caching Objects from Entra ID . . ." -Status "Cached: $count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
+                Write-Progress -Activity "Retrieving Delegate Permissions..." -Status "Cached: $count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
             }
 
             # Get one page of User objects and add to the cache
@@ -234,7 +224,7 @@ function Export-MsIdAppConsentGrantReport {
             Get-MgUser -Top $PrecacheSize | ForEach-Object { CacheObject -Object $_ }
 
             # Get all existing OAuth2 permission grants, get the client, resource and scope details
-            Write-Progress -Activity "Processing Delegated Permission Grants..."
+            Write-Progress -Activity "Processing Delegate Permission Grants..."
             foreach ($grant in $Oauth2PermGrants) {
                 if ($grant.Scope) {
                     $grant.Scope.Split(" ") | Where-Object { $_ } | ForEach-Object {
@@ -286,8 +276,8 @@ function Export-MsIdAppConsentGrantReport {
 
             # Iterate over all ServicePrincipal objects and get app permissions
             Write-Progress -Activity "Processing Application Permission Grants..."
-            $script:ObjectByObjectClassId['MicrosoftGraphServicePrincipal'].GetEnumerator() | ForEach-Object {
-                $sp = $_.Value
+            $servicePrincipals | ForEach-Object {
+                $sp = $_
 
                 Get-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $sp.Id -All:$true `
                 | Where-Object { $_.PrincipalType -eq "ServicePrincipal" } | ForEach-Object {
@@ -305,13 +295,11 @@ function Export-MsIdAppConsentGrantReport {
                     }
 
                     $resource = GetObjectByObjectId -ObjectId $assignment.ResourceId
-                    #$appRole = $resource.AppRoles | Where-Object { $_.Id -eq $assignment.Id }
 
-                    # Lookup appRole for MS Graph
-                    $appRole = $script:msGraphAppRolesHashTableId["$($assignment.AppRoleId)"]
-                    if ($null -eq $appRole) {
-                        # Lookup appRole for AAD Graph
-                        $appRole = $script:aadGraphAppRolesHashTableId["$($assignment.AppRoleId)"]
+                    $appRole = $sp.AppRoles | Where-Object { $_.id -eq $assignment.AppRoleId }
+                    $appRoleValue = $assignment.AppRoleId
+                    if($null -ne $appRole.value -and $appRole.Value -ne "") {
+                        $appRoleValue = $appRole.Value
                     }
 
                     New-Object PSObject -Property ([ordered]@{
@@ -322,8 +310,8 @@ function Export-MsIdAppConsentGrantReport {
                             "ResourceObjectIdFilter"       = $grant.ResourceId
                             "ResourceDisplayName"          = $resource.DisplayName
                             "ResourceDisplayNameFilter"    = $resource.DisplayName
-                            "Permission"                   = $appRole.Value
-                            "PermissionFilter"             = $appRole.Value
+                            "Permission"                   = $appRoleValue
+                            "PermissionFilter"             = $appRoleValue
                             "ConsentTypeFilter"            = "Application"
                             "MicrosoftRegisteredClientApp" = $MicrosoftRegisteredClientApp
                         })
