@@ -68,13 +68,12 @@ function Export-MsIdAppConsentGrantReport {
             $highprivilegeobjects = $evaluatedData | Where-Object { $_.Privilege -eq "High" }
             $highprivilegeobjects | ForEach-Object {
                 $userAssignmentRequired = @()
-                $userAssignments = @()
                 $userAssignmentsCount = @()
-                $userAssignmentRequired = Get-MgServicePrincipal -ServicePrincipalId $_.ClientObjectId
+                $clientId = $_.ClientObjectId
+                $userAssignmentRequired = $script:ServicePrincipals | Where-Object { $_.Id -eq  $clientId}
 
                 if ($userAssignmentRequired.AppRoleAssignmentRequired -eq $true) {
-                    $userAssignments = Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $_.ClientObjectId -All
-                    $userAssignmentsCount = $userAssignments.count
+                    $userAssignmentsCount = $userAssignmentRequired.UsersAssignedCount
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name UsersAssignedCount -Value $userAssignmentsCount
                 }
                 elseif ($userAssignmentRequired.AppRoleAssignmentRequired -eq $false) {
@@ -135,7 +134,7 @@ function Export-MsIdAppConsentGrantReport {
 
 
             $styles = @(
-                New-ExcelStyle -BackgroundColor LightBlue -Bold -Range "A1:P1"
+                New-ExcelStyle -FontColor White -BackgroundColor Purple -Bold -Range "A1:P1"
                 New-ExcelStyle -FontColor Blue -Underline "E2:E1048576"
                 New-ExcelStyle -FontColor Blue -Underline "M2:M1048576"
             )
@@ -147,54 +146,54 @@ function Export-MsIdAppConsentGrantReport {
                 -Activate `
                 -Style $styles `
                 -HideSheet "None" `
-                -UnHideSheet "PermissionsByPrivilegeRating" `
                 -PassThru
 
-            $ws = $excel.Workbook.Worksheets["ConsentGrantData"]
-            $ws.Column(1).Width = 20 #PermissionType
-            $ws.Column(2).Hidden = $true #ConsentTypeFilter
-            $ws.Column(3).Hidden = $true #ClientObjectId
-            $ws.Column(4).Hidden = $true #AppId
-            $ws.Column(5).Width = 40 #ClientDisplayName
-            $ws.Column(6).Hidden = $true #ResourceObjectId
-            $ws.Column(7).Hidden = $true #ResourceObjectIdFilter
-            $ws.Column(8).Width = 40 #ResourceDisplayName
-            $ws.Column(9).Hidden = $true #ResourceDisplayNameFilter
-            $ws.Column(10).Width = 40 #Permission
-            $ws.Column(11).Hidden = $true #PermissionFilter
-            $ws.Column(12).Hidden = $true #PrincipalObjectId
-            $ws.Column(13).Width = 23 #PrincipalDisplayName
-            $ws.Column(14).Width = 13 #MicrosoftApp
-            $ws.Column(15).Hidden = $true #AppOwnerOrganizationId
-            $ws.Column(16).Width = 15 #Privilege
-            $ws.Column(17).Hidden = $true #PrivilegeFilter
+            $style = New-ExcelStyle -FontColor White -BackgroundColor Purple -Bold -Range "A1:B1"
+            $highprivilegeusers | Export-Excel -ExcelPackage $excel -WorksheetName HighPrivilegeUsers -Style $style -PassThru | Out-Null
+            $style = New-ExcelStyle -FontColor White -BackgroundColor Purple -Bold -Range "A1:D1"
+            $highprivilegeapps | Export-Excel -ExcelPackage $excel -WorksheetName HighPrivilegeApps -Style $style  -PassThru | Out-Null
 
-            $xlTempFile = [system.io.path]::GetTempFileName()
-            $exceltemp = $highprivilegeusers | Export-Excel $xlTempFile -PassThru
-            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeUsers -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] | Out-Null
-            Remove-Item $xlTempFile -ErrorAction Ignore
+            $consentSheet = $excel.Workbook.Worksheets["ConsentGrantData"]
+            $consentSheet.Column(1).Width = 20 #PermissionType
+            $consentSheet.Column(2).Hidden = $true #ConsentTypeFilter
+            $consentSheet.Column(3).Hidden = $true #ClientObjectId
+            $consentSheet.Column(4).Hidden = $true #AppId
+            $consentSheet.Column(5).Width = 40 #ClientDisplayName
+            $consentSheet.Column(6).Hidden = $true #ResourceObjectId
+            $consentSheet.Column(7).Hidden = $true #ResourceObjectIdFilter
+            $consentSheet.Column(8).Width = 40 #ResourceDisplayName
+            $consentSheet.Column(9).Hidden = $true #ResourceDisplayNameFilter
+            $consentSheet.Column(10).Width = 40 #Permission
+            $consentSheet.Column(11).Hidden = $true #PermissionFilter
+            $consentSheet.Column(12).Hidden = $true #PrincipalObjectId
+            $consentSheet.Column(13).Width = 23 #PrincipalDisplayName
+            $consentSheet.Column(14).Width = 13 #MicrosoftApp
+            $consentSheet.Column(15).Hidden = $true #AppOwnerOrganizationId
+            $consentSheet.Column(16).Width = 15 #Privilege
+            $consentSheet.Column(17).Hidden = $true #PrivilegeFilter
 
-            Write-Verbose "Create temporary Excel file and add High Privilege Apps sheet"
-            $xlTempFile = [system.io.path]::GetTempFileName()
-            $exceltemp = $highprivilegeapps | Export-Excel $xlTempFile -PassThru
-            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeApps -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] | Out-Null
-            Remove-Item $xlTempFile -ErrorAction Ignore
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor LightGreen
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Unranked" -ForegroundColor Black -BackgroundColor LightGray
 
-            $sheet = $excel.Workbook.Worksheets["ConsentGrantData"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor LightGreen
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Unranked" -ForegroundColor Black -BackgroundColor LightGray
+            $userSheet = $excel.Workbook.Worksheets["HighPrivilegeUsers"]
+            Add-ConditionalFormatting -Worksheet $userSheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Set-ExcelRange -Worksheet $userSheet -Range A1:C1048576
+            $userSheet.Column(1).Width = 45 #PrincipalDisplayName
+            $userSheet.Column(2).Width = 20 #Privilege
 
-            $sheet = $excel.Workbook.Worksheets["HighPrivilegeUsers"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
-            Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
-            $sheet = $excel.Workbook.Worksheets["HighPrivilegeApps"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
-            Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
+            $appSheet = $excel.Workbook.Worksheets["HighPrivilegeApps"]
+            Add-ConditionalFormatting -Worksheet $appSheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Set-ExcelRange -Worksheet $appSheet -Range A1:C1048576 -AutoSize:$autoSize
+            $appSheet.Column(1).Width = 45 #ClientDisplayName
+            $appSheet.Column(2).Width = 20 #Privilege
+            $appSheet.Column(3).Width = 20 #UsersAssignedCount
+            $appSheet.Column(4).Width = 15 #MicrosoftApp
 
-            Export-Excel -ExcelPackage $excel | Out-Null
+            Export-Excel -ExcelPackage $excel
+            Remove-Worksheet -Path $Path -WorksheetName "Sheet1" | Out-Null
             Write-Verbose ("Excel workbook {0}" -f $ExcelWorkbookPath)
         }
 
@@ -315,18 +314,19 @@ function Export-MsIdAppConsentGrantReport {
                 return $permissions
             }
 
-            function GetApplicationPermissions($allServicePrincipals) {
+            function GetApplicationPermissions() {
                 $count = 0
                 $permissions = @()
 
-                foreach ($client in $servicePrincipals) {
+                foreach ($client in $script:ServicePrincipals) {
                     $count++
                     Write-Progress -Activity "Retrieving application permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
 
                     $isMicrosoftApp = IsMicrosoftApp -AppOwnerOrganizationId $client.AppOwnerOrganizationId
                     $spLink = GetServicePrincipalLink -spId $client.Id -appId $client.AppId -name $client.DisplayName
                     $appPermissions = Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $client.Id -All
-
+                    $userAssignmentsCount = $appPermissions.Count
+                    Add-Member -InputObject $client -MemberType NoteProperty -Name UsersAssignedCount -Value $userAssignmentsCount
                     foreach ($grant in $appPermissions) {
 
                         # Look up the related SP to get the name of the permission from the AppRoleId GUID
@@ -364,11 +364,11 @@ function Export-MsIdAppConsentGrantReport {
             Write-Progress -Activity "Retrieving service principal count..."
             $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
             Write-Progress -Activity "Retrieving $count service principals." -Status "This can take some time please wait..."
-            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo" -Top 100 #-All
+            $script:ServicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo" -All
 
             $allPermissions = @()
-            $allPermissions += GetApplicationPermissions $servicePrincipals
-            $allPermissions += GetDelegatePermissions $servicePrincipals
+            $allPermissions += GetApplicationPermissions
+            $allPermissions += GetDelegatePermissions
 
 
             return $allPermissions
