@@ -86,12 +86,12 @@ function Export-MsIdAppConsentGrantReport {
                 Write-Progress -Activity "Counting users assigned to high privilege apps . . ." -Status "Apps Counted: $count of $($highprivilegeobjects.Count)" -PercentComplete (($count / $highprivilegeobjects.Count) * 100)
             }
             $highprivilegeusers = $highprivilegeobjects | Where-Object { $null -ne $_.PrincipalObjectId } | Select-Object PrincipalDisplayName, Privilege | Sort-Object PrincipalDisplayName -Unique
-            $highprivilegeapps = $highprivilegeobjects | Select-Object ClientDisplayName, Privilege, UsersAssignedCount, MicrosoftRegisteredClientApp | Sort-Object ClientDisplayName -Unique | Sort-Object UsersAssignedCount -Descending
+            $highprivilegeapps = $highprivilegeobjects | Select-Object ClientDisplayName, Privilege, UsersAssignedCount, MicrosoftApp | Sort-Object ClientDisplayName -Unique | Sort-Object UsersAssignedCount -Descending
 
             # Pivot table by user
             $pt = New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
                 -PivotTableName "PermissionsByUser" `
-                -PivotFilter PrivilegeFilter, PermissionFilter, ResourceDisplayNameFilter, ConsentTypeFilter, ClientDisplayName, MicrosoftRegisteredClientApp `
+                -PivotFilter PrivilegeFilter, PermissionFilter, ResourceDisplayNameFilter, ConsentTypeFilter, ClientDisplayName, MicrosoftApp `
                 -PivotRows PrincipalDisplayName `
                 -PivotColumns Privilege, PermissionType `
                 -PivotData @{Permission = 'Count' } `
@@ -106,7 +106,7 @@ function Export-MsIdAppConsentGrantReport {
             # Pivot table by resource
             $pt += New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
                 -PivotTableName "PermissionsByResource" `
-                -PivotFilter PrivilegeFilter, ResourceDisplayNameFilter, ConsentTypeFilter, PrincipalDisplayName, MicrosoftRegisteredClientApp `
+                -PivotFilter PrivilegeFilter, ResourceDisplayNameFilter, ConsentTypeFilter, PrincipalDisplayName, MicrosoftApp `
                 -PivotRows ResourceDisplayName, PermissionFilter `
                 -PivotColumns Privilege, PermissionType `
                 -PivotData @{Permission = 'Count' } `
@@ -121,7 +121,7 @@ function Export-MsIdAppConsentGrantReport {
             # Pivot table by privilege rating
             $pt += New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
                 -PivotTableName "PermissionsByPrivilegeRating" `
-                -PivotFilter PrivilegeFilter, PermissionFilter, ResourceDisplayNameFilter, ConsentTypeFilter, PrincipalDisplayName, MicrosoftRegisteredClientApp `
+                -PivotFilter PrivilegeFilter, PermissionFilter, ResourceDisplayNameFilter, ConsentTypeFilter, PrincipalDisplayName, MicrosoftApp `
                 -PivotRows Privilege, ResourceDisplayName `
                 -PivotColumns PermissionType `
                 -PivotData @{Permission = 'Count' } `
@@ -134,19 +134,40 @@ function Export-MsIdAppConsentGrantReport {
                 -WarningAction SilentlyContinue
 
 
-            $style = New-ExcelStyle -BackgroundColor LightBlue -Bold -Range "A1:Q1"
+            $styles = @(
+                New-ExcelStyle -BackgroundColor LightBlue -Bold -Range "A1:P1"
+                New-ExcelStyle -FontColor Blue -Underline "E2:E1048576"
+                New-ExcelStyle -FontColor Blue -Underline "M2:M1048576"
+            )
 
             $excel = $data | Export-Excel -Path $Path -WorksheetName ConsentGrantData `
                 -PivotTableDefinition $pt `
                 -FreezeTopRow `
                 -AutoFilter `
-                -AutoSize:$autoSize `
                 -Activate `
-                -Style $style `
+                -Style $styles `
                 -HideSheet "None" `
                 -UnHideSheet "PermissionsByPrivilegeRating" `
                 -PassThru
 
+            $ws = $excel.Workbook.Worksheets["ConsentGrantData"]
+            $ws.Column(1).Width = 20 #PermissionType
+            $ws.Column(2).Hidden = $true #ConsentTypeFilter
+            $ws.Column(3).Hidden = $true #ClientObjectId
+            $ws.Column(4).Hidden = $true #AppId
+            $ws.Column(5).Width = 40 #ClientDisplayName
+            $ws.Column(6).Hidden = $true #ResourceObjectId
+            $ws.Column(7).Hidden = $true #ResourceObjectIdFilter
+            $ws.Column(8).Width = 40 #ResourceDisplayName
+            $ws.Column(9).Hidden = $true #ResourceDisplayNameFilter
+            $ws.Column(10).Width = 40 #Permission
+            $ws.Column(11).Hidden = $true #PermissionFilter
+            $ws.Column(12).Hidden = $true #PrincipalObjectId
+            $ws.Column(13).Width = 23 #PrincipalDisplayName
+            $ws.Column(14).Width = 13 #MicrosoftApp
+            $ws.Column(15).Hidden = $true #AppOwnerOrganizationId
+            $ws.Column(16).Width = 15 #Privilege
+            $ws.Column(17).Hidden = $true #PrivilegeFilter
 
             $xlTempFile = [system.io.path]::GetTempFileName()
             $exceltemp = $highprivilegeusers | Export-Excel $xlTempFile -PassThru
@@ -156,20 +177,21 @@ function Export-MsIdAppConsentGrantReport {
             Write-Verbose "Create temporary Excel file and add High Privilege Apps sheet"
             $xlTempFile = [system.io.path]::GetTempFileName()
             $exceltemp = $highprivilegeapps | Export-Excel $xlTempFile -PassThru
-            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeApps -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] -Activate | Out-Null
+            Add-Worksheet -ExcelPackage $excel -WorksheetName HighPrivilegeApps -CopySource $exceltemp.Workbook.Worksheets["Sheet1"] | Out-Null
             Remove-Item $xlTempFile -ErrorAction Ignore
 
             $sheet = $excel.Workbook.Worksheets["ConsentGrantData"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red -Bold -Underline
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange -Bold -Underline
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor Yellow -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor LightGreen
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Unranked" -ForegroundColor Black -BackgroundColor LightGray
 
             $sheet = $excel.Workbook.Worksheets["HighPrivilegeUsers"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
             Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
             $sheet = $excel.Workbook.Worksheets["HighPrivilegeApps"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
             Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
             Export-Excel -ExcelPackage $excel | Out-Null
@@ -178,9 +200,7 @@ function Export-MsIdAppConsentGrantReport {
 
         function Get-MSCloudIdConsentGrantList {
             [CmdletBinding()]
-            param(
-                [int] $PrecacheSize = 999
-            )
+            param()
             # An in-memory cache of objects by {object ID} andy by {object class, object ID}
             $script:ObjectByObjectId = @{}
             $script:ObjectByObjectClassId = @{}
@@ -212,6 +232,33 @@ function Export-MsIdAppConsentGrantReport {
                 return $script:ObjectByObjectId[$ObjectId]
             }
 
+            function IsMicrosoftApp($AppOwnerOrganizationId) {
+                if ($AppOwnerOrganizationId -in $script:KnownMSTenantIds) {
+                    return "Yes"
+                }
+                else {
+                    return "No"
+                }
+            }
+
+            function GetServicePrincipalLink($spId, $appId, $name) {
+                if ($null -eq $spId -or $null -eq $appId -or $null -eq $name) {
+                    return $null
+                }
+                else {
+                    return "=HYPERLINK(`"https://entra.microsoft.com/#view/Microsoft_AAD_IAM/ManagedAppMenuBlade/~/Overview/objectId/$($spId)/appId/$($appId)/preferredSingleSignOnMode~/null/servicePrincipalType/Application/fromNav/`",`"$($name)`")"
+                }
+            }
+
+            function GetUserLink($userId, $name) {
+                if ($null -eq $userId -or $null -eq $name) {
+                    return $null
+                }
+                else {
+                    return "=HYPERLINK(`"https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/$($userId)/hidePreviewBanner~/true`",`"$($name)`")"
+                }
+            }
+
             function GetDelegatePermissions($allServicePrincipals) {
                 $count = 0
                 $permissions = @()
@@ -219,8 +266,8 @@ function Export-MsIdAppConsentGrantReport {
                     $count++
                     Write-Progress -Activity "Retrieving delegate permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
 
-                    $isMicrosoftApp = $client.AppOwnerOrganizationId -in $script:KnownMSTenantIds
-
+                    $isMicrosoftApp = IsMicrosoftApp -AppOwnerOrganizationId $client.AppOwnerOrganizationId
+                    $spLink = GetServicePrincipalLink -spId $client.Id -appId $client.AppId -name $client.DisplayName
                     $oAuth2PermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $client.Id -All
 
                     foreach ($grant in $oAuth2PermGrants) {
@@ -244,20 +291,21 @@ function Export-MsIdAppConsentGrantReport {
                                 }
 
                                 $permissions += New-Object PSObject -Property ([ordered]@{
-                                        "PermissionType"               = $simplifiedgranttype
-                                        "ConsentTypeFilter"            = $simplifiedgranttype
-                                        "ClientObjectId"               = $client.Id
-                                        "ClientDisplayName"            = $client.DisplayName
-                                        "ResourceObjectId"             = $grant.ResourceId
-                                        "ResourceObjectIdFilter"       = $grant.ResourceId
-                                        "ResourceDisplayName"          = $resource.AdditionalProperties.displayName
-                                        "ResourceDisplayNameFilter"    = $resource.AdditionalProperties.displayName
-                                        "Permission"                   = $scope
-                                        "PermissionFilter"             = $scope
-                                        "PrincipalObjectId"            = $grant.PrincipalId
-                                        "PrincipalDisplayName"         = $principalDisplayName
-                                        "MicrosoftRegisteredClientApp" = $isMicrosoftApp
-                                        "AppOwnerOrganizationId"       = $client.AppOwnerOrganizationId
+                                        "PermissionType"            = $simplifiedgranttype
+                                        "ConsentTypeFilter"         = $simplifiedgranttype
+                                        "ClientObjectId"            = $client.Id
+                                        "AppId"                     = $client.AppId
+                                        "ClientDisplayName"         = $spLink
+                                        "ResourceObjectId"          = $grant.ResourceId
+                                        "ResourceObjectIdFilter"    = $grant.ResourceId
+                                        "ResourceDisplayName"       = $resource.AdditionalProperties.displayName
+                                        "ResourceDisplayNameFilter" = $resource.AdditionalProperties.displayName
+                                        "Permission"                = $scope
+                                        "PermissionFilter"          = $scope
+                                        "PrincipalObjectId"         = $grant.PrincipalId
+                                        "PrincipalDisplayName"      = GetUserLink -userId $grant.PrincipalId -name $principalDisplayName
+                                        "MicrosoftApp"              = $isMicrosoftApp
+                                        "AppOwnerOrganizationId"    = $client.AppOwnerOrganizationId
                                     })
                             }
                         }
@@ -275,32 +323,35 @@ function Export-MsIdAppConsentGrantReport {
                     $count++
                     Write-Progress -Activity "Retrieving application permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
 
-                    $isMicrosoftApp = $client.AppOwnerOrganizationId -in $script:KnownMSTenantIds
-
+                    $isMicrosoftApp = IsMicrosoftApp -AppOwnerOrganizationId $client.AppOwnerOrganizationId
+                    $spLink = GetServicePrincipalLink -spId $client.Id -appId $client.AppId -name $client.DisplayName
                     $appPermissions = Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $client.Id -All
 
                     foreach ($grant in $appPermissions) {
 
                         # Look up the related SP to get the name of the permission from the AppRoleId GUID
-                        $appRole = $sp.AppRoles | Where-Object { $_.id -eq $grant.AppRoleId } | Select-Object -First 1
-                        $appRoleValue = $assignment.AppRoleId
+                        $appRole = $servicePrincipals.AppRoles | Where-Object { $_.id -eq $grant.AppRoleId } | Select-Object -First 1
+                        $appRoleValue = $grant.AppRoleId
                         if ($null -ne $appRole.value -and $appRole.Value -ne "") {
                             $appRoleValue = $appRole.Value
                         }
 
                         $permissions += New-Object PSObject -Property ([ordered]@{
-                                "PermissionType"               = "Application"
-                                "ClientObjectId"               = $client.PrincipalId
-                                "ClientDisplayName"            = $client.DisplayName
-                                "ResourceObjectId"             = $grant.ResourceId
-                                "ResourceObjectIdFilter"       = $grant.ResourceId
-                                "ResourceDisplayName"          = $grant.ResourceDisplayName
-                                "ResourceDisplayNameFilter"    = $grant.ResourceDisplayName
-                                "Permission"                   = $appRoleValue
-                                "PermissionFilter"             = $appRoleValue
-                                "ConsentTypeFilter"            = "Application"
-                                "MicrosoftRegisteredClientApp" = $isMicrosoftApp
-                                "AppOwnerOrganizationId"       = $client.AppOwnerOrganizationId
+                                "PermissionType"            = "Application"
+                                "ConsentTypeFilter"         = "Application"
+                                "ClientObjectId"            = $client.Id
+                                "AppId"                     = $client.AppId
+                                "ClientDisplayName"         = $spLink
+                                "ResourceObjectId"          = $grant.ResourceId
+                                "ResourceObjectIdFilter"    = $grant.ResourceId
+                                "ResourceDisplayName"       = $grant.ResourceDisplayName
+                                "ResourceDisplayNameFilter" = $grant.ResourceDisplayName
+                                "Permission"                = $appRoleValue
+                                "PermissionFilter"          = $appRoleValue
+                                "PrincipalObjectId"         = ""
+                                "PrincipalDisplayName"      = ""
+                                "MicrosoftApp"              = $isMicrosoftApp
+                                "AppOwnerOrganizationId"    = $client.AppOwnerOrganizationId
                             })
                     }
                 }
@@ -313,15 +364,12 @@ function Export-MsIdAppConsentGrantReport {
             Write-Progress -Activity "Retrieving service principal count..."
             $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
             Write-Progress -Activity "Retrieving $count service principals." -Status "This can take some time please wait..."
-            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo" -All
-
-            # # Get one page of User objects and add to the cache
-            # Write-Verbose "Retrieving User objects..."
-            # Get-MgUser -Top $PrecacheSize | ForEach-Object { CacheObject -Object $_ }
+            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo" -Top 100 #-All
 
             $allPermissions = @()
-            $allPermissions += GetDelegatePermissions $servicePrincipals
             $allPermissions += GetApplicationPermissions $servicePrincipals
+            $allPermissions += GetDelegatePermissions $servicePrincipals
+
 
             return $allPermissions
         }
