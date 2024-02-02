@@ -351,3 +351,5 @@ MigrationBackup/
 
 # Ignore generated wiki pages
 .wiki/
+
+temp/

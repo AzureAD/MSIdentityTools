@@ -3,10 +3,7 @@
     Lists and categorizes privilege for delegated permissions (OAuth2PermissionGrants) and application permissions (AppRoleAssignments).
 
 .DESCRIPTION
-    This cmdlet requires the ImportExcel module to be installed.
-    This module can be installed from the PowerShell Gallery with the following command:
-
-    Install-Module ImportExcel
+    This cmdlet requires the `ImportExcel` module to be installed if you use the `-ReportOutputType ExcelWorkbook` parameter.
 
 .EXAMPLE
     PS > Install-Module ImportExcel
@@ -76,7 +73,7 @@ function Export-MsIdAppConsentGrantReport {
                 $userAssignmentRequired = Get-MgServicePrincipal -ServicePrincipalId $_.ClientObjectId
 
                 if ($userAssignmentRequired.AppRoleAssignmentRequired -eq $true) {
-                    $userAssignments = Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $_.ClientObjectId -All:$true
+                    $userAssignments = Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $_.ClientObjectId -All
                     $userAssignmentsCount = $userAssignments.count
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name UsersAssignedCount -Value $userAssignmentsCount
                 }
@@ -92,7 +89,7 @@ function Export-MsIdAppConsentGrantReport {
             $highprivilegeapps = $highprivilegeobjects | Select-Object ClientDisplayName, Privilege, UsersAssignedCount, MicrosoftRegisteredClientApp | Sort-Object ClientDisplayName -Unique | Sort-Object UsersAssignedCount -Descending
 
             # Pivot table by user
-            $pt = New-PivotTableDefinition -SourceWorkSheet ConsentGrantData `
+            $pt = New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
                 -PivotTableName "PermissionsByUser" `
                 -PivotFilter PrivilegeFilter, PermissionFilter, ResourceDisplayNameFilter, ConsentTypeFilter, ClientDisplayName, MicrosoftRegisteredClientApp `
                 -PivotRows PrincipalDisplayName `
@@ -103,10 +100,11 @@ function Export-MsIdAppConsentGrantReport {
                 -ChartHeight 800 `
                 -ChartWidth 1200 `
                 -ChartRow 4 `
-                -ChartColumn 14
+                -ChartColumn 14 `
+                -WarningAction SilentlyContinue
 
             # Pivot table by resource
-            $pt += New-PivotTableDefinition -SourceWorkSheet ConsentGrantData `
+            $pt += New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
                 -PivotTableName "PermissionsByResource" `
                 -PivotFilter PrivilegeFilter, ResourceDisplayNameFilter, ConsentTypeFilter, PrincipalDisplayName, MicrosoftRegisteredClientApp `
                 -PivotRows ResourceDisplayName, PermissionFilter `
@@ -117,10 +115,11 @@ function Export-MsIdAppConsentGrantReport {
                 -ChartHeight 800 `
                 -ChartWidth 1200 `
                 -ChartRow 4 `
-                -ChartColumn 14
+                -ChartColumn 14 `
+                -WarningAction SilentlyContinue
 
             # Pivot table by privilege rating
-            $pt += New-PivotTableDefinition -SourceWorkSheet ConsentGrantData `
+            $pt += New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
                 -PivotTableName "PermissionsByPrivilegeRating" `
                 -PivotFilter PrivilegeFilter, PermissionFilter, ResourceDisplayNameFilter, ConsentTypeFilter, PrincipalDisplayName, MicrosoftRegisteredClientApp `
                 -PivotRows Privilege, ResourceDisplayName `
@@ -131,12 +130,19 @@ function Export-MsIdAppConsentGrantReport {
                 -ChartHeight 800 `
                 -ChartWidth 1200 `
                 -ChartRow 4 `
-                -ChartColumn 5
+                -ChartColumn 5 `
+                -WarningAction SilentlyContinue
+
+
+            $style = New-ExcelStyle -BackgroundColor LightBlue -Bold -Range "A1:Q1"
 
             $excel = $data | Export-Excel -Path $Path -WorksheetName ConsentGrantData `
                 -PivotTableDefinition $pt `
+                -FreezeTopRow `
+                -AutoFilter `
                 -AutoSize:$autoSize `
                 -Activate `
+                -Style $style `
                 -HideSheet "None" `
                 -UnHideSheet "PermissionsByPrivilegeRating" `
                 -PassThru
@@ -154,16 +160,16 @@ function Export-MsIdAppConsentGrantReport {
             Remove-Item $xlTempFile -ErrorAction Ignore
 
             $sheet = $excel.Workbook.Worksheets["ConsentGrantData"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "High" -ForeGroundColor White -BackgroundColor Red -Bold -Underline
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "Medium" -ForeGroundColor Black -BackgroundColor Orange -Bold -Underline
-            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "Low" -ForeGroundColor Black -BackgroundColor Yellow -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "A1:N1048576" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor Yellow -Bold -Underline
 
             $sheet = $excel.Workbook.Worksheets["HighPrivilegeUsers"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForeGroundColor White -BackgroundColor Red -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red -Bold -Underline
             Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
             $sheet = $excel.Workbook.Worksheets["HighPrivilegeApps"]
-            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForeGroundColor White -BackgroundColor Red -Bold -Underline
+            Add-ConditionalFormatting -Worksheet $sheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red -Bold -Underline
             Set-ExcelRange -Worksheet $sheet -Range A1:C1048576 -AutoSize:$autoSize
 
             Export-Excel -ExcelPackage $excel | Out-Null
@@ -206,121 +212,118 @@ function Export-MsIdAppConsentGrantReport {
                 return $script:ObjectByObjectId[$ObjectId]
             }
 
-            # Get all ServicePrincipal objects and add to the cache
-            Write-Verbose "Retrieving ServicePrincipal objects..."
-            Write-Progress -Activity "Retrieving ServicePrincipal objects..."
-            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo"  -All:$true
-            $Oauth2PermGrants = @()
+            function GetDelegatePermissions($allServicePrincipals) {
+                $count = 0
+                $permissions = @()
+                foreach ($client in $servicePrincipals) {
+                    $count++
+                    Write-Progress -Activity "Retrieving delegate permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
 
-            $count = 0
-            foreach ($sp in $servicePrincipals) {
-                CacheObject -Object $sp
-                $spPermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $sp.Id -All:$true
-                $Oauth2PermGrants += $spPermGrants
-                $count++
-                Write-Progress -Activity "Retrieving Delegate Permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
+                    $isMicrosoftApp = $client.AppOwnerOrganizationId -in $script:KnownMSTenantIds
+
+                    $oAuth2PermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $client.Id -All
+
+                    foreach ($grant in $oAuth2PermGrants) {
+                        if ($grant.Scope) {
+                            $grant.Scope.Split(" ") | Where-Object { $_ } | ForEach-Object {
+                                $scope = $_
+                                $resource = GetObjectByObjectId -ObjectId $grant.ResourceId
+                                $principalDisplayName = ""
+
+                                if ($grant.PrincipalId) {
+                                    $principal = GetObjectByObjectId -ObjectId $grant.PrincipalId
+                                    $principalDisplayName = $principal.AdditionalProperties.displayName
+                                }
+
+                                $simplifiedgranttype = ""
+                                if ($grant.ConsentType -eq "AllPrincipals") {
+                                    $simplifiedgranttype = "Delegated-AllPrincipals"
+                                }
+                                elseif ($grant.ConsentType -eq "Principal") {
+                                    $simplifiedgranttype = "Delegated-Principal"
+                                }
+
+                                $permissions += New-Object PSObject -Property ([ordered]@{
+                                        "PermissionType"               = $simplifiedgranttype
+                                        "ConsentTypeFilter"            = $simplifiedgranttype
+                                        "ClientObjectId"               = $client.Id
+                                        "ClientDisplayName"            = $client.DisplayName
+                                        "ResourceObjectId"             = $grant.ResourceId
+                                        "ResourceObjectIdFilter"       = $grant.ResourceId
+                                        "ResourceDisplayName"          = $resource.AdditionalProperties.displayName
+                                        "ResourceDisplayNameFilter"    = $resource.AdditionalProperties.displayName
+                                        "Permission"                   = $scope
+                                        "PermissionFilter"             = $scope
+                                        "PrincipalObjectId"            = $grant.PrincipalId
+                                        "PrincipalDisplayName"         = $principalDisplayName
+                                        "MicrosoftRegisteredClientApp" = $isMicrosoftApp
+                                        "AppOwnerOrganizationId"       = $client.AppOwnerOrganizationId
+                                    })
+                            }
+                        }
+                    }
+
+                }
+                return $permissions
             }
 
-            # Get one page of User objects and add to the cache
-            Write-Verbose "Retrieving User objects..."
-            Get-MgUser -Top $PrecacheSize | ForEach-Object { CacheObject -Object $_ }
+            function GetApplicationPermissions($allServicePrincipals) {
+                $count = 0
+                $permissions = @()
 
-            # Get all existing OAuth2 permission grants, get the client, resource and scope details
-            Write-Progress -Activity "Processing Delegate Permission Grants..."
-            foreach ($grant in $Oauth2PermGrants) {
-                if ($grant.Scope) {
-                    $grant.Scope.Split(" ") | Where-Object { $_ } | ForEach-Object {
-                        $scope = $_
-                        $client = GetObjectByObjectId -ObjectId $grant.ClientId
+                foreach ($client in $servicePrincipals) {
+                    $count++
+                    Write-Progress -Activity "Retrieving application permissions..." -Status "$count of $($servicePrincipals.Count)" -PercentComplete (($count / $servicePrincipals.Count) * 100)
 
-                        # Determine if the object comes from the Microsoft Services tenant, and flag it if true
-                        $MicrosoftRegisteredClientApp = @()
-                        $appOwnerTenantId = Get-ObjectPropertyValue $client 'AppOwnerTenantId'
-                        if ($appOwnerTenantId -in $script:KnownMSTenantIds) {
-                            $MicrosoftRegisteredClientApp = $true
-                        }
-                        else {
-                            $MicrosoftRegisteredClientApp = $false
-                        }
+                    $isMicrosoftApp = $client.AppOwnerOrganizationId -in $script:KnownMSTenantIds
 
-                        $resource = GetObjectByObjectId -ObjectId $grant.ResourceId
-                        $principalDisplayName = ""
-                        if ($grant.PrincipalId) {
-                            $principal = GetObjectByObjectId -ObjectId $grant.PrincipalId
-                            $principalDisplayName = $principal.DisplayName
+                    $appPermissions = Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $client.Id -All
+
+                    foreach ($grant in $appPermissions) {
+
+                        # Look up the related SP to get the name of the permission from the AppRoleId GUID
+                        $appRole = $sp.AppRoles | Where-Object { $_.id -eq $grant.AppRoleId } | Select-Object -First 1
+                        $appRoleValue = $assignment.AppRoleId
+                        if ($null -ne $appRole.value -and $appRole.Value -ne "") {
+                            $appRoleValue = $appRole.Value
                         }
 
-                        if ($grant.ConsentType -eq "AllPrincipals") {
-                            $simplifiedgranttype = "Delegated-AllPrincipals"
-                        }
-                        elseif ($grant.ConsentType -eq "Principal") {
-                            $simplifiedgranttype = "Delegated-Principal"
-                        }
-
-                        New-Object PSObject -Property ([ordered]@{
-                                "PermissionType"               = $simplifiedgranttype
-                                "ConsentTypeFilter"            = $simplifiedgranttype
-                                "ClientObjectId"               = $grant.ClientId
+                        $permissions += New-Object PSObject -Property ([ordered]@{
+                                "PermissionType"               = "Application"
+                                "ClientObjectId"               = $client.PrincipalId
                                 "ClientDisplayName"            = $client.DisplayName
                                 "ResourceObjectId"             = $grant.ResourceId
                                 "ResourceObjectIdFilter"       = $grant.ResourceId
-                                "ResourceDisplayName"          = $resource.DisplayName
-                                "ResourceDisplayNameFilter"    = $resource.DisplayName
-                                "Permission"                   = $scope
-                                "PermissionFilter"             = $scope
-                                "PrincipalObjectId"            = $grant.PrincipalId
-                                "PrincipalDisplayName"         = $principalDisplayName
-                                "MicrosoftRegisteredClientApp" = $MicrosoftRegisteredClientApp
+                                "ResourceDisplayName"          = $grant.ResourceDisplayName
+                                "ResourceDisplayNameFilter"    = $grant.ResourceDisplayName
+                                "Permission"                   = $appRoleValue
+                                "PermissionFilter"             = $appRoleValue
+                                "ConsentTypeFilter"            = "Application"
+                                "MicrosoftRegisteredClientApp" = $isMicrosoftApp
+                                "AppOwnerOrganizationId"       = $client.AppOwnerOrganizationId
                             })
                     }
                 }
+                return $permissions
             }
 
-            # Iterate over all ServicePrincipal objects and get app permissions
-            Write-Progress -Activity "Retrieving Application Permissions..."
-            $servicePrincipals | ForEach-Object {
-                $sp = $_
+            # Get all ServicePrincipal objects and add to the cache
+            Write-Verbose "Retrieving ServicePrincipal objects..."
 
-                Get-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $sp.Id -All:$true `
-                | Where-Object { $_.PrincipalType -eq "ServicePrincipal" } | ForEach-Object {
-                    $assignment = $_
+            Write-Progress -Activity "Retrieving service principal count..."
+            $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
+            Write-Progress -Activity "Retrieving $count service principals." -Status "This can take some time please wait..."
+            $servicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignedTo" -All
 
-                    $client = GetObjectByObjectId -ObjectId $assignment.PrincipalId
+            # # Get one page of User objects and add to the cache
+            # Write-Verbose "Retrieving User objects..."
+            # Get-MgUser -Top $PrecacheSize | ForEach-Object { CacheObject -Object $_ }
 
-                    # Determine if the object comes from the Microsoft Services tenant, and flag it if true
-                    $MicrosoftRegisteredClientApp = @()
-                    if ($client.AppOwnerTenantId -in $script:KnownMSTenantIds) {
-                        $MicrosoftRegisteredClientApp = $true
-                    }
-                    else {
-                        $MicrosoftRegisteredClientApp = $false
-                    }
+            $allPermissions = @()
+            $allPermissions += GetDelegatePermissions $servicePrincipals
+            $allPermissions += GetApplicationPermissions $servicePrincipals
 
-                    $resource = GetObjectByObjectId -ObjectId $assignment.ResourceId
-
-                    $appRole = $sp.AppRoles | Where-Object { $_.id -eq $assignment.AppRoleId }
-                    $appRoleValue = $assignment.AppRoleId
-                    if($null -ne $appRole.value -and $appRole.Value -ne "") {
-                        $appRoleValue = $appRole.Value
-                    }
-
-                    New-Object PSObject -Property ([ordered]@{
-                            "PermissionType"               = "Application"
-                            "ClientObjectId"               = $assignment.PrincipalId
-                            "ClientDisplayName"            = $client.DisplayName
-                            "ResourceObjectId"             = $assignment.ResourceId
-                            "ResourceObjectIdFilter"       = $grant.ResourceId
-                            "ResourceDisplayName"          = $resource.DisplayName
-                            "ResourceDisplayNameFilter"    = $resource.DisplayName
-                            "Permission"                   = $appRoleValue
-                            "PermissionFilter"             = $appRoleValue
-                            "ConsentTypeFilter"            = "Application"
-                            "MicrosoftRegisteredClientApp" = $MicrosoftRegisteredClientApp
-                        })
-                }
-            }
-
-
+            return $allPermissions
         }
 
         function EvaluateConsentGrants {
@@ -328,13 +331,10 @@ function Export-MsIdAppConsentGrantReport {
                 $data
             )
 
-
             # Process Privilege for gathered data
             $count = 0
             $data | ForEach-Object {
-
                 try {
-
                     $count++
                     Write-Progress -Activity "Processing privilege for each permission . . ." -Status "Processed: $count of $($data.Count)" -PercentComplete (($count / $data.Count) * 100)
 
@@ -385,7 +385,6 @@ function Export-MsIdAppConsentGrantReport {
                     # Add the privilege to the current object
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name Privilege -Value $privilege
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name PrivilegeFilter -Value $privilege
-                    Add-Member -InputObject $_ -MemberType NoteProperty -Name Reason -Value $reason
                 }
                 catch {
                     Write-Error "Error Processing Permission for $_"
@@ -394,10 +393,9 @@ function Export-MsIdAppConsentGrantReport {
                     Write-Output $_
                 }
             }
-
         }
 
-        function loadPermisionsTable {
+        function GetPermissionsTable {
             param (
                 $PermissionsTableCsvPath
             )
@@ -417,34 +415,27 @@ function Export-MsIdAppConsentGrantReport {
         if ("ExcelWorkbook" -eq $ReportOutputType) {
             # Determine if the ImportExcel module is installed since the parameter was included
             if ($null -eq (Get-Module -Name ImportExcel -ListAvailable)) {
-                throw "The ImportExcel module is not installed.   This is used to export the results to an Excel worksheet.  Please install the ImportExcel Module before using this parameter or run without this parameter."
+                throw "The ImportExcel module is not installed. This is used to export the results to an Excel worksheet. Please install the ImportExcel Module before using this parameter or run without this parameter."
             }
         }
-
     }
     process {
-
-        $permstable = loadPermisionsTable -PermissionsTableCsvPath $PermissionsTableCsvPath
+        $permstable = GetPermissionsTable -PermissionsTableCsvPath $PermissionsTableCsvPath
 
         Write-Verbose "Retrieving Permission Grants from Entra ID..."
         $data = Get-MSCloudIdConsentGrantList
         if ($null -ne $data) {
             $evaluatedData = EvaluateConsentGrants -data $data
         }
-
     }
     end {
-
         if ("ExcelWorkbook" -eq $ReportOutputType) {
-
             Write-Verbose "Generating Excel Workbook at $ExcelWorkbookPath"
             GenerateExcelReport -evaluatedData $evaluatedData -Path $ExcelWorkbookPath
-
         }
         else {
             Write-Output $evaluatedData
         }
-
         Set-StrictMode -Version Latest
     }
 }
