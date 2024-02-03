@@ -26,7 +26,7 @@
 .EXAMPLE
     PS > Export-MsIdAppConsentGrantReport -ExcelWorkbookPath .\report.xlsx -ThrottleLimit 5
 
-    Increase the throttle limit to speed things up or reduce if you are getting throttling errors. Default is 10
+    Increase the throttle limit to speed things up or reduce if you are getting throttling errors. Default is 20
 
 #>
 function Export-MsIdAppConsentGrantReport {
@@ -48,9 +48,9 @@ function Export-MsIdAppConsentGrantReport {
         [string]
         $PermissionsTableCsvPath,
 
-        # The number of parallel threads to use when calling the Microsoft Graph API. Default is 10.
+        # The number of parallel threads to use when calling the Microsoft Graph API. Default is 20.
         [int]
-        $ThrottleLimit = 10
+        $ThrottleLimit = 20
     )
 
     $script:ObjectByObjectId = @{} # Cache for all directory objects
@@ -80,12 +80,14 @@ function Export-MsIdAppConsentGrantReport {
             if ("ExcelWorkbook" -eq $ReportOutputType) {
                 Write-Verbose "Generating Excel workbook at $ExcelWorkbookPath"
 
+                WriteMainProgress Complete -Status "Saving report..." -ForceRefresh
                 GenerateExcelReport -AppConsentsWithRisk $appConsentsWithRisk -Path $ExcelWorkbookPath
             }
             else {
+                WriteMainProgress Complete -Status "Finishing up" -ForceRefresh
                 Write-Output $appConsentsWithRisk
             }
-            WriteMainProgress Complete -Status "Finishing up..."
+
         }
         else {
             throw "An error occurred while retrieving app consent grants. Please try again."
@@ -96,9 +98,9 @@ function Export-MsIdAppConsentGrantReport {
         # Get all ServicePrincipal objects and add to the cache
         Write-Verbose "Retrieving ServicePrincipal objects..."
 
-        WriteMainProgress ServicePrincipal -Status "This can take some time..."
+        WriteMainProgress ServicePrincipal -Status "This can take some time..." -ForceRefresh
         $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
-        WriteMainProgress ServicePrincipal -ChildPercent 5 -Status "Retrieving $count service principals. This can take some time..."
+        WriteMainProgress ServicePrincipal -ChildPercent 5 -Status "Retrieving $count service principals. This can take some time..." -ForceRefresh
         Start-Sleep -Milliseconds 500 #Allow message to update
         $servicePrincipalProps = "id,appId,appOwnerOrganizationId,displayName,appRoles"
         $script:ServicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignments" -Select $servicePrincipalProps -All -PageSize 999
@@ -211,7 +213,7 @@ function Export-MsIdAppConsentGrantReport {
         $spList = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
         $spListFailed = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
 
-        WriteMainProgress DelegatePerm -Status "Downloading all delegate permissions..."
+        WriteMainProgress DownloadDelegatePerm -Status "Downloading all delegate permissions..." -ForceRefresh
         Write-Verbose "Downloading all delegate permissions using $ThrottleLimit threads"
 
         $job = $script:servicePrincipals | ForEach-Object -AsJob -ThrottleLimit $ThrottleLimit -Parallel {
@@ -236,7 +238,18 @@ function Export-MsIdAppConsentGrantReport {
         }
 
         while ($job.State -eq 'Running') {
-            WriteMainProgress DelegatePerm -Status "[$($spList.Count) of $($servicePrincipals.Count)]"
+            $count = $spList.Count
+            if ($count -eq 0) {
+                Start-Sleep -Seconds 1
+            }
+            else {
+                $totalCount = $servicePrincipals.Count
+                # get the last item by index
+                $lastSp = $servicePrincipals[$count]
+
+                $delPercent = (($count / $totalCount) * 100)
+                WriteMainProgress DownloadDelegatePerm -Status "[$count of $totalCount] $($lastSp.DisplayName)" -ChildPercent $delPercent -ForceRefresh
+            }
         }
 
         if ($spListFailed.Count -gt 0) {
@@ -253,7 +266,7 @@ function Export-MsIdAppConsentGrantReport {
 
             $count++
             $delPercent = (($count / $totalCount) * 100)
-            WriteMainProgress DelegatePerm -status "[$count of $($totalCount)] $($client.DisplayName)" -childPercent $delPercent
+            WriteMainProgress ProcessDelegatePerm -status "[$count of $($totalCount)] $($client.DisplayName)" -childPercent $delPercent
             Write-Verbose "Processing delegate permissions for $($client.DisplayName)"
 
             $isMicrosoftApp = IsMicrosoftApp -AppOwnerOrganizationId $client.AppOwnerOrganizationId
@@ -301,65 +314,22 @@ function Export-MsIdAppConsentGrantReport {
                 }
             }
         }
-
-        # $count = 0
-        # foreach ($client in $servicePrincipals) {
-        #     $count++
-        #     $delPercent = (($count / $servicePrincipals.Count) * 100)
-        #     WriteMainProgress DelegatePerm -status "[$count of $($servicePrincipals.Count)] $($client.DisplayName)" -childPercent $delPercent
-
-        #     $isMicrosoftApp = IsMicrosoftApp -AppOwnerOrganizationId $client.AppOwnerOrganizationId
-        #     $spLink = GetServicePrincipalLink -spId $client.Id -appId $client.AppId -name $client.DisplayName
-        #     $oAuth2PermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $client.Id -All -PageSize 999
-
-        #     foreach ($grant in $oAuth2PermGrants) {
-        #         if ($grant.Scope) {
-        #             $grant.Scope.Split(" ") | Where-Object { $_ } | ForEach-Object {
-        #                 $scope = $_
-        #                 $resource = GetObjectByObjectId -ObjectId $grant.ResourceId
-        #                 $principalDisplayName = ""
-
-        #                 if ($grant.PrincipalId) {
-        #                     $principal = GetObjectByObjectId -ObjectId $grant.PrincipalId
-        #                     $principalDisplayName = $principal.AdditionalProperties.displayName
-        #                 }
-
-        #                 $simplifiedgranttype = ""
-        #                 if ($grant.ConsentType -eq "AllPrincipals") {
-        #                     $simplifiedgranttype = "Delegated-AllPrincipals"
-        #                 }
-        #                 elseif ($grant.ConsentType -eq "Principal") {
-        #                     $simplifiedgranttype = "Delegated-Principal"
-        #                 }
-
-        #                 $permissions += New-Object PSObject -Property ([ordered]@{
-        #                         "PermissionType"            = $simplifiedgranttype
-        #                         "ConsentTypeFilter"         = $simplifiedgranttype
-        #                         "ClientObjectId"            = $client.Id
-        #                         "AppId"                     = $client.AppId
-        #                         "ClientDisplayName"         = $spLink
-        #                         "ResourceObjectId"          = $grant.ResourceId
-        #                         "ResourceObjectIdFilter"    = $grant.ResourceId
-        #                         "ResourceDisplayName"       = $resource.AdditionalProperties.displayName
-        #                         "ResourceDisplayNameFilter" = $resource.AdditionalProperties.displayName
-        #                         "Permission"                = GetScopeLink $scope
-        #                         "PermissionFilter"          = $scope
-        #                         "PrincipalObjectId"         = $grant.PrincipalId
-        #                         "PrincipalDisplayName"      = GetUserLink -userId $grant.PrincipalId -name $principalDisplayName
-        #                         "MicrosoftApp"              = $isMicrosoftApp
-        #                         "AppOwnerOrganizationId"    = $client.AppOwnerOrganizationId
-        #                     })
-        #             }
-        #         }
-        #     }
-        # }
         return $permissions
     }
 
     function AddConsentRisk ($AppConsents) {
 
         $permstable = GetPermissionsTable -PermissionsTableCsvPath $PermissionsTableCsvPath
+        $permsHash = @{}
 
+        foreach ($perm in $permstable) {
+            $key = $perm.Type + $perm.Permission
+            $permsHash[$key] = $perm
+            if ($perm.permission -Match ".") {
+                $key = $perm.Type + $perm.Permission.Split(".")[0]
+                $permsHash[$key] = $perm
+            }
+        }
         # Process Privilege for gathered data
         $count = 0
         $AppConsents | ForEach-Object {
@@ -370,7 +340,7 @@ function Export-MsIdAppConsentGrantReport {
             WriteMainProgress GenerateExcel -Status "[$count of $($AppConsents.Count)] $($consent.PermissionFilter)" -ChildPercent (($count / $AppConsents.Count) * 100)
             $scope = $consent.PermissionFilter
             $type = ""
-            if ($consent.PermissionType -eq "Delegated-AllPrincipals" -or "Delegated-Principal") {
+            if ($consent.PermissionType -eq "Delegated-AllPrincipals" -or $consent.PermissionType -eq "Delegated-Principal") {
                 $type = "Delegated"
             }
             elseif ($consent.PermissionType -eq "Application") {
@@ -378,30 +348,27 @@ function Export-MsIdAppConsentGrantReport {
             }
 
             # Check permission table for an exact match
-            $privilege = $null
-            $scoperoot = @()
             Write-Debug ("Permission Scope: $Scope")
 
             $scoperoot = $scope.Split(".")[0]
 
-            $test = Get-ObjectPropertyValue ($permstable | Where-Object { $_.Permission -eq "$scoperoot" -and $_.Type -eq $type }) 'Privilege' # checking if there is a matching root in the CSV
-            $privilege = Get-ObjectPropertyValue ($permstable | Where-Object { $_.Permission -eq "$scope" -and $_.Type -eq $type }) 'Privilege' # Checking for an exact match
-
             $risk = "Unranked"
             # Search for matching root level permission if there was no exact match
-            if (!$privilege -and $test) {
-                # No exact match, but there is a root match
-                $risk = ($permstable | Where-Object { $_.Permission -eq "$scoperoot" -and $_.Type -eq $type }).Privilege
+            if ($permsHash.ContainsKey($type + $scope)) {
+                # Exact match e.g. Application.Read.All
+                $risk = $permsHash[$type + $scope].Privilege
             }
-            elseif (!$privilege -and !$test -and $type -eq "Application" -and $scope -like "*Write*") {
+            elseif ($permsHash.ContainsKey($type + $scoperoot)) {
+                #Matches top level e.g. Application.
+                $risk = $permsHash[$type + $scoperoot].Privilege
+            }
+            elseif ($type -eq "Application") {
                 # Application permissions without exact or root matches with write scope
-                $risk = "High"
-            }
-            elseif (!$privilege -and !$test -and $type -eq "Application" -and $scope -notlike "*Write*") {
-                # Application permissions without exact or root matches without write scope
                 $risk = "Medium"
+                if ($scope -like "*Write*") {
+                    $risk = "High"
+                }
             }
-
             # Add the privilege to the current object
             Add-Member -InputObject $_ -MemberType NoteProperty -Name Privilege -Value $risk
             Add-Member -InputObject $_ -MemberType NoteProperty -Name PrivilegeFilter -Value $risk
@@ -427,24 +394,29 @@ function Export-MsIdAppConsentGrantReport {
 
     function WriteMainProgress(
         # The current step of the overal generation
-        [ValidateSet("ServicePrincipal", "AppPerm", "DelegatePerm", "GenerateExcel", "Complete")]
+        [ValidateSet("ServicePrincipal", "AppPerm", "DownloadDelegatePerm", "ProcessDelegatePerm", "GenerateExcel", "Complete")]
         $MainStep,
         $Status = "Processing...",
         # The percentage of completion within the child step
-        $ChildPercent) {
+        $ChildPercent,
+        [switch]$ForceRefresh) {
         $percent = 0
         switch ($MainStep) {
             "ServicePrincipal" {
                 $percent = GetNextPercent $ChildPercent 2 10
-                $activity = "Retrieving service principals"
+                $activity = "Downloading service principals"
             }
             "AppPerm" {
                 $percent = GetNextPercent $ChildPercent 10 50
-                $activity = "Retrieving application permissions"
+                $activity = "Downloading application permissions"
             }
-            "DelegatePerm" {
-                $percent = GetNextPercent $ChildPercent 50 90
-                $activity = "Retrieving delegate permissions"
+            "DownloadDelegatePerm" {
+                $percent = GetNextPercent $ChildPercent 50 75
+                $activity = "Downloading delegate permissions"
+            }
+            "ProcessDelegatePerm" {
+                $percent = GetNextPercent $ChildPercent 75 90
+                $activity = "Processing delegate permissions"
             }
             "GenerateExcel" {
                 $percent = GetNextPercent $ChildPercent 90 99
@@ -456,6 +428,9 @@ function Export-MsIdAppConsentGrantReport {
             }
         }
 
+        if ($ForceRefresh.IsPresent) {
+            Start-Sleep -Milliseconds 250
+        }
         Write-Progress -Id 0 -Activity $activity -PercentComplete $percent -Status $Status
     }
 
@@ -476,7 +451,6 @@ function Export-MsIdAppConsentGrantReport {
             Get-ChildItem $Path | Remove-Item -Force
         }
 
-        $count = 0
         $highprivilegeobjects = $AppConsentsWithRisk | Where-Object { $_.PrivilegeFilter -eq "High" }
         $highprivilegeobjects | ForEach-Object {
             $userAssignmentRequired = @()
@@ -492,9 +466,6 @@ function Export-MsIdAppConsentGrantReport {
                 $userAssignmentsCount = "AllUsers"
                 Add-Member -InputObject $_ -MemberType NoteProperty -Name UsersAssignedCount -Value $userAssignmentsCount
             }
-
-            $count++
-            $genPercent = (($count / $highprivilegeobjects.Count) * 100)
         }
         $highprivilegeusers = $highprivilegeobjects | Where-Object { $null -ne $_.PrincipalObjectId } | Select-Object PrincipalDisplayName, Privilege | Sort-Object PrincipalDisplayName -Unique
         $highprivilegeapps = $highprivilegeobjects | Select-Object ClientDisplayName, Privilege, UsersAssignedCount, MicrosoftApp | Sort-Object ClientDisplayName -Unique | Sort-Object UsersAssignedCount -Descending
