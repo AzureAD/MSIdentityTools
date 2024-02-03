@@ -7,9 +7,7 @@
 
 .EXAMPLE
     PS > Install-Module ImportExcel
-
     PS > Connect-MgGragh -Scopes Application.Read.All
-
     PS > Export-MsIdAppConsentGrantReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
 
     Output a report in Excel format
@@ -52,11 +50,10 @@ function Export-MsIdAppConsentGrantReport {
 
         function GenerateExcelReport {
             param (
-                $evaluatedData,
+                $EvaluatedData,
                 $Path
             )
-
-            $autoSize = $IsWindows # AutoSize of columns only works on Windows
+            $maxRows = $EvaluatedData.Count + 1
 
             # Delete the existing output file if it already exists
             $OutputFileExists = Test-Path $Path
@@ -65,12 +62,12 @@ function Export-MsIdAppConsentGrantReport {
             }
 
             $count = 0
-            $highprivilegeobjects = $evaluatedData | Where-Object { $_.Privilege -eq "High" }
+            $highprivilegeobjects = $EvaluatedData | Where-Object { $_.Privilege -eq "High" }
             $highprivilegeobjects | ForEach-Object {
                 $userAssignmentRequired = @()
                 $userAssignmentsCount = @()
                 $clientId = $_.ClientObjectId
-                $userAssignmentRequired = $script:ServicePrincipals | Where-Object { $_.Id -eq  $clientId}
+                $userAssignmentRequired = $script:ServicePrincipals | Where-Object { $_.Id -eq $clientId }
 
                 if ($userAssignmentRequired.AppRoleAssignmentRequired -eq $true) {
                     $userAssignmentsCount = $userAssignmentRequired.UsersAssignedCount
@@ -135,8 +132,8 @@ function Export-MsIdAppConsentGrantReport {
 
             $styles = @(
                 New-ExcelStyle -FontColor White -BackgroundColor Purple -Bold -Range "A1:P1"
-                New-ExcelStyle -FontColor Blue -Underline "E2:E1048576"
-                New-ExcelStyle -FontColor Blue -Underline "M2:M1048576"
+                New-ExcelStyle -FontColor Blue -Underline "E2:E$maxRows"
+                New-ExcelStyle -FontColor Blue -Underline "M2:M$maxRows"
             )
 
             $excel = $data | Export-Excel -Path $Path -WorksheetName ConsentGrantData `
@@ -151,7 +148,7 @@ function Export-MsIdAppConsentGrantReport {
             $style = New-ExcelStyle -FontColor White -BackgroundColor Purple -Bold -Range "A1:B1"
             $highprivilegeusers | Export-Excel -ExcelPackage $excel -WorksheetName HighPrivilegeUsers -Style $style -PassThru | Out-Null
             $style = New-ExcelStyle -FontColor White -BackgroundColor Purple -Bold -Range "A1:D1"
-            $highprivilegeapps | Export-Excel -ExcelPackage $excel -WorksheetName HighPrivilegeApps -Style $style  -PassThru | Out-Null
+            $highprivilegeapps | Export-Excel -ExcelPackage $excel -WorksheetName HighPrivilegeApps -Style $style -PassThru | Out-Null
 
             $consentSheet = $excel.Workbook.Worksheets["ConsentGrantData"]
             $consentSheet.Column(1).Width = 20 #PermissionType
@@ -172,21 +169,21 @@ function Export-MsIdAppConsentGrantReport {
             $consentSheet.Column(16).Width = 15 #Privilege
             $consentSheet.Column(17).Hidden = $true #PrivilegeFilter
 
-            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
-            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange
-            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor LightGreen
-            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z1048576" -RuleType Equal -ConditionValue "Unranked" -ForegroundColor Black -BackgroundColor LightGray
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z$maxRows" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z$maxRows" -RuleType Equal -ConditionValue "Medium" -ForegroundColor Black -BackgroundColor Orange
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z$maxRows" -RuleType Equal -ConditionValue "Low" -ForegroundColor Black -BackgroundColor LightGreen
+            Add-ConditionalFormatting -Worksheet $consentSheet -Range "A1:Z$maxRows" -RuleType Equal -ConditionValue "Unranked" -ForegroundColor Black -BackgroundColor LightGray
 
             $userSheet = $excel.Workbook.Worksheets["HighPrivilegeUsers"]
-            Add-ConditionalFormatting -Worksheet $userSheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
-            Set-ExcelRange -Worksheet $userSheet -Range A1:C1048576
+            Add-ConditionalFormatting -Worksheet $userSheet -Range "B1:B$maxRows" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Set-ExcelRange -Worksheet $userSheet -Range "A1:C$maxRows"
             $userSheet.Column(1).Width = 45 #PrincipalDisplayName
             $userSheet.Column(2).Width = 20 #Privilege
 
 
             $appSheet = $excel.Workbook.Worksheets["HighPrivilegeApps"]
-            Add-ConditionalFormatting -Worksheet $appSheet -Range "B1:B1048576" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
-            Set-ExcelRange -Worksheet $appSheet -Range A1:C1048576 -AutoSize:$autoSize
+            Add-ConditionalFormatting -Worksheet $appSheet -Range "B1:B$maxRows" -RuleType Equal -ConditionValue "High" -ForegroundColor White -BackgroundColor Red
+            Set-ExcelRange -Worksheet $appSheet -Range "A1:C$maxRows"
             $appSheet.Column(1).Width = 45 #ClientDisplayName
             $appSheet.Column(2).Width = 20 #Privilege
             $appSheet.Column(3).Width = 20 #UsersAssignedCount
@@ -200,7 +197,7 @@ function Export-MsIdAppConsentGrantReport {
         function Get-MSCloudIdConsentGrantList {
             [CmdletBinding()]
             param()
-            # An in-memory cache of objects by {object ID} andy by {object class, object ID}
+            # An in-memory cache of objects by {object ID} and by {object class, object ID}
             $script:ObjectByObjectId = @{}
             $script:ObjectByObjectClassId = @{}
             $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
@@ -358,6 +355,12 @@ function Export-MsIdAppConsentGrantReport {
                 return $permissions
             }
 
+            if ($null -eq (Get-MgContext)) {
+                Connect-MgGraph -Scopes Directory.Read.All
+            }
+            if ($null -eq (Get-MgContext)) {
+                throw "You must connect to the Microsoft Graph before running this command."
+            }
             # Get all ServicePrincipal objects and add to the cache
             Write-Verbose "Retrieving ServicePrincipal objects..."
 
@@ -369,7 +372,6 @@ function Export-MsIdAppConsentGrantReport {
             $allPermissions = @()
             $allPermissions += GetApplicationPermissions
             $allPermissions += GetDelegatePermissions
-
 
             return $allPermissions
         }
@@ -435,7 +437,7 @@ function Export-MsIdAppConsentGrantReport {
                     Add-Member -InputObject $_ -MemberType NoteProperty -Name PrivilegeFilter -Value $privilege
                 }
                 catch {
-                    Write-Error "Error Processing Permission for $_"
+                    Write-Error "Error processing permission for $_"
                 }
                 finally {
                     Write-Output $_
@@ -444,9 +446,7 @@ function Export-MsIdAppConsentGrantReport {
         }
 
         function GetPermissionsTable {
-            param (
-                $PermissionsTableCsvPath
-            )
+            param ($PermissionsTableCsvPath)
 
             if ($null -like $PermissionsTableCsvPath) {
                 # Create hash table of permissions and permissions privilege
@@ -470,19 +470,18 @@ function Export-MsIdAppConsentGrantReport {
     process {
         $permstable = GetPermissionsTable -PermissionsTableCsvPath $PermissionsTableCsvPath
 
-        Write-Verbose "Retrieving Permission Grants from Entra ID..."
         $data = Get-MSCloudIdConsentGrantList
         if ($null -ne $data) {
-            $evaluatedData = EvaluateConsentGrants -data $data
+            $EvaluatedData = EvaluateConsentGrants -data $data
         }
     }
     end {
         if ("ExcelWorkbook" -eq $ReportOutputType) {
-            Write-Verbose "Generating Excel Workbook at $ExcelWorkbookPath"
-            GenerateExcelReport -evaluatedData $evaluatedData -Path $ExcelWorkbookPath
+            Write-Verbose "Generating Excel workbook at $ExcelWorkbookPath"
+            GenerateExcelReport -EvaluatedData $EvaluatedData -Path $ExcelWorkbookPath
         }
         else {
-            Write-Output $evaluatedData
+            Write-Output $EvaluatedData
         }
         Set-StrictMode -Version Latest
     }
