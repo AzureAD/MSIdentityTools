@@ -102,7 +102,7 @@ function Export-MsIdAppConsentGrantReport {
         $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
         WriteMainProgress ServicePrincipal -ChildPercent 5 -Status "Retrieving $count service principals. This can take some time..." -ForceRefresh
         Start-Sleep -Milliseconds 500 #Allow message to update
-        $servicePrincipalProps = "id,appId,appOwnerOrganizationId,displayName,appRoles"
+        $servicePrincipalProps = "id,appId,appOwnerOrganizationId,displayName,appRoles,appRoleAssignmentRequired"
         $script:ServicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignments" -Select $servicePrincipalProps -All -PageSize 999
 
 
@@ -142,18 +142,25 @@ function Export-MsIdAppConsentGrantReport {
     }
 
     function GetScopeLink($scope) {
-        if ("ExcelWorkbook" -ne $ReportOutputType -or [string]::IsNullOrEmpty($scope)) { return $scope }
+        if ("ExcelWorkbook" -ne $ReportOutputType) { return $scope }
+        if ([string]::IsNullOrEmpty($scope)) { return $scope }
         return "=HYPERLINK(`"https://graphpermissions.merill.net/permission/$scope`",`"$scope`")"
     }
 
     function GetServicePrincipalLink($spId, $appId, $name) {
-        if ("ExcelWorkbook" -ne $ReportOutputType -or [string]::IsNullOrEmpty($spId) -or [string]::IsNullOrEmpty($appId) -or [string]::IsNullOrEmpty($name)) { return $name }
+        if ("ExcelWorkbook" -ne $ReportOutputType) { return $name }
+        if ([string]::IsNullOrEmpty($spId) -or [string]::IsNullOrEmpty($appId) -or [string]::IsNullOrEmpty($name)) { return $name }
         return "=HYPERLINK(`"https://entra.microsoft.com/#view/Microsoft_AAD_IAM/ManagedAppMenuBlade/~/Overview/objectId/$($spId)/appId/$($appId)/preferredSingleSignOnMode~/null/servicePrincipalType/Application/fromNav/`",`"$($name)`")"
     }
 
     function GetUserLink($userId, $name) {
-        if ("ExcelWorkbook" -ne $ReportOutputType -or [string]::IsNullOrEmpty($userId) -or [string]::IsNullOrEmpty($name)) { return $null }
-        return "=HYPERLINK(`"https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/$($userId)/hidePreviewBanner~/true`",`"$($name)`")"
+        $returnValue = $name
+        if ([string]::IsNullOrEmpty($name)) { $returnValue = $userId } # If we don't have a name, show the userid
+
+        if ("ExcelWorkbook" -eq $ReportOutputType -and ![string]::IsNullOrEmpty($userId)) { #If Excel and linkable then show name
+            $returnValue = "=HYPERLINK(`"https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/$($userId)/hidePreviewBanner~/true`",`"$($name)`")"
+        }
+        return $returnValue
     }
 
     function GetApplicationPermissions() {
@@ -172,9 +179,7 @@ function Export-MsIdAppConsentGrantReport {
             $spLink = GetServicePrincipalLink -spId $client.Id -appId $client.AppId -name $client.DisplayName
             Write-Verbose "Getting app permissions: [$count of $($servicePrincipals.Count)] $($client.DisplayName)"
 
-            $grantCount = 0
             foreach ($grant in $client.AppRoleAssignments) {
-                $grantCount++
                 # Look up the related SP to get the name of the permission from the AppRoleId GUID
                 $appRole = $servicePrincipals.AppRoles | Where-Object { $_.id -eq $grant.AppRoleId } | Select-Object -First 1
                 $appRoleValue = $grant.AppRoleId
@@ -200,7 +205,6 @@ function Export-MsIdAppConsentGrantReport {
                         "AppOwnerOrganizationId"    = $client.AppOwnerOrganizationId
                     })
             }
-            Add-Member -InputObject $client -MemberType NoteProperty -Name UsersAssignedCount -Value $grantCount
         }
         return $permissions
     }
@@ -451,24 +455,34 @@ function Export-MsIdAppConsentGrantReport {
             Get-ChildItem $Path | Remove-Item -Force
         }
 
+        $servicePrincipalAssignedToList = @{}
         $highprivilegeobjects = $AppConsentsWithRisk | Where-Object { $_.PrivilegeFilter -eq "High" }
         $highprivilegeobjects | ForEach-Object {
-            $userAssignmentRequired = @()
-            $userAssignmentsCount = @()
             $clientId = $_.ClientObjectId
-            $userAssignmentRequired = $script:ServicePrincipals | Where-Object { $_.Id -eq $clientId }
+            if (!$servicePrincipalAssignedToList.ContainsKey($clientId)) {
+                # If we already have the value, don't call graph again
+                $servicePrincipal = $script:ServicePrincipals | Where-Object { $_.Id -eq $clientId }
 
-            if ($userAssignmentRequired.AppRoleAssignmentRequired -eq $true) {
-                $userAssignmentsCount = $userAssignmentRequired.UsersAssignedCount
-                Add-Member -InputObject $_ -MemberType NoteProperty -Name UsersAssignedCount -Value $userAssignmentsCount
+                $assignedTo = ""
+                if ($servicePrincipal.AppRoleAssignmentRequired -eq $true) {
+                    $userAssignments = Get-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $_.ClientObjectId -All:$true
+                    $group = $userAssignments | Group-Object -Property PrincipalType
+                    foreach ($g in $group) {
+                        if ($g.Name -eq "User") {
+                            $assignedTo += "$($g.Count) $($g.Name)s "
+                        }
+                    }
+                }
+                elseif ($servicePrincipal.AppRoleAssignmentRequired -eq $false) {
+                    $assignedTo = "All Users"
+                }
+                $servicePrincipalAssignedToList[$clientId] = $assignedTo
             }
-            elseif ($userAssignmentRequired.AppRoleAssignmentRequired -eq $false) {
-                $userAssignmentsCount = "AllUsers"
-                Add-Member -InputObject $_ -MemberType NoteProperty -Name UsersAssignedCount -Value $userAssignmentsCount
-            }
+            $assignedToValue = $servicePrincipalAssignedToList[$clientId]
+            Add-Member -InputObject $_ -MemberType NoteProperty -Name AssignedTo -Value $assignedToValue
         }
-        $highprivilegeusers = $highprivilegeobjects | Where-Object { $null -ne $_.PrincipalObjectId } | Select-Object PrincipalDisplayName, Privilege | Sort-Object PrincipalDisplayName -Unique
-        $highprivilegeapps = $highprivilegeobjects | Select-Object ClientDisplayName, Privilege, UsersAssignedCount, MicrosoftApp | Sort-Object ClientDisplayName -Unique | Sort-Object UsersAssignedCount -Descending
+        $highprivilegeusers = $highprivilegeobjects | Where-Object { ![string]::IsNullOrEmpty($_.PrincipalObjectId) } | Select-Object PrincipalDisplayName, Privilege | Sort-Object PrincipalDisplayName -Unique
+        $highprivilegeapps = $highprivilegeobjects | Select-Object ClientDisplayName, Privilege, AssignedTo, MicrosoftApp | Sort-Object ClientDisplayName -Unique | Sort-Object AssignedTo -Descending
 
         # Pivot table by user
         $pt = New-PivotTableDefinition -SourceWorksheet ConsentGrantData `
@@ -517,7 +531,7 @@ function Export-MsIdAppConsentGrantReport {
 
 
         $styles = @(
-            New-ExcelStyle -FontColor White -BackgroundColor DarkBlue -Bold -Range "A1:P1" -Height 20 -FontSize 12 -VerticalAlignment Center
+            New-ExcelStyle -FontColor White -BackgroundColor DarkBlue -Bold -Range "A1:R1" -Height 20 -FontSize 12 -VerticalAlignment Center
             New-ExcelStyle -FontColor Blue -Underline -Range "E2:E$maxRows"
             New-ExcelStyle -FontColor Blue -Underline -Range "J2:J$maxRows"
             New-ExcelStyle -FontColor Blue -Underline -Range "M2:M$maxRows"
@@ -561,6 +575,7 @@ function Export-MsIdAppConsentGrantReport {
         $consentSheet.Column(15).Hidden = $true #AppOwnerOrganizationId
         $consentSheet.Column(16).Width = 15 #Privilege
         $consentSheet.Column(17).Hidden = $true #PrivilegeFilter
+        $consentSheet.Column(18).Hidden = $true #AssignedTo
 
         $consentSheet.Column(14).Style.HorizontalAlignment = "Center" #MicrosoftApp
         $consentSheet.Column(16).Style.HorizontalAlignment = "Center" #Privilege
@@ -583,14 +598,18 @@ function Export-MsIdAppConsentGrantReport {
         Set-ExcelRange -Worksheet $appSheet -Range "A1:C$maxRows"
         $appSheet.Column(1).Width = 45 #ClientDisplayName
         $appSheet.Column(2).Width = 15 #Privilege
-        $appSheet.Column(3).Width = 20 #UsersAssignedCount
+        $appSheet.Column(3).Width = 20 #AssignedTo
         $appSheet.Column(4).Width = 17 #MicrosoftApp
 
         $appSheet.Column(2).Style.HorizontalAlignment = "Center" #Privilege
+        $appSheet.Column(3).Style.HorizontalAlignment = "Right" #AssignedTo
         $appSheet.Column(4).Style.HorizontalAlignment = "Center" #MicrosoftApp
 
-        Export-Excel -ExcelPackage $excel
-        Remove-Worksheet -Path $Path -WorksheetName "Sheet1" | Out-Null
+        $appSheet.Cells["C1"].Style.HorizontalAlignment = "Center" #AssignedTo
+        $appSheet.Cells["D1"].Style.HorizontalAlignment = "Center" #AssignedTo
+
+        Export-Excel -ExcelPackage $excel -WorksheetName "ConsentGrantData" -Activate -HideSheet "Sheet1"
+
         Write-Verbose ("Excel workbook {0}" -f $ExcelWorkbookPath)
     }
 
