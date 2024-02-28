@@ -8,7 +8,7 @@
 
 .EXAMPLE
     PS > Install-Module ImportExcel
-    PS > Connect-MgGragh -Scopes Directory.Read.All
+    PS > Connect-MgGraph -Scopes Directory.Read.All
     PS > Export-MsIdAppConsentGrantReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
 
     Output a report in Excel format
