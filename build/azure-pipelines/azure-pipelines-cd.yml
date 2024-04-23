@@ -275,7 +275,7 @@ stages:
             parameters:
               moduleName: '$(moduleName)'
               RepositorySourceLocation: 'https://www.powershellgallery.com/api/v2'
-              NuGetApiKeyAzureConnection: 'Azure - MSFT Identity - Community Projects'
+              NuGetApiKeyAzureConnection: 'GTP-Arch-WorkloadIdentity'
               NuGetApiKeyVaultName: 'codesign-kv'
               NuGetApiKeySecretName: 'PSGallery-API-Key'
           - task: GitHubRelease@1
