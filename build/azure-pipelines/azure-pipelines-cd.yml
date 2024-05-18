@@ -86,7 +86,7 @@ stages:
     - template: template-psmodule-sign.yml
       parameters:
         moduleName: '$(moduleName)'
-        EsrpCodeSigningServiceName: 'ESRP-MI'
+        EsrpCodeSigningServiceName: 'ESRP-Signing-WorkloadIdentity'
 
 # - stage: Test
 #   dependsOn: Build
