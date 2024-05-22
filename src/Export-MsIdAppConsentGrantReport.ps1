@@ -249,7 +249,7 @@ function Export-MsIdAppConsentGrantReport {
                 $lastSp = $servicePrincipals[$count]
 
                 $delPercent = (($count / $totalCount) * 100)
-                WriteMainProgress DownloadDelegatePerm -Status "[$count of $totalCount] $($lastSp.DisplayName)" -ChildPercent $delPercent -ForceRefresh
+                WriteMainProgress DownloadDelegatePerm -Status "$count of $totalCount - $($lastSp.DisplayName)" -ChildPercent $delPercent -ForceRefresh
             }
         }
 

@@ -85,7 +85,53 @@ function Export-MsIdAzureMfaReport {
 
         $azureUsersMfa = GetUserMfaInsight $Users
 
-        return $azureUsersMfa
+        if ("PowerShellObjects" -eq $ReportOutputType) {
+            return $azureUsersMfa
+        }
+        else {
+            GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
+        }
+
+    }
+
+    function GenerateExcelReport ($UsersMfa, $Path) {
+
+        $maxRows = $UsersMfa.Count + 1
+
+        # Delete the existing output file if it already exists
+        $OutputFileExists = Test-Path $Path
+        if ($OutputFileExists -eq $true) {
+            Get-ChildItem $Path | Remove-Item -Force
+        }
+
+        $styles = @(
+            New-ExcelStyle -FontColor White -BackgroundColor DarkBlue -Bold -Range "A1:R1" -Height 20 -FontSize 12 -VerticalAlignment Center
+        )
+
+        $report = $UsersMfa | Select-Object UserId, UserPrincipalName, UserDisplayName, IsMfaRegistered, `
+        @{name = 'AuthenticationMethods'; expression = { $_.AuthenticationMethods -join ', ' } } , AzureAppName
+
+        $excel = $report | Export-Excel -Path $Path -WorksheetName "MFA Report" `
+            -FreezeTopRow `
+            -AutoFilter `
+            -Activate `
+            -Style $styles `
+            -HideSheet "None" `
+            -PassThru `
+            -IncludePivotChart -PivotTableName "MFA Readiness" -PivotRows "IsMfaRegistered" -PivotData @{'IsMfaRegistered'='count'} -PivotChartType PieExploded3D
+
+        $sheet = $excel.Workbook.Worksheets["MFA Report"]
+        $sheet.Column(1).Width = 10 #UserId
+        $sheet.Column(2).Width = 25 #UPN
+        $sheet.Column(3).Width = 30 #DisplayName
+        $sheet.Column(4).Width = 17 #MFA Registered
+        $sheet.Column(5).Width = 30 #AuthenticationMethods
+        $sheet.Column(6).Width = 25 #MFA Registerd
+
+        Export-Excel -ExcelPackage $excel -WorksheetName "MFA Report" -Activate
+
+        Write-Verbose ("Excel workbook {0}" -f $ExcelWorkbookPath)
+
     }
 
     # Get the authentication method state for each user

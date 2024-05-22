@@ -118,7 +118,6 @@ function Get-MsIdAzureUsers {
                 $percent = GetProgressPercent $earliestDate $latestDate $latestProcessedDate
                 Write-Verbose $percent
                 $formattedDate = GetDateDisplayFormat $latestProcessedDate
-                # WriteExportProgress Users -Status "$currentCount of $totalItems" -ChildPercent $percent -ForceRefresh
                 $status = "Found $($azureUsers.Count) Azure users. Now processing $formattedDate ($([int]$percent)% completed)"
                 Write-Progress -Activity "Checking sign in logs" -Status $status -PercentComplete $percent
                 $resultsJson = Invoke-GraphRequest -Uri $nextLink
