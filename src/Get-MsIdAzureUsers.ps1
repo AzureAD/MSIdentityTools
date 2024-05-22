@@ -34,18 +34,15 @@ function Get-MsIdAzureUsers {
 
     $mfaEnforcedApps = @(
         @{
-            Name        = "AzurePortal"
-            Id          = "c44b4083-3bb0-49c1-b47d-974e53cbdf3c"
+            AppId       = "c44b4083-3bb0-49c1-b47d-974e53cbdf3c"
             DisplayName = "Azure Portal"
         },
         @{
-            Name        = "AzureCli"
-            Id          = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
+            AppId       = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
             DisplayName = "Microsoft Azure CLI"
         },
         @{
-            Name        = "AzurePowerShell"
-            Id          = "1950a258-227b-4e31-a9cf-717495945fc2"
+            AppId       = "1950a258-227b-4e31-a9cf-717495945fc2"
             DisplayName = "Microsoft Azure PowerShell"
         }
     )
@@ -103,14 +100,15 @@ function Get-MsIdAzureUsers {
                         UserId            = $item.userId
                         UserPrincipalName = $item.userPrincipalName
                         DisplayName       = $item.userDisplayName
-                        AppIds            = @($item.appId)
+                        AzureAppName      = ""
+                        AzureAppId        = @($item.appId)
                     }
                     $azureUsers[$userId] = $user
                 }
                 else {
-                    # Add the app id to the existing user if it doesn't exist
-                    if ($null -eq $user.AppIds -contains $item.appId) {
-                        $user.AppIds += $item.appId
+                    # Add the app if it doesn't already exist
+                    if ($user.AzureAppId -notcontains $item.appId) {
+                        $user.AzureAppId += $item.appId
                     }
                 }
             }
@@ -126,6 +124,18 @@ function Get-MsIdAzureUsers {
             }
             $nextLink = Get-ObjectPropertyValue $resultsJson -Property '@odata.nextLink'
         } while ($null -ne $nextLink)
+
+        # Update the Azure App name for each user
+        foreach ($user in $azureUsers.Values) {
+            $appNames = @()
+            foreach ($appId in $user.AzureAppId) {
+                $app = $mfaEnforcedApps | Where-Object { $_.AppId -eq $appId }
+                if ($app) {
+                    $appNames += $app.DisplayName
+                }
+            }
+            $user.AzureAppName = $appNames -join ", "
+        }
         return $azureUsers
     }
 
@@ -169,7 +179,7 @@ function Get-MsIdAzureUsers {
     }
 
     function GetAppFilter() {
-        $allAppFilter = $mfaEnforcedApps.Id -join "' or appid eq '"
+        $allAppFilter = $mfaEnforcedApps.AppId -join "' or appid eq '"
         $allAppFilter = "(appid eq '$allAppFilter')"
         return $allAppFilter
     }
