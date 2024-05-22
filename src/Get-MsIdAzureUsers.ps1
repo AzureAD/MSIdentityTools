@@ -82,7 +82,7 @@ function Get-MsIdAzureUsers {
 
         Write-Verbose "Getting sign in logs $graphUri"
         $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET
-
+        $nextLink = Get-ObjectPropertyValue $resultsJson -Property '@odata.nextLink'
 
         $latestDate = $resultsJson.value[0].createdDateTime
         # Create a key/value dictionary to store users by userId
@@ -99,7 +99,7 @@ function Get-MsIdAzureUsers {
                     $user = [pscustomobject]@{
                         UserId            = $item.userId
                         UserPrincipalName = $item.userPrincipalName
-                        DisplayName       = $item.userDisplayName
+                        UserDisplayName   = $item.userDisplayName
                         AzureAppName      = ""
                         AzureAppId        = @($item.appId)
                     }
@@ -112,7 +112,8 @@ function Get-MsIdAzureUsers {
                     }
                 }
             }
-            if ($null -ne $resultsJson.'@odata.nextLink') {
+
+            if ($null -ne $nextLink) {
                 $latestProcessedDate = $resultsJson.value[$resultsJson.value.Count - 1].createdDateTime
                 $percent = GetProgressPercent $earliestDate $latestDate $latestProcessedDate
                 Write-Verbose $percent
@@ -120,7 +121,7 @@ function Get-MsIdAzureUsers {
                 # WriteExportProgress Users -Status "$currentCount of $totalItems" -ChildPercent $percent -ForceRefresh
                 $status = "Found $($azureUsers.Count) Azure users. Now processing $formattedDate ($([int]$percent)% completed)"
                 Write-Progress -Activity "Checking sign in logs" -Status $status -PercentComplete $percent
-                $resultsJson = Invoke-GraphRequest -Uri $resultsJson.'@odata.nextLink'
+                $resultsJson = Invoke-GraphRequest -Uri $nextLink
             }
             $nextLink = Get-ObjectPropertyValue $resultsJson -Property '@odata.nextLink'
         } while ($null -ne $nextLink)

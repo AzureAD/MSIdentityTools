@@ -67,9 +67,6 @@ function Export-MsIdAppConsentGrantReport {
         if ($null -eq (Get-MgContext)) {
             Connect-MgGraph -Scopes Directory.Read.All
         }
-        if ($null -eq (Get-MgContext)) {
-            throw "You must connect to the Microsoft Graph before running this command."
-        }
 
         $appConsents = GetAppConsentGrants
 
