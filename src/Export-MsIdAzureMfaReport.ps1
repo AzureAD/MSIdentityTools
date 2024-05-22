@@ -98,17 +98,13 @@ function Export-MsIdAzureMfaReport {
             UpdateProgress $currentCount $totalCount $user
 
             $graphUri = (GetGraphBaseUri) + "/v1.0/users/$($user.UserId)/authentication/methods"
-            $authMethods = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+            $authMethodsJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
 
-            Write-Verbose $authMethods
-
-            $graphMethods = Get-ObjectPropertyValue $authMethods -Name "value"
-            Write-Verbose "Graph methods: "
-            Write-Verbose $graphMethods
+            $graphMethods = Get-ObjectPropertyValue $authMethodsJson -Property "value"
 
             if ($null -eq $graphMethods) {
                 $note = "Could not retrieve authentication methods for user."
-                $err = Get-ObjectPropertyValue $authMethods -Name "error"
+                $err = Get-ObjectPropertyValue $authMethodsJson -Property "error"
                 if ($null -ne $err) {
                     $note = $err.message
                 }
@@ -118,13 +114,15 @@ function Export-MsIdAzureMfaReport {
 
             $userAuthMethods = @()
             $isMfaRegistered = $false
-            foreach ($method in $authMethods.value) {
+            $types = $authMethodsJson.value | Select-Object '@odata.type' -Unique
+            foreach ($method in $types) {
                 $type = $method.'@odata.type'
-                $userAuthMethod = $authMethods | Where-Object { $_.Type -eq $type }
-                if ($userAuthMethod.IsMfa) {
+                Write-Verbose "Type: $type"
+                $userAuthMethod = GetAuthMethodInfo $type
+                if ($userAuthMethod) {
                     $isMfaRegistered = $true
+                    $userAuthMethods += $userAuthMethod
                 }
-                $userAuthMethods += $userAuthMethod
             }
             $user.AuthenticationMethods = $userAuthMethods
             $user.IsMfaRegistered = $isMfaRegistered
@@ -200,69 +198,73 @@ function Export-MsIdAzureMfaReport {
     # #, Mobile phone, Office phone, Alternate mobile phone, Security question, , , Hardware OATH token, FIDO2 security key, , Microsoft Passwordless phone sign-in, ,  , Passkey (Microsoft Authenticator), Passkey (Windows Hello)
 
     function GetAuthMethodInfo($type) {
-        $authMethods = @(
-            @{
-                Type        = '#microsoft.graph.fido2AuthenticationMethod'
-                DisplayName = "Passkey (other device-bound)"
-                IsMfa       = $true
-            },
-            @{
-                Type        = '#microsoft.graph.emailAuthenticationMethod'
-                DisplayName = 'Email'
-                IsMfa       = $false
-            },
-            @{
-                Type        = '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
-                DisplayName = 'Microsoft Authenticator'
-                IsMfa       = $true
-            },
-            @{
-                Type        = '#microsoft.graph.phoneAuthenticationMethod'
-                DisplayName = 'Phone'
-                IsMfa       = $true
-            },
-            @{
-                Type        = '#microsoft.graph.softwareOathAuthenticationMethod'
-                DisplayName = 'Authenticator app (TOTP)'
-                IsMfa       = $true
-            },
-            @{
-                Type        = '#microsoft.graph.temporaryAccessPassAuthenticationMethod'
-                DisplayName = 'Temporary Access Pass'
-                IsMfa       = $false
-            },
-            @{
-                Type        = '#microsoft.graph.windowsHelloForBusinessAuthenticationMethod'
-                DisplayName = 'Windows Hello for Business'
-            },
-            @{
-                Type        = '#microsoft.graph.passwordAuthenticationMethod'
-                DisplayName = 'Password'
-                IsMfa       = $false
-            },
-            @{
-                Type        = '#microsoft.graph.platformCredentialAuthenticationMethod'
-                DisplayName = 'Platform Credential for MacOS'
-                IsMfa       = $true
-            },
-            @{
-                Type        = '#microsoft.graph.passwordlessMicrosoftAuthenticatorAuthenticationMethod'
-                DisplayName = 'Microsoft Authenticator'
-                IsMfa       = $true
-            }
-        )
-        $methodInfo = $authMethods | Where-Object { $_.Type -eq $type }
-
-        if ($null -eq $methodInfo) {
+        $mt = $authMethods | Where-Object { $_.Type -eq $type}
+        $methodInfo = $null
+        if ($null -eq $mt -or $mt.IsMfa) {
+            $displayName = ($type -replace '#microsoft.graph.', '') -replace 'AuthenticationMethod', ''
+            if($mt) { $displayName = $mt.DisplayName }
             # Default to the type and assume it is MFA
             $methodInfo = @{
                 Type        = $type
-                DisplayName = ($type -replace '#microsoft.graph.', '') -replace 'AuthenticationMethod', ''
+                DisplayName = $displayName
                 IsMfa       = $true
             }
         }
         return $methodInfo
     }
+
+    $authMethods = @(
+        @{
+            Type        = '#microsoft.graph.fido2AuthenticationMethod'
+            DisplayName = "Passkey (other device-bound)"
+            IsMfa       = $true
+        },
+        @{
+            Type        = '#microsoft.graph.emailAuthenticationMethod'
+            DisplayName = 'Email'
+            IsMfa       = $false
+        },
+        @{
+            Type        = '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
+            DisplayName = 'Microsoft Authenticator'
+            IsMfa       = $true
+        },
+        @{
+            Type        = '#microsoft.graph.phoneAuthenticationMethod'
+            DisplayName = 'Phone'
+            IsMfa       = $true
+        },
+        @{
+            Type        = '#microsoft.graph.softwareOathAuthenticationMethod'
+            DisplayName = 'Authenticator app (TOTP)'
+            IsMfa       = $true
+        },
+        @{
+            Type        = '#microsoft.graph.temporaryAccessPassAuthenticationMethod'
+            DisplayName = 'Temporary Access Pass'
+            IsMfa       = $false
+        },
+        @{
+            Type        = '#microsoft.graph.windowsHelloForBusinessAuthenticationMethod'
+            DisplayName = 'Windows Hello for Business'
+            IsMfa       = $true
+        },
+        @{
+            Type        = '#microsoft.graph.passwordAuthenticationMethod'
+            DisplayName = 'Password'
+            IsMfa       = $false
+        },
+        @{
+            Type        = '#microsoft.graph.platformCredentialAuthenticationMethod'
+            DisplayName = 'Platform Credential for MacOS'
+            IsMfa       = $true
+        },
+        @{
+            Type        = '#microsoft.graph.passwordlessMicrosoftAuthenticatorAuthenticationMethod'
+            DisplayName = 'Microsoft Authenticator'
+            IsMfa       = $true
+        }
+    )
 
     # Call main function
     Main
