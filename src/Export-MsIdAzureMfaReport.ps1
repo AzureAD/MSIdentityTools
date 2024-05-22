@@ -2,7 +2,7 @@
 .SYNOPSIS
     Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell.
     The report includes each user's MFA registration status.
-    Required scopes: AuditLog.Read.All, User.Read.All, UserAuthenticationMethod.Read.All
+    Required scopes: AuditLog.Read.All, UserAuthenticationMethod.Read.All
 
 .DESCRIPTION
     - Entra ID free tenants have access to sign in logs for the last 7 days.
@@ -59,7 +59,11 @@ function Export-MsIdAzureMfaReport {
 
         # Hashtable with a pre-defined list of User objects with a UserId property.
         [array]
-        $Users
+        $Users,
+
+        # If enabled, the user auth method will be used (slower) instead of the reporting API. Not applicable for Free tenants since they don't have access to the reporting API.
+        [switch]
+        $UseAuthenticationMethodEndPoint
     )
 
     function Main() {
@@ -88,23 +92,28 @@ function Export-MsIdAzureMfaReport {
     function GetUserMfaInsight($users) {
         $totalCount = $users.Count
         $currentCount = 0
+
+        if ($UseAuthenticationMethodEndPoint) { $isPremiumTenant = $false } # Force into free tenant mode
+        else { $isPremiumTenant = GetIsPremiumTenant $users }
+
         foreach ($user in $users) {
             Write-Verbose $user.UserId
             Write-Verbose $user.UserPrincipalName
 
             $currentCount++
             AddMfaProperties $user
-
             UpdateProgress $currentCount $totalCount $user
 
             $graphUri = (GetGraphBaseUri) + "/v1.0/users/$($user.UserId)/authentication/methods"
-            $authMethodsJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+            if ($isPremiumTenant) {
+                $graphUri = (GetGraphBaseUri) + "/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
+            }
+            $resultJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+            $err = Get-ObjectPropertyValue $resultJson -Property "error"
 
-            $graphMethods = Get-ObjectPropertyValue $authMethodsJson -Property "value"
-
-            if ($null -eq $graphMethods) {
+            if ($err) {
                 $note = "Could not retrieve authentication methods for user."
-                $err = Get-ObjectPropertyValue $authMethodsJson -Property "error"
+
                 if ($null -ne $err) {
                     $note = $err.message
                 }
@@ -112,25 +121,47 @@ function Export-MsIdAzureMfaReport {
                 continue
             }
 
-            $userAuthMethods = @()
-            $isMfaRegistered = $false
-            $types = $authMethodsJson.value | Select-Object '@odata.type' -Unique
-            foreach ($method in $types) {
-                $type = $method.'@odata.type'
-                Write-Verbose "Type: $type"
-                $userAuthMethod = GetAuthMethodInfo $type
-                if ($userAuthMethod) {
-                    $isMfaRegistered = $true
-                    $userAuthMethods += $userAuthMethod
-                }
+            if ($isPremiumTenant) {
+                $user.AuthenticationMethods = Get-ObjectPropertyValue $resultJson -Property 'methodsRegistered'
+                $user.IsMfaRegistered = Get-ObjectPropertyValue $resultJson -Property 'isMfaRegistered'
             }
-            $user.AuthenticationMethods = $userAuthMethods
-            $user.IsMfaRegistered = $isMfaRegistered
+            else {
+                $graphMethods = Get-ObjectPropertyValue $resultJson -Property "value"
+                $userAuthMethods = @()
+                $isMfaRegistered = $false
+                $types = $graphMethods | Select-Object '@odata.type' -Unique
+                foreach ($method in $types) {
+                    $type = $method.'@odata.type'
+                    Write-Verbose "Type: $type"
+                    $userAuthMethod = GetAuthMethodInfo $type
+                    if ($userAuthMethod.IsMfa) {
+                        $isMfaRegistered = $true
+                        $userAuthMethods += $userAuthMethod.DisplayName
+                    }
+                }
+                $user.AuthenticationMethods = $userAuthMethods
+                $user.IsMfaRegistered = $isMfaRegistered
+            }
         }
 
         return $users
     }
 
+    # Check if the tenant has permissions to call the user registration API.
+    function GetIsPremiumTenant($users) {
+        $isPremiumTenant = $true
+        if ($users -and $users.Count -gt 0) {
+            $user = $users[0]
+            $graphUri = (GetGraphBaseUri) + "/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
+            $resultJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+            $err = Get-ObjectPropertyValue $resultJson -Property "error"
+
+            if ($err) {
+                $isPremiumTenant = $err.code -ne "Authentication_RequestFromNonPremiumTenantOrB2CTenant"
+            }
+        }
+        return $isPremiumTenant
+    }
     function AddMfaProperties($user) {
         $user | Add-Member -MemberType NoteProperty -Name "Note" -Value $null -ErrorAction SilentlyContinue
         $user | Add-Member -MemberType NoteProperty -Name "AuthenticationMethods" -Value $null -ErrorAction SilentlyContinue
@@ -198,15 +229,12 @@ function Export-MsIdAzureMfaReport {
     # #, Mobile phone, Office phone, Alternate mobile phone, Security question, , , Hardware OATH token, FIDO2 security key, , Microsoft Passwordless phone sign-in, ,  , Passkey (Microsoft Authenticator), Passkey (Windows Hello)
 
     function GetAuthMethodInfo($type) {
-        $mt = $authMethods | Where-Object { $_.Type -eq $type}
-        $methodInfo = $null
-        if ($null -eq $mt -or $mt.IsMfa) {
-            $displayName = ($type -replace '#microsoft.graph.', '') -replace 'AuthenticationMethod', ''
-            if($mt) { $displayName = $mt.DisplayName }
+        $methodInfo = $authMethods | Where-Object { $_.Type -eq $type }
+        if ($null -eq $methodInfo) {
             # Default to the type and assume it is MFA
             $methodInfo = @{
                 Type        = $type
-                DisplayName = $displayName
+                DisplayName = ($type -replace '#microsoft.graph.', '') -replace 'AuthenticationMethod', ''
                 IsMfa       = $true
             }
         }
