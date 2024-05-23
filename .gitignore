@@ -353,3 +353,4 @@ MigrationBackup/
 .wiki/
 
 temp/
+.DS_Store

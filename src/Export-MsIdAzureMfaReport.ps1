@@ -57,9 +57,13 @@ function Export-MsIdAzureMfaReport {
         [int]
         $Days,
 
-        # Hashtable with a pre-defined list of User objects with a UserId property.
+        # Optional. Hashtable with a pre-defined list of User objects (Use Get-MsIdAzureUsers).
         [array]
         $Users,
+
+        # Optional. Hashtable with a pre-defined list of User objects with auth methods. Used for generating spreadhsheet.
+        [array]
+        $UsersMfa,
 
         # If enabled, the user auth method will be used (slower) instead of the reporting API. Not applicable for Free tenants since they don't have access to the reporting API.
         [switch]
@@ -79,11 +83,12 @@ function Export-MsIdAzureMfaReport {
             throw "You must connect to the Microsoft Graph before running this command."
         }
 
-        if ($null -eq $Users) {
+        if ($null -eq $Users -and $null -eq $UsersMfa) {
             $Users = Get-MsIdAzureUsers -Days $Days
         }
 
-        $azureUsersMfa = GetUserMfaInsight $Users
+        if ($UsersMfa) { $azureUsersMfa = $UsersMfa }
+        else { $azureUsersMfa = GetUserMfaInsight $Users }
 
         if ("PowerShellObjects" -eq $ReportOutputType) {
             return $azureUsersMfa
@@ -91,12 +96,13 @@ function Export-MsIdAzureMfaReport {
         else {
             GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
         }
-
     }
 
     function GenerateExcelReport ($UsersMfa, $Path) {
 
         $maxRows = $UsersMfa.Count + 1
+
+        $UsersMfa = $UsersMfa | Sort-Object -Property IsMfaRegistered, UserDisplayName
 
         # Delete the existing output file if it already exists
         $OutputFileExists = Test-Path $Path
@@ -104,29 +110,62 @@ function Export-MsIdAzureMfaReport {
             Get-ChildItem $Path | Remove-Item -Force
         }
 
+        $headerBgColour = [System.Drawing.ColorTranslator]::FromHtml("#0077b6")
+        $darkGrayColour = [System.Drawing.ColorTranslator]::FromHtml("#A9A9A9")
         $styles = @(
-            New-ExcelStyle -FontColor White -BackgroundColor DarkBlue -Bold -Range "A1:R1" -Height 20 -FontSize 12 -VerticalAlignment Center
+            New-ExcelStyle -Range "A1:J$maxRows" -Height 20 -FontSize 14
+            New-ExcelStyle -Range "A1:J1" -FontColor White -BackgroundColor $headerBgColour -Bold -HorizontalAlignment Center
+            New-ExcelStyle -Range "A2:A$maxRows" -FontColor Blue -Underline
+            New-ExcelStyle -Range "D2:D$maxRows" -FontColor Blue -Underline
+            New-ExcelStyle -Range "E2:G$maxRows" -FontColor Blue
+            New-ExcelStyle -Range "C2:G$maxRows" -HorizontalAlignment Center
+            New-ExcelStyle -Range "I2:I$maxRows" -FontColor $darkGrayColour -HorizontalAlignment Fill
         )
 
-        $report = $UsersMfa | Select-Object UserId, UserPrincipalName, UserDisplayName, IsMfaRegistered, `
-        @{name = 'AuthenticationMethods'; expression = { $_.AuthenticationMethods -join ', ' } } , AzureAppName
+        $authMethodBlade = 'https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/UserAuthMethods/userId/%id%/hidePreviewBanner~/true'
+        $userBlade = 'https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/overview/userId/%id%/hidePreviewBanner~/true'
+
+        $report = $UsersMfa | Select-Object `
+        @{name = 'Name'; expression = { GetLink $userBlade $_.UserId $_.UserDisplayName } }, UserPrincipalName, `
+        @{name = ' '; expression = {
+                if ($_.IsMfaRegistered) { $mfa = '✅' } else { $mfa = '❌' }
+                $mfa
+            }
+        }, `
+        @{name = 'MFA Status'; expression = {
+                if ($_.IsMfaRegistered) { $mfa = 'MFA Registered' } else { $mfa = 'No MFA Registered' }
+                GetLink $authMethodBlade $_.UserId $mfa
+            }
+        }, `
+        @{name = 'Az Portal'; expression = { GetTickSymbol $_.AzureAppName "Azure Portal" } }, `
+        @{name = 'Az CLI'; expression = { GetTickSymbol $_.AzureAppName "Azure CLI" } }, `
+        @{name = 'Az PowerShell'; expression = { GetTickSymbol $_.AzureAppName "Azure PowerShell" } }, `
+        @{name = 'Authentication Methods'; expression = { $_.AuthenticationMethods -join ', ' } }, UserId, `
+        @{name = 'Notes'; expression = { if ([string]::IsNullOrEmpty($_.Notes)) { "' " } else { $_.Notes } } } `
+
 
         $excel = $report | Export-Excel -Path $Path -WorksheetName "MFA Report" `
             -FreezeTopRow `
-            -AutoFilter `
             -Activate `
             -Style $styles `
             -HideSheet "None" `
             -PassThru `
-            -IncludePivotChart -PivotTableName "MFA Readiness" -PivotRows "IsMfaRegistered" -PivotData @{'IsMfaRegistered'='count'} -PivotChartType PieExploded3D
+            -IncludePivotChart -PivotTableName "MFA Readiness" -PivotRows "MFA Status" -PivotData @{'MFA Status' = 'count' } -PivotChartType PieExploded3D -ShowPercent
 
         $sheet = $excel.Workbook.Worksheets["MFA Report"]
-        $sheet.Column(1).Width = 10 #UserId
-        $sheet.Column(2).Width = 25 #UPN
-        $sheet.Column(3).Width = 30 #DisplayName
-        $sheet.Column(4).Width = 17 #MFA Registered
-        $sheet.Column(5).Width = 30 #AuthenticationMethods
-        $sheet.Column(6).Width = 25 #MFA Registerd
+        $sheet.Column(1).Width = 35 #DisplayName
+        $sheet.Column(2).Width = 35 #UPN
+        $sheet.Column(3).Width = 6 #MFA Icon
+        $sheet.Column(4).Width = 22 #MFA Registered
+        $sheet.Column(5).Width = 17 #Azure Portal
+        $sheet.Column(6).Width = 17 #Azure CLI
+        $sheet.Column(7).Width = 17 #Azure PowerShell
+        $sheet.Column(8).Width = 40 #AuthenticationMethods
+        $sheet.Column(9).Width = 15 #UserId
+        $sheet.Column(10).Width = 30 #Notes
+
+        Add-ConditionalFormatting -Worksheet $sheet -Range "C2:C$maxRows" -ConditionValue '=$C2="✅"' -RuleType Expression -ForegroundColor Green
+        Add-ConditionalFormatting -Worksheet $sheet -Range "C2:C$maxRows" -ConditionValue '=$C2="❌"' -RuleType Expression -ForegroundColor Red
 
         Export-Excel -ExcelPackage $excel -WorksheetName "MFA Report" -Activate
 
@@ -134,14 +173,30 @@ function Export-MsIdAzureMfaReport {
 
     }
 
+    function GetTickSymbol($source, $matchString) {
+        if ($source -match $matchString) { return "🔵" }
+        return ""
+    }
+
+    function GetLink($uriFormat, $id, $name) {
+        $uri = $uriFormat -replace '%id%', $id
+        $hyperlink = '=Hyperlink("%uri%", "%name%")'
+        $hyperlink = $hyperlink -replace '%uri%', $uri
+        $hyperlink = $hyperlink -replace '%name%', $name
+        Write-Verbose $hyperlink
+        return ( $hyperlink)
+    }
+
     # Get the authentication method state for each user
     function GetUserMfaInsight($users) {
-        $totalCount = $users.Count
-        $currentCount = 0
 
         if ($UseAuthenticationMethodEndPoint) { $isPremiumTenant = $false } # Force into free tenant mode
         else { $isPremiumTenant = GetIsPremiumTenant $users }
 
+        #$users = $users | Select-Object -First 10 # For testing
+
+        $totalCount = $users.Count
+        $currentCount = 0
         foreach ($user in $users) {
             Write-Verbose $user.UserId
             Write-Verbose $user.UserPrincipalName
@@ -168,7 +223,14 @@ function Export-MsIdAzureMfaReport {
             }
 
             if ($isPremiumTenant) {
-                $user.AuthenticationMethods = Get-ObjectPropertyValue $resultJson -Property 'methodsRegistered'
+                $methodsRegistered = Get-ObjectPropertyValue $resultJson -Property 'methodsRegistered'
+                $userAuthMethod = @()
+                foreach ($method in $methodsRegistered) {
+                    $methodInfo = $authMethods | Where-Object { $_.ReportType -eq $method }
+                    if ($null -eq $methodInfo) { $userAuthMethod += $method }
+                    else { $userAuthMethod += $methodInfo.DisplayName }
+                }
+                $user.AuthenticationMethods = $userAuthMethod -join ', '
                 $user.IsMfaRegistered = Get-ObjectPropertyValue $resultJson -Property 'isMfaRegistered'
             }
             else {
@@ -289,51 +351,67 @@ function Export-MsIdAzureMfaReport {
 
     $authMethods = @(
         @{
+            ReportType  = 'passKeyDeviceBoundAuthenticator'
+            Type        = $null
+            DisplayName = 'Passkey (Microsoft Authenticator)'
+            IsMfa       = $true
+        },
+        @{
+            ReportType  = 'passKeyDeviceBound'
             Type        = '#microsoft.graph.fido2AuthenticationMethod'
             DisplayName = "Passkey (other device-bound)"
             IsMfa       = $true
         },
         @{
+            ReportType  = 'email'
             Type        = '#microsoft.graph.emailAuthenticationMethod'
             DisplayName = 'Email'
             IsMfa       = $false
         },
         @{
+            ReportType  = 'microsoftAuthenticatorPush'
             Type        = '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
             DisplayName = 'Microsoft Authenticator'
             IsMfa       = $true
         },
         @{
+            ReportType  = 'mobilePhone'
             Type        = '#microsoft.graph.phoneAuthenticationMethod'
             DisplayName = 'Phone'
             IsMfa       = $true
         },
         @{
+            ReportType  = 'softwareOneTimePasscode'
             Type        = '#microsoft.graph.softwareOathAuthenticationMethod'
             DisplayName = 'Authenticator app (TOTP)'
             IsMfa       = $true
         },
         @{
+            ReportType  = $null
             Type        = '#microsoft.graph.temporaryAccessPassAuthenticationMethod'
             DisplayName = 'Temporary Access Pass'
             IsMfa       = $false
         },
         @{
+            ReportType  = 'windowsHelloForBusiness'
             Type        = '#microsoft.graph.windowsHelloForBusinessAuthenticationMethod'
             DisplayName = 'Windows Hello for Business'
             IsMfa       = $true
         },
         @{
+            ReportType  = $null
             Type        = '#microsoft.graph.passwordAuthenticationMethod'
             DisplayName = 'Password'
             IsMfa       = $false
         },
         @{
+            ReportType  = $null
             Type        = '#microsoft.graph.platformCredentialAuthenticationMethod'
             DisplayName = 'Platform Credential for MacOS'
             IsMfa       = $true
         },
         @{
+            ReportType  = 'microsoftAuthenticatorPasswordless'
             Type        = '#microsoft.graph.passwordlessMicrosoftAuthenticatorAuthenticationMethod'
             DisplayName = 'Microsoft Authenticator'
             IsMfa       = $true
