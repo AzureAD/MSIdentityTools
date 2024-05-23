@@ -17,7 +17,7 @@ function Test-MgCommandPrerequisites {
         # The service API version.
         [Parameter(Mandatory = $false, Position = 2)]
         [ValidateSet('v1.0', 'beta')]
-        [string] $ApiVersion = 'beta',
+        [string] $ApiVersion = 'v1.0',
         # Specifies a minimum version.
         [Parameter(Mandatory = $false)]
         [version] $MinimumVersion,
@@ -47,8 +47,9 @@ function Test-MgCommandPrerequisites {
         foreach ($CommandName in $Name) {
             [array] $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion
 
-            $MgCommand = $MgCommands[0]
+            
             if ($MgCommands.Count -gt 1) {
+                $MgCommand = $MgCommands[0]                
                 ## Resolve from multiple results
                 [array] $MgCommandsWithPermissions = $MgCommands | Where-Object Permissions -NE $null
                 [array] $MgCommandsWithListPermissions = $MgCommandsWithPermissions | Where-Object URI -NotLike "*}"
