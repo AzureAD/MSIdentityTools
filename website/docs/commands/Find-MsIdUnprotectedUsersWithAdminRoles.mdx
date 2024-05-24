@@ -1,0 +1,94 @@
+---
+sidebar_class_name: hidden
+description: Find Users with Admin Roles that are not registered for MFA
+id: Find-MsIdUnprotectedUsersWithAdminRoles
+title: Find-MsIdUnprotectedUsersWithAdminRoles
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Find-MsIdUnprotectedUsersWithAdminRoles.ps1
+---
+
+## SYNOPSIS
+
+Find Users with Admin Roles that are not registered for MFA
+
+## SYNTAX
+
+```powershell
+Find-MsIdUnprotectedUsersWithAdminRoles [-IncludeSignIns] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Find Users with Admin Roles that are not registered for MFA by evaluating their authentication methods registered for MFA and their sign-in activity.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Find-MsIdUnprotectedUsersWithAdminRoles
+```
+
+Enumerate users with role assignments
+
+### EXAMPLE 2
+
+```powershell
+Find-MsIdUnprotectedUsersWithAdminRoles -includeSignIns:$false
+```
+
+Enumerate users with role assignments including their sign in activity
+
+## PARAMETERS
+
+### -IncludeSignIns
+
+Include Sign In log activity -  Note this can cause the query to run slower in larger active environments
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+### System.String
+
+## NOTES
+- Eligible users for roles may not have active assignments showing in their directoryrolememberships, but they have the potential to elevate to assigned roles
+- Large amounts of role assignments may take time process.
+- Must be connected to MS Graph with appropriate scopes for reading user, group, application, role, an sign in information .
+ --  Connect-MgGraph -scopes RoleManagement.Read.Directory,UserAuthenticationMethod.Read.All,AuditLog.Read.All,User.Read.All,Group.Read.All,Application.Read.All
+
+## RELATED LINKS

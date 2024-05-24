@@ -1,0 +1,137 @@
+---
+sidebar_class_name: hidden
+description: Set TLS settings on Windows OS to use more secure TLS protocols.
+id: Set-MsIdWindowsTlsSettings
+title: Set-MsIdWindowsTlsSettings
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Set-MsIdWindowsTlsSettings.ps1
+---
+
+## SYNOPSIS
+
+Set TLS settings on Windows OS to use more secure TLS protocols.
+
+## SYNTAX
+
+```powershell
+Set-MsIdWindowsTlsSettings [-DotNetFwUseSystemDefault] [-DotNetFwUseStrongCrypto]
+ [-IEDisableLegacySecurityProtocols] [-DisableClientLegacyTlsVersions] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Set-MsIdWindowsTlsSettings -DotNetFwUseSystemDefault -DotNetFwUseStrongCrypto -IEDisableLegacySecurityProtocols
+```
+
+Sets recommended TLS settings for .NET Framework applications and Internet Explorer (Internet Options) which should default to TLS 1.2+ on Windows 8/2012 and later.
+
+### EXAMPLE 2
+
+```powershell
+Set-MsIdWindowsTlsSettings -DisableClientLegacyTlsVersions
+```
+
+Disables TLS 1.1 and earlier for the entire operating system.
+
+## PARAMETERS
+
+### -DotNetFwUseSystemDefault
+
+System-wide .NET Framework setting to allow the operating system to choose the protocol.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DotNetFwUseStrongCrypto
+
+System-wide .NET Framework setting to use more secure network protocols (TLS 1.2, TLS 1.1, and TLS 1.0) and blocks protocols that are not secure.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IEDisableLegacySecurityProtocols
+
+Internet Explorer (Internet Options) setting to disable use of TLS 1.1 and earlier.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DisableClientLegacyTlsVersions
+
+System-wide Windows Secure Channel setting to disable all use of TLS 1.1 and earlier.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

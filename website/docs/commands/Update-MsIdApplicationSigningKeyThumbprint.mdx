@@ -1,0 +1,145 @@
+---
+sidebar_class_name: hidden
+description: Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint
+id: Update-MsIdApplicationSigningKeyThumbprint
+title: Update-MsIdApplicationSigningKeyThumbprint
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Update-MsIdApplicationSigningKeyThumbprint.ps1
+---
+
+## SYNOPSIS
+
+Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint
+
+## SYNTAX
+
+```powershell
+Update-MsIdApplicationSigningKeyThumbprint [-Tenant <Object>] -ApplicationId <String> [-KeyThumbprint <String>]
+ [-Default] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint
+For more information on Microsoft Identity platorm signing key rollover see https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-signing-key-rollover
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -KeyThumbprint <Thumbprint>
+```
+
+Update Application's preferred signing key to the specified thumbprint
+
+### EXAMPLE 2
+
+```powershell
+Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId> -Default
+```
+
+Update Application's preferred signing key to default value null
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdSigningKeyThumbprint -Latest | Update-MsIdApplicationSigningKeyThumbprint -ApplicationId <ApplicationId>
+```
+
+Get the latest signing key thumbprint and set it as the perferred signing key on the application
+
+## PARAMETERS
+
+### -Tenant
+
+Tenant ID
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: Common
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ApplicationId
+
+Application ID
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -KeyThumbprint
+
+Thumbprint of certificate
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -Default
+
+Return preferredTokenSigningKeyThumbprint to default value
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

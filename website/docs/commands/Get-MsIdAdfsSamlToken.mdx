@@ -1,0 +1,132 @@
+---
+sidebar_class_name: hidden
+description: Initiates a SAML logon request to and AD FS server to generate log activity and returns the user token.
+id: Get-MsIdAdfsSamlToken
+title: Get-MsIdAdfsSamlToken
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdAdfsSamlToken.ps1
+---
+
+## SYNOPSIS
+
+Initiates a SAML logon request to and AD FS server to generate log activity and returns the user token.
+
+## SYNTAX
+
+```powershell
+Get-MsIdAdfsSamlToken [-Issuer] <String> -HostName <String> [-Credential <PSCredential>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+This command will generate log activity on the ADFS server, by requesting a SAML token using Windows or forms authentication.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdAdfsSamlToken urn:microsoft:adfs:claimsxray -HostName adfs.contoso.com
+```
+
+Sign in to an application on an AD FS server using logged user credentials using the SAML protocol.
+
+### EXAMPLE 2
+
+```powershell
+$credential = Get-Credential
+PS > Get-MsIdAdfsSamlToken urn:microsoft:adfs:claimsxray -HostName adfs.contoso.com
+```
+
+Sign in  to an application on an AD FS server using credentials provided by the user using the SAML endpoint and forms based authentication.
+
+### EXAMPLE 3
+
+```powershell
+$SamlIdentifiers =  Get-AdfsRelyingPartyTrust | where { $_.WSFedEndpoint -eq $null } | foreach { $_.Identifier.Item(0) }
+PS > $SamlIdentifiers | foreach { Get-MsIdAdfsSamlToken $_ -HostName adfs.contoso.com }
+```
+
+Get all SAML relying party trusts from the AD FS server and sign in using the logged user credentials.
+
+## PARAMETERS
+
+### -Issuer
+
+Application identifier
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -HostName
+
+Enter host name for the AD FS server
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Credential
+
+Provide the credential for the user to be signed in
+
+```yaml
+Type: PSCredential
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+### System.String
+
+## NOTES
+
+## RELATED LINKS

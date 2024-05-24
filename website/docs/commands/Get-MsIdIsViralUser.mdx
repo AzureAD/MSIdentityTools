@@ -1,0 +1,79 @@
+---
+sidebar_class_name: hidden
+description: Returns true if the user's mail domain is a viral (unmanaged) Azure AD tenant.
+id: Get-MsIdIsViralUser
+title: Get-MsIdIsViralUser
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdIsViralUser.ps1
+---
+
+## SYNOPSIS
+
+Returns true if the user's mail domain is a viral (unmanaged) Azure AD tenant.
+
+## SYNTAX
+
+```powershell
+Get-MsIdIsViralUser [-Mail] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+To learn more about viral tenants see [Take over an unmanaged directory as administrator in Azure Active Directory](https://docs.microsoft.com/azure/active-directory/enterprise-users/domains-admin-takeover)
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdIsViralUser -Mail john@yopmail.net
+```
+
+Check if the mail address is from a viral tenant.
+
+## PARAMETERS
+
+### -Mail
+
+The email address of the external user.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

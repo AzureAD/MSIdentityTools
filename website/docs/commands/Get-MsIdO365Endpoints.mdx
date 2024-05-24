@@ -1,0 +1,165 @@
+---
+sidebar_class_name: hidden
+description: Get list of URLs and IP ranges for O365
+id: Get-MsIdO365Endpoints
+title: Get-MsIdO365Endpoints
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdO365Endpoints.ps1
+---
+
+## SYNOPSIS
+
+Get list of URLs and IP ranges for O365
+
+## SYNTAX
+
+```powershell
+Get-MsIdO365Endpoints [[-Cloud] <String>] [-TenantName <String>] [-NoIPv6] [-ServiceAreas <String[]>]
+ [-ClientRequestId <Guid>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+http://aka.ms/ipurlws
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdO365Endpoints
+```
+
+Get list of URLs and IP ranges for O365 Worldwide cloud.
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdO365Endpoints -Cloud China -ServiceAreas Exchange,SharePoint
+```
+
+Get list of URLs and IP ranges for Exchange and SharePoint in O365 China Cloud.
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdO365Endpoints -Cloud Worldwide -ServiceAreas Common | Where-Object id -In 54,56,59,96
+```
+
+Get list of URLs and IP ranges related to Azure Active Directory.
+
+## PARAMETERS
+
+### -Cloud
+
+Name of O365 Cloud.
+Valid values are: 'Worldwide','USGovGCCHigh','USGovDoD','Germany','China'
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: Worldwide
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TenantName
+
+Office 365 tenant name.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoIPv6
+
+Exclude IPv6 addresses from the output
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ServiceAreas
+
+Name of Service Area.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ClientRequestId
+
+Client Request Id.
+
+```yaml
+Type: Guid
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: (New-Guid)
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+### System.Management.Automation.PSObject
+
+## NOTES
+
+## RELATED LINKS

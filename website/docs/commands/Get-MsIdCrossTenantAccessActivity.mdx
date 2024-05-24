@@ -1,0 +1,295 @@
+---
+sidebar_class_name: hidden
+description: Gets cross tenant user sign-in activity
+id: Get-MsIdCrossTenantAccessActivity
+title: Get-MsIdCrossTenantAccessActivity
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdCrossTenantAccessActivity.ps1
+---
+
+## SYNOPSIS
+
+Gets cross tenant user sign-in activity
+
+## SYNTAX
+
+```powershell
+Get-MsIdCrossTenantAccessActivity [[-AccessDirection] <String>] [[-ExternalTenantId] <Guid>] [-SummaryStats]
+ [-ResolveTenantId] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Gets user sign-in activity associated with external tenants.
+By default, shows both connections
+from local users access an external tenant (outbound), and external users accessing the local
+tenant (inbound).
+
+Has a parameter, -AccessDirection, to further refine results, using the following values:
+
+  * Outboud - lists sign-in events of external tenant IDs accessed by local users
+  * Inbound - list sign-in events of external tenant IDs of external users accessing local tenant
+
+Has a parameter, -ExternalTenantId, to target a single external tenant ID.
+
+Has a switch, -SummaryStats, to show summary statistics for each external tenant.
+This also works
+when targeting a single tenant.
+It is best to use this with Format-Table and Out-Gridview to ensure
+a table is produced.
+
+Has a switch, -ResolvelTenantId, to return additional details on the external tenant ID.
+
+-Verbose will give insight into the cmdlets activities.
+
+Requires AuditLog.Read.All scope (to access logs) and CrossTenantInfo.ReadBasic.All scope
+(for -ResolveTenantId), i.e.
+Connect-MgGraph -Scopes AuditLog.Read.All
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdCrossTenantAccessActivity
+```
+
+Gets all available sign-in events for external users accessing resources in the local tenant and
+local users accessing resources in an external tenant.
+
+Lists by external tenant ID.
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -ResolveTenantId -Verbose
+```
+
+Gets all available sign-in events for external users accessing resources in the local tenant and
+local users accessing resources in an external tenant.
+
+Lists by external tenant ID.
+Attempts to resolve the external tenant ID GUID.
+
+Provides verbose output for insight into the cmdlet's execution.
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -SummaryStats | Format-Table
+```
+
+Provides a summary for sign-in information for the external tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1, for both external
+users accessing resources in the local tenant and local users accessing resources in an external tenant.
+
+Use Format-Table to ensure a table is returned.
+
+### EXAMPLE 4
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -ExternalTenantId 3ce14667-9122-45f5-bcd4-f618957d9ba1
+```
+
+Gets all available sign-in events for local users accessing resources in the external tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1,
+and external users from tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1 accessing resources in the local tenant.
+
+Lists by targeted external tenant.
+
+### EXAMPLE 5
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Outbound
+```
+
+Gets all available sign-in events for local users accessing resources in an external tenant.
+
+Lists by unique external tenant.
+
+### EXAMPLE 6
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Outbound -Verbose
+```
+
+Gets all available sign-in events for local users accessing resources in an external tenant.
+
+Lists by unique external tenant.
+
+Provides verbose output for insight into the cmdlet's execution.
+
+### EXAMPLE 7
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Outbound -SummaryStats -ResolveTenantId
+```
+
+Provides a summary of sign-ins for local users accessing resources in an external tenant.
+
+Attempts to resolve the external tenant ID GUID.
+
+### EXAMPLE 8
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Outbound -ExternalTenantId 3ce14667-9122-45f5-bcd4-f618957d9ba1
+```
+
+Gets all available sign-in events for local users accessing resources in the external tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1.
+
+Lists by unique external tenant.
+
+### EXAMPLE 9
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Inbound
+```
+
+Gets all available sign-in events for external users accessing resources in the local tenant.
+
+Lists by unique external tenant.
+
+### EXAMPLE 10
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Inbound -Verbose
+```
+
+Gets all available sign-in events for external users accessing resources in the local tenant.
+
+Lists by unique external tenant.
+
+Provides verbose output for insight into the cmdlet's execution.
+
+### EXAMPLE 11
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Inbound -SummaryStats | Out-Gridview
+```
+
+Provides a summary of sign-ins for external users accessing resources in the local tenant.
+
+Use Out-Gridview to display a table in the Out-Gridview window.
+
+### EXAMPLE 12
+
+```powershell
+Get-MsIdCrossTenantAccessActivity -AccessDirection Inbound -ExternalTenantId 3ce14667-9122-45f5-bcd4-f618957d9ba1
+```
+
+Gets all available sign-in events for external user from external tenant 3ce14667-9122-45f5-bcd4-f618957d9ba1 accessing
+resources in the local tenant.
+
+Lists by unique external tenant.
+
+## PARAMETERS
+
+### -AccessDirection
+
+Return events based on external tenant access direction, either 'Inbound', 'Outbound', or 'Both'
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ExternalTenantId
+
+Return events for the supplied external tenant ID
+
+```yaml
+Type: Guid
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SummaryStats
+
+Show summary statistics by tenant
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ResolveTenantId
+
+Atemmpt to resolve the external tenant ID
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
+FITNESS FOR A PARTICULAR PURPOSE.
+
+This sample is not supported under any Microsoft standard support program or service.
+The script is provided AS IS without warranty of any kind.
+Microsoft further disclaims all
+implied warranties including, without limitation, any implied warranties of merchantability
+or of fitness for a particular purpose.
+The entire risk arising out of the use or performance
+of the sample and documentation remains with you.
+In no event shall Microsoft, its authors,
+or anyone else involved in the creation, production, or delivery of the script be liable for
+any damages whatsoever (including, without limitation, damages for loss of business profits,
+business interruption, loss of business information, or other pecuniary loss) arising out of
+the use of or inability to use the sample or documentation, even if Microsoft has been advised
+of the possibility of such damages, rising out of the use of or inability to use the sample script,
+even if Microsoft has been advised of the possibility of such damages.
+
+## RELATED LINKS

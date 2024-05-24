@@ -1,0 +1,178 @@
+---
+sidebar_class_name: hidden
+description: Update an Azure AD cloud group settings to writeback as an AD on-premises group
+id: Update-MsIdGroupWritebackConfiguration
+title: Update-MsIdGroupWritebackConfiguration
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Update-MsIdGroupWritebackConfiguration.ps1
+---
+
+## SYNOPSIS
+
+Update an Azure AD cloud group settings to writeback as an AD on-premises group
+
+## SYNTAX
+
+### ObjectId (Default)
+
+```powershell
+Update-MsIdGroupWritebackConfiguration [-GroupId] <String[]> [-WriteBackEnabled] <Boolean>
+ [[-WriteBackOnPremGroupType] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### GraphGroup
+
+```powershell
+Update-MsIdGroupWritebackConfiguration [-Group] <Object[]> [-WriteBackEnabled] <Boolean>
+ [[-WriteBackOnPremGroupType] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Update-MsIdGroupWritebackConfiguration -GroupId <GroupId> -WriteBackEnabled $false
+```
+
+Disable Group Writeback for Group ID
+
+### EXAMPLE 2
+
+```powershell
+Update-MsIdGroupWritebackConfiguration -GroupId <GroupId> -WriteBackEnabled $true -WriteBackOnPremGroupType universalDistributionGroup
+```
+
+Enable Group Writeback for Group ID as universalDistributionGroup on-premises
+
+### EXAMPLE 3
+
+```powershell
+Update-MsIdGroupWritebackConfiguration -GroupId <GroupId> -WriteBackEnabled $false
+```
+
+Disable Group Writeback for Group ID
+
+### EXAMPLE 4
+
+```powershell
+Get-mggroup -filter "groupTypes/any(c:c eq 'Unified')"|Update-MsIdGroupWritebackConfiguration -WriteBackEnabled $false -verbose
+```
+
+For all M365 Groups in the tenant, set the WritebackEnabled to false to prevent them from being written back on-premises
+
+## PARAMETERS
+
+### -GroupId
+
+Group Object ID
+
+```yaml
+Type: String[]
+Parameter Sets: ObjectId
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Group
+
+Group Object
+
+```yaml
+Type: Object[]
+Parameter Sets: GraphGroup
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -WriteBackEnabled
+
+WritebackEnabled true or false
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 3
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WriteBackOnPremGroupType
+
+On-Premises Group Type cloud group is written back as
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+- Updating Role Assignable Groups or Privileged Access Groups require PrivilegedAccess.ReadWrite.AzureADGroup permission scope
+
+THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
+FITNESS FOR A PARTICULAR PURPOSE.
+This sample is not supported under any Microsoft standard support program or service.
+The script is provided AS IS without warranty of any kind. Microsoft further disclaims all
+implied warranties including, without limitation, any implied warranties of merchantability
+or of fitness for a particular purpose. The entire risk arising out of the use or performance
+of the sample and documentation remains with you. In no event shall Microsoft, its authors,
+or anyone else involved in the creation, production, or delivery of the script be liable for
+any damages whatsoever (including, without limitation, damages for loss of business profits,
+business interruption, loss of business information, or other pecuniary loss) arising out of
+the use of or inability to use the sample or documentation, even if Microsoft has been advised
+of the possibility of such damages, rising out of the use of or inability to use the sample script,
+even if Microsoft has been advised of the possibility of such damages.
+
+## RELATED LINKS

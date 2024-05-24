@@ -1,0 +1,173 @@
+---
+sidebar_class_name: hidden
+description: Resets the redemption state of an external user.
+id: Reset-MsIdExternalUser
+title: Reset-MsIdExternalUser
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Reset-MsIdExternalUser.ps1
+---
+
+## SYNOPSIS
+
+Resets the redemption state of an external user.
+
+## SYNTAX
+
+### ObjectId (Default)
+
+```powershell
+Reset-MsIdExternalUser [-UserId] <String> [[-InviteRedirectUrl] <String>] [-SendInvitationMessage]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### GraphUser
+
+```powershell
+Reset-MsIdExternalUser [-User] <PSObject> [[-InviteRedirectUrl] <String>] [-SendInvitationMessage]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Reset-MsIdExternalUser -UserId 1468b68b-8536-4bc5-ab1f-6014175b836d
+```
+
+Resets the invitation state of an external user.
+
+### EXAMPLE 2
+
+```powershell
+Reset-MsIdExternalUser -UserId 1468b68b-8536-4bc5-ab1f-6014175b836d -SendInvitationMessage
+```
+
+Resets the invitation state of an external user and sends them the invitation redemption mail.
+
+### EXAMPLE 3
+
+```powershell
+$user = Get-MgUser -Filter "startsWith(mail, 'john.doe@fabrikam.net')"
+PS > Reset-MsIdExternalUser -UserId $user.Id
+```
+
+Resets the invitation state of an external user with the email address john.doe@fabrikam.net.
+
+### EXAMPLE 4
+
+```powershell
+$users = Get-MgUser -Filter "endsWith(mail, '@fabrikam.net')"
+PS > $users | Reset-MsIdExternalUser -UserId $user.Id -SendInvitationMessage
+```
+
+Resets the invitation state of all external users from fabrikam.net and sends them an invitation mail.
+
+### EXAMPLE 5
+
+```powershell
+Get-MsIdUnmanagedExternalUser | Reset-MsIdExternalUser
+```
+
+Resets the invitation state of all unmanaged external users in the tenant.
+
+## PARAMETERS
+
+### -UserId
+
+ObjectId of external user
+
+```yaml
+Type: String
+Parameter Sets: ObjectId
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -User
+
+User object of external user
+
+```yaml
+Type: PSObject
+Parameter Sets: GraphUser
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -InviteRedirectUrl
+
+The url to redirect the user to after they redeem the link
+Defaults to My Apps page of the inviter's home tenant.
+https://myapps.microsoft.com?tenantId=\{tenantId\}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SendInvitationMessage
+
+Sends an email notification to the user with the guest invitation redemption link
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

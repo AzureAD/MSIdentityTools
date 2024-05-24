@@ -1,0 +1,198 @@
+---
+sidebar_class_name: hidden
+description: Get list of IP ranges for Azure
+id: Get-MsIdAzureIpRange
+title: Get-MsIdAzureIpRange
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdAzureIpRange.ps1
+---
+
+## SYNOPSIS
+
+Get list of IP ranges for Azure
+
+## SYNTAX
+
+### ById (Default)
+
+```powershell
+Get-MsIdAzureIpRange [[-Cloud] <String>] [[-Region] <String>] [[-ServiceTag] <String>] [-ForceRefresh]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### AllServiceTagsAndRegions
+
+```powershell
+Get-MsIdAzureIpRange [[-Cloud] <String>] [-AllServiceTagsAndRegions] [-ForceRefresh]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdAzureIpRange -AllServiceTagsAndRegions
+```
+
+Get list of IP ranges for Azure Public cloud catagorized by Service Tag and Region.
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdAzureIpRange -ServiceTag AzureActiveDirectory
+```
+
+Get list of IP ranges for Azure Active Directory in Azure Public Cloud.
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdAzureIpRange -Region WestUS
+```
+
+Get list of IP ranges for West US region of Azure Public Cloud.
+
+### EXAMPLE 4
+
+```powershell
+Get-MsIdAzureIpRange -Cloud China -Region ChinaEast -ServiceTag Storage
+```
+
+Get list of IP ranges for Storage in ChinaEast region of Azure China Cloud.
+
+## PARAMETERS
+
+### -Cloud
+
+Name of Azure Cloud.
+Valid values are: Public, Government, Germany, China
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: Public
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Region
+
+Name of Region.
+Use AllServiceTagsAndRegions parameter to see valid regions.
+Default Cloud parameter value
+Default ServiceTag parameter value
+$StartPosition = $host.UI.RawUI.CursorPosition
+Write-Host '...' -NoNewline
+$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object \{ $_ \}
+| ForEach-Object \{$_\}
+$host.UI.RawUI.CursorPosition = $StartPosition
+Write-Host ('   ') -NoNewline
+
+```yaml
+Type: String
+Parameter Sets: ById
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ServiceTag
+
+Name of Service Tag.
+Use AllServiceTagsAndRegions parameter to see valid service tags.
+Default Cloud parameter value
+Default Region parameter value
+Write-Host '...' -NoNewline
+$AllServiceTagsAndRegions.values.properties.region | Select-Object -Unique | Where-Object \{ $_ \}
+| ForEach-Object \{$_\}
+
+```yaml
+Type: String
+Parameter Sets: ById
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AllServiceTagsAndRegions
+
+List all IP ranges catagorized by Service Tag and Region.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: AllServiceTagsAndRegions
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ForceRefresh
+
+Bypass cache and download data again.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+### System.Management.Automation.PSObject
+
+### System.String[]
+## NOTES
+
+## RELATED LINKS

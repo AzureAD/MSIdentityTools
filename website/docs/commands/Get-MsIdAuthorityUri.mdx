@@ -1,0 +1,264 @@
+---
+sidebar_class_name: hidden
+description: Build Microsoft Identity Provider Authority URI
+id: Get-MsIdAuthorityUri
+title: Get-MsIdAuthorityUri
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdAuthorityUri.ps1
+---
+
+## SYNOPSIS
+
+Build Microsoft Identity Provider Authority URI
+
+## SYNTAX
+
+### Common (Default)
+
+```powershell
+Get-MsIdAuthorityUri [-TenantName <String>] [-TenantId <String>] [-AppType <String>]
+ [-OAuth2EndpointVersion <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### AzureAd
+
+```powershell
+Get-MsIdAuthorityUri [-AzureAd] [-TenantName <String>] [-TenantId <String>] [-AppType <String>]
+ [-OAuth2EndpointVersion <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### AzureAdB2c
+
+```powershell
+Get-MsIdAuthorityUri [-AzureAdB2c] -TenantName <String> [-TenantId <String>] -Policy <String>
+ [-AppType <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### Msa
+
+```powershell
+Get-MsIdAuthorityUri [-Msa] [-AppType <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdAuthorityUri
+```
+
+Get common Microsoft authority URI endpoint.
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdAuthorityUri -TenantId contoso.com
+```
+
+Get Microsoft IdP authority URI endpoint for a specific organizational tenant (Azure AD).
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdAuthorityUri -AzureAd
+```
+
+Get Microsoft IdP authority URI endpoint for any organizational account (Azure AD).
+
+### EXAMPLE 4
+
+```powershell
+Get-MsIdAuthorityUri -Msa
+```
+
+Get Microsoft IdP authority URI endpoint for any Microsoft consumer account (MSA).
+
+### EXAMPLE 5
+
+```powershell
+Get-MsIdAuthorityUri -AzureAdB2c -TenantName contoso -Policy B2C_1_SignUp
+```
+
+Get Microsoft IdP authority URI endpoint for a specific organization B2C tenant (Azure AD B2C) using the B2C_1_SignUp policy.
+
+## PARAMETERS
+
+### -AzureAd
+
+Use endpoint for organizational accounts (Azure AD).
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: AzureAd
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AzureAdB2c
+
+Use endpoint for organizational B2C accounts (Azure AD B2C).
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: AzureAdB2c
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Msa
+
+Use endpoint for Microsoft consumer accounts (MSA).
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Msa
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TenantName
+
+Name of Azure AD tenant.
+For example: &lt;TenantName&gt;.onmicrosoft.com
+
+```yaml
+Type: String
+Parameter Sets: Common, AzureAd
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+```yaml
+Type: String
+Parameter Sets: AzureAdB2c
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TenantId
+
+Azure AD tenant GUID or verified domain name.
+For example: contoso.onmicrosoft.com or contoso.com
+
+```yaml
+Type: String
+Parameter Sets: Common, AzureAd, AzureAdB2c
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Policy
+
+Name of B2C Policy defined in Azure AD B2C tenant.
+
+```yaml
+Type: String
+Parameter Sets: AzureAdB2c
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AppType
+
+Type of app integration ('OAuth2','Saml','WsFed').
+'OAuth2' is default.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: OAuth2
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OAuth2EndpointVersion
+
+OAuth2 endpoint version ('v1.0','v2.0').
+v2.0 is default.
+
+```yaml
+Type: String
+Parameter Sets: Common, AzureAd
+Aliases:
+
+Required: False
+Position: Named
+Default value: V2.0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+### System.String
+
+## NOTES
+
+## RELATED LINKS

@@ -1,0 +1,112 @@
+---
+sidebar_class_name: hidden
+description: Get Statistics for Set of Azure AD Provisioning Logs
+id: Get-MsIdProvisioningLogStatistics
+title: Get-MsIdProvisioningLogStatistics
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdProvisioningLogStatistics.ps1
+---
+
+## SYNOPSIS
+
+Get Statistics for Set of Azure AD Provisioning Logs
+
+## SYNTAX
+
+```powershell
+Get-MsIdProvisioningLogStatistics [-ProvisioningLogs] <Object[]> [-SummarizeByCycleId] [-WriteToConsole]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MgAuditLogProvisioning -Filter "jobId eq '<jobId>'" | Get-MsIdProvisioningLogStatistics -SummarizeByCycleId -WriteToConsole
+```
+
+Get Statistics for Set of Azure AD Provisioning Logs
+
+## PARAMETERS
+
+### -ProvisioningLogs
+
+Provisioning Logs
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -SummarizeByCycleId
+
+Summarize Logs by CycleId
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WriteToConsole
+
+Write Summary to Host Console in addition to Standard Output
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

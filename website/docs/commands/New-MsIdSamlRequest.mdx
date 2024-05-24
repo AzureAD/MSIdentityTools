@@ -1,0 +1,214 @@
+---
+sidebar_class_name: hidden
+description: Create New Saml Request.
+id: New-MsIdSamlRequest
+title: New-MsIdSamlRequest
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/New-MsIdSamlRequest.ps1
+---
+
+## SYNOPSIS
+
+Create New Saml Request.
+
+## SYNTAX
+
+```powershell
+New-MsIdSamlRequest [-Issuer] <String> [[-AssertionConsumerServiceURL] <String>] [-IsPassive] [-ForceAuthn]
+ [[-NameIDPolicyFormat] <String>] [[-RequestedAuthnContext] <String[]>]
+ [[-RequestedAuthnContextComparison] <String>] [-DeflateAndEncode] [-UrlEncode]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-MsIdSamlRequest -Issuer 'urn:microsoft:adfs:claimsxray'
+```
+
+Create New Saml Request for Claims X-Ray.
+
+## PARAMETERS
+
+### -Issuer
+
+Azure AD uses this attribute to populate the InResponseTo attribute of the returned response.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -AssertionConsumerServiceURL
+
+If provided, this parameter must match the RedirectUri of the cloud service in Azure AD.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -IsPassive
+
+If this is true, Azure AD will attempt to authenticate the user silently using the session cookie.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -ForceAuthn
+
+If true, it means that the user will be forced to re-authenticate, even if they have a valid session with Azure AD.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -NameIDPolicyFormat
+
+Tailors the name identifier in the subjects of assertions.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -RequestedAuthnContext
+
+Specifies the authentication context requirements of authentication statements returned in response to a request or query.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -RequestedAuthnContextComparison
+
+Specifies the comparison method used to evaluate the requested context classes or statements, one of "exact", "minimum", "maximum", or "better".
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -DeflateAndEncode
+
+Deflate and Base64 Encode the Saml Request
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UrlEncode
+
+Url Encode the Deflated and Base64 Encoded Saml Request
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+### SamlMessage : System.Xml.XmlDocument, System.String
+
+## NOTES
+
+## RELATED LINKS

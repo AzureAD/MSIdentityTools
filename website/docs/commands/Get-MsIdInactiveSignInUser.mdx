@@ -1,0 +1,115 @@
+---
+sidebar_class_name: hidden
+description: Retrieve Users who have not had interactive sign ins since XX days ago
+id: Get-MsIdInactiveSignInUser
+title: Get-MsIdInactiveSignInUser
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdInactiveSignInUser.ps1
+---
+
+## SYNOPSIS
+
+Retrieve Users who have not had interactive sign ins since XX days ago
+
+## SYNTAX
+
+```powershell
+Get-MsIdInactiveSignInUser [-LastSignInBeforeDaysAgo] <Int32> [-UserType <String>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdInactiveSignInUser -LastSignInBeforeDaysAgo 30
+```
+
+Retrieve Users who have not signed in since 30 days ago from today
+
+## PARAMETERS
+
+### -LastSignInBeforeDaysAgo
+
+User Last Sign In Activity is before Days ago
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases: BeforeDaysAgo
+
+Required: True
+Position: 2
+Default value: 30
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -UserType
+
+Return results for All, Member, or Guest userTypes
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: All
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.Int
+
+## OUTPUTS
+
+### System.String
+
+## NOTES
+- Updating Role Assignable Groups or Privileged Access Groups require PrivilegedAccess.ReadWrite.AzureADGroup permission scope
+THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
+FITNESS FOR A PARTICULAR PURPOSE.
+This sample is not supported under any Microsoft standard support program or service.
+The script is provided AS IS without warranty of any kind. Microsoft further disclaims all
+implied warranties including, without limitation, any implied warranties of merchantability
+or of fitness for a particular purpose. The entire risk arising out of the use or performance
+of the sample and documentation remains with you. In no event shall Microsoft, its authors,
+or anyone else involved in the creation, production, or delivery of the script be liable for
+any damages whatsoever (including, without limitation, damages for loss of business profits,
+business interruption, loss of business information, or other pecuniary loss) arising out of
+the use of or inability to use the sample or documentation, even if Microsoft has been advised
+of the possibility of such damages, rising out of the use of or inability to use the sample script,
+even if Microsoft has been advised of the possibility of such damages.
+
+## RELATED LINKS

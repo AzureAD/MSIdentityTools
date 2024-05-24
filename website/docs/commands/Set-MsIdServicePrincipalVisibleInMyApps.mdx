@@ -1,0 +1,248 @@
+---
+sidebar_class_name: hidden
+description: Toggles whether application service principals are visible when launching myapplications.microsoft.com (MyApps)
+id: Set-MsIdServicePrincipalVisibleInMyApps
+title: Set-MsIdServicePrincipalVisibleInMyApps
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Set-MsIdServicePrincipalVisibleInMyApps.ps1
+---
+
+## SYNOPSIS
+
+Toggles whether application service principals are visible when launching myapplications.microsoft.com (MyApps)
+
+## SYNTAX
+
+```powershell
+Set-MsIdServicePrincipalVisibleInMyApps [-Visible] <Boolean> [-InFile] <String> [[-OutFile] <String>] [-WhatIf]
+ [[-Top] <Int32>] [[-Skip] <Int32>] [[-Continue] <Int32>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+For each provided service principal ID, this cmdlet will add (or remove) the 'HideApp' tag to (or from) its list of tags.
+
+MyApps reads this tag to determine whether to show the service principal in the UX.
+
+-Verbose will give insight into the cmdlet's activities.
+
+Requires Application.ReadWrite.All (to manage service principals), i.e.
+Connect-MgGraph -Scopes Application.ReadWrite.All
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Set-MsIdServicePrincipalVisibleInMyApps -Visible $false -InFile .\sps.txt -OutFile .\output.txt -Verbose
+```
+
+Adds the 'HideApp' tag for each Service Principal listed by guid in the sps.txt file.
+This ensures that the app is no longer visible in the MyApps portal.
+
+Creates a list of changed SPs, written to output.txt, at the script execution directory.
+
+Provides verbose output to assist with monitoring.
+
+### EXAMPLE 2
+
+```powershell
+Set-MsIdServicePrincipalVisibleInMyApps -Visible $true -InFile .\sps.txt -OutFile .\output.txt -Verbose
+```
+
+Removes the 'HideApp' tag for each Service Principal listed by guid in the sps.txt file.
+This ensures that the app is visible in the MyApps portal.
+
+Creates a list of changed SPs, written to output.txt, at the script execution directory.
+
+Provides verbose output to assist with monitoring.
+
+### EXAMPLE 3
+
+```powershell
+Set-MsIdServicePrincipalVisibleInMyApps -Visible $true -InFile .\sps.txt -WhatIf
+```
+
+Removes the 'HideApp' tag for each Service Principal listed by guid in the sps.txt file.
+This ensures that the app is visible in the MyApps portal.
+
+Provides a 'whatif' analysis to show what would've been updated without the -WhatIf switch.
+
+### EXAMPLE 4
+
+```powershell
+Set-MsIdServicePrincipalVisibleInMyApps -Visible $true -InFile .\sps.txt -WhatIf -Top 200
+```
+
+Removes the 'HideApp' tag for each Service Principal listed by guid in the sps.txt file.
+This ensures that the app is visible in the MyApps portal.
+
+Provides a 'whatif' analysis to show what would've been updated without the -WhatIf switch.
+Processes 200 service principals.
+
+## PARAMETERS
+
+### -Visible
+
+Whether to show or hide the SP.
+Supply $true or $false.
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -InFile
+
+A file specifying the list of SP IDs to process.
+Provide one guid per line with no other characters.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -OutFile
+
+(Optional) The list of changed SPs is written to a file at this location for easy recovery.
+A default file will be generated if a path is not provided.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+
+(Optional) When set, shows which SPs would be changed without changing them.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Top
+
+(Optional) The number of SPs to process from the list with each request.
+Default 100.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: 100
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Skip
+
+(Optional) Determines where in the list to begin executing.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 5
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Continue
+
+(Optional) After a failure due to request throttling, set this to the number of inputs that were evaluated before throttling began on the previous request.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 6
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+THIS CODE-SAMPLE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
+FITNESS FOR A PARTICULAR PURPOSE.
+
+This sample is not supported under any Microsoft standard support program or service.
+The script is provided AS IS without warranty of any kind.
+Microsoft further disclaims all
+implied warranties including, without limitation, any implied warranties of merchantability
+or of fitness for a particular purpose.
+The entire risk arising out of the use or performance
+of the sample and documentation remains with you.
+In no event shall Microsoft, its authors,
+or anyone else involved in the creation, production, or delivery of the script be liable for
+any damages whatsoever (including, without limitation, damages for loss of business profits,
+business interruption, loss of business information, or other pecuniary loss) arising out of
+the use of or inability to use the sample or documentation, even if Microsoft has been advised
+of the possibility of such damages, rising out of the use of or inability to use the sample script,
+even if Microsoft has been advised of the possibility of such damages.
+
+## RELATED LINKS

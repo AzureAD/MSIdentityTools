@@ -1,0 +1,92 @@
+---
+sidebar_class_name: hidden
+description: Test connectivity on Windows OS for Azure AD Device Registration
+id: Test-MsIdAzureAdDeviceRegConnectivity
+title: Test-MsIdAzureAdDeviceRegConnectivity
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Test-MsIdAzureAdDeviceRegConnectivity.ps1
+---
+
+## SYNOPSIS
+
+Test connectivity on Windows OS for Azure AD Device Registration
+
+## SYNTAX
+
+```powershell
+Test-MsIdAzureAdDeviceRegConnectivity [[-AdfsHostname] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Test-MsIdAzureAdDeviceRegConnectivity
+```
+
+Test required hostnames
+
+### EXAMPLE 2
+
+```powershell
+Test-MsIdAzureAdDeviceRegConnectivity -AdfsHostname 'adfs.contoso.com'
+```
+
+Test required hostnames and ADFS server
+
+## PARAMETERS
+
+### -AdfsHostname
+
+ADFS Server
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS
+
+[https://docs.microsoft.com/en-us/samples/azure-samples/testdeviceregconnectivity/testdeviceregconnectivity/](https://docs.microsoft.com/en-us/samples/azure-samples/testdeviceregconnectivity/testdeviceregconnectivity/)

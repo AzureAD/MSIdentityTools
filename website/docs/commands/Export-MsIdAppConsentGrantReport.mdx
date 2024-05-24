@@ -1,0 +1,168 @@
+---
+sidebar_class_name: hidden
+description: Lists and categorizes privilege for delegated permissions (OAuth2PermissionGrants) and application permissions (AppRoleAssignments).
+id: Export-MsIdAppConsentGrantReport
+title: Export-MsIdAppConsentGrantReport
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Export-MsIdAppConsentGrantReport.ps1
+---
+
+## SYNOPSIS
+
+Lists and categorizes privilege for delegated permissions (OAuth2PermissionGrants) and application permissions (AppRoleAssignments).
+NOTE: This cmdlet can take many hours to run on large tenants.
+
+## SYNTAX
+
+### Excel
+
+```powershell
+Export-MsIdAppConsentGrantReport [-ExcelWorkbookPath] <String> [[-ReportOutputType] <String>]
+ [-PermissionsTableCsvPath <String>] [-ThrottleLimit <Int32>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+### PowerShell
+
+```powershell
+Export-MsIdAppConsentGrantReport [[-ReportOutputType] <String>] [-PermissionsTableCsvPath <String>]
+ [-ThrottleLimit <Int32>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+This cmdlet requires the `ImportExcel` module to be installed if you use the `-ReportOutputType ExcelWorkbook` parameter.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Install-Module ImportExcel
+PS > Connect-MgGragh -Scopes Directory.Read.All
+PS > Export-MsIdAppConsentGrantReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
+```
+
+Output a report in Excel format
+
+### EXAMPLE 2
+
+```powershell
+Export-MsIdAppConsentGrantReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx -PermissionsTableCsvPath .\table.csv
+```
+
+Output a report in Excel format and specify a local path for a customized CSV containing consent privilege categorizations
+
+### EXAMPLE 3
+
+```powershell
+$appConsent = Export-MsIdAppConsentGrantReport -ReportOutputType PowerShellObjects
+```
+
+Return the resuls as hashtable for processing or exporting to other formats like csv or json.
+
+### EXAMPLE 4
+
+```powershell
+Export-MsIdAppConsentGrantReport -ExcelWorkbookPath .\report.xlsx -ThrottleLimit 5
+```
+
+Increase the throttle limit to speed things up or reduce if you are getting throttling errors.
+Default is 20
+
+## PARAMETERS
+
+### -ExcelWorkbookPath
+
+Output file location for Excel Workbook
+
+```yaml
+Type: String
+Parameter Sets: Excel
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ReportOutputType
+
+Output type for the report.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: ExcelWorkbook
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PermissionsTableCsvPath
+
+Path to CSV file for Permissions Table
+If not provided the default table will be downloaded from GitHub https://raw.githubusercontent.com/AzureAD/MSIdentityTools/main/assets/aadconsentgrantpermissiontable.csv
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ThrottleLimit
+
+The number of parallel threads to use when calling the Microsoft Graph API.
+Default is 20.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 20
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

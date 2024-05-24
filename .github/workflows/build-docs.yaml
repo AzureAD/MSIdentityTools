@@ -1,0 +1,25 @@
+# Regenerates the documentation for the "Command Reference" section of the site https://maester.dev
+name: build-docs
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow updates to the repository
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update docs
+        run: ./build/Update-CommandReference.ps1
+        shell: pwsh
+
+      - name: Create PR to update repo
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: Update command reference

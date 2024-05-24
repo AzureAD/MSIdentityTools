@@ -1,0 +1,108 @@
+---
+sidebar_class_name: hidden
+description: Imports the 'MsId Block Off Corp and VPN' sample AD FS access control policy.
+id: Import-MsIdAdfsSamplePolicy
+title: Import-MsIdAdfsSamplePolicy
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Import-MsIdAdfsSamplePolicy.ps1
+---
+
+## SYNOPSIS
+
+Imports the 'MsId Block Off Corp and VPN' sample AD FS access control policy.
+This policy is meant to be used as test policy.
+
+## SYNTAX
+
+```powershell
+Import-MsIdAdfsSamplePolicy [-Locations] <String[]> [[-ApplyTo] <String[]>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Imports the 'MsId Block Off Corp and VPN' sample AD FS access control policy.
+Pass locations in the format of range (205.143.204.1-205.143.205.250) or CIDR (12.159.168.1/24).
+
+This policy is meant to be used as test policy!
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Import-MsIdAdfsSamplePolicy -Locations 205.143.204.1-205.143.205.250,12.159.168.1/24,12.35.175.1/26
+```
+
+Create the policy to the local AD FS server.
+
+### EXAMPLE 2
+
+```powershell
+Import-MsIdAdfsSamplePolicy -Locations 205.143.204.1-205.143.205.250 -ApplyTo App1,App2
+```
+
+Create the policy to the local AD FS server and apply it to to the list of applications.
+
+## PARAMETERS
+
+### -Locations
+
+Network locations
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ApplyTo
+
+Relying party names to apply the policy
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

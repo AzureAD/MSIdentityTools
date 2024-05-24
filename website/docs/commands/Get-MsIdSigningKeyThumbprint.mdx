@@ -1,0 +1,132 @@
+---
+sidebar_class_name: hidden
+description: Get signing keys used by Azure AD.
+id: Get-MsIdSigningKeyThumbprint
+title: Get-MsIdSigningKeyThumbprint
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdSigningKeyThumbprint.ps1
+---
+
+## SYNOPSIS
+
+Get signing keys used by Azure AD.
+
+## SYNTAX
+
+```powershell
+Get-MsIdSigningKeyThumbprint [[-Tenant] <Object>] [[-Environment] <Object>] [-Latest]
+ [[-DownloadPath] <String>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdSigningKeyThumbprint
+```
+
+Get common Azure AD signing key thumbprints.
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdSigningKeyThumbprint -Tenant <tenandId>
+```
+
+Get Azure AD signing key thumbprints for the given tenant.
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdSigningKeyThumbprint -Tenant <tenandId> -Latest
+```
+
+Get the latest Azure AD signing key thumbprint for the given tenant.
+
+### EXAMPLE 4
+
+```powershell
+Get-MsIdSigningKeyThumbprint -DownloadPath C:\temp
+```
+
+Export the certificates to a folder destination.
+
+## PARAMETERS
+
+### -Tenant
+
+Tenant ID
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: Common
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Environment
+
+Cloud environment
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: Prod
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Latest
+
+Return the latest certificate
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DownloadPath
+
+Location to save certificate
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

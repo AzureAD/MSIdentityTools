@@ -1,0 +1,116 @@
+---
+sidebar_class_name: hidden
+description: Parse OpenId Provider Configuration and Keys
+id: Get-MsIdOpenIdProviderConfiguration
+title: Get-MsIdOpenIdProviderConfiguration
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Get-MsIdOpenIdProviderConfiguration.ps1
+---
+
+## SYNOPSIS
+
+Parse OpenId Provider Configuration and Keys
+
+## SYNTAX
+
+```powershell
+Get-MsIdOpenIdProviderConfiguration [-Issuer] <Uri> [-Keys] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com | Get-MsIdOpenIdProviderConfiguration
+```
+
+Get OpenId Provider Configuration for a specific Microsoft organizational tenant (Azure AD).
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdAuthorityUri -TenantId tenant.onmicrosoft.com | Get-MsIdOpenIdProviderConfiguration -Keys
+```
+
+Get public keys for OpenId Provider for a specific Microsoft organizational tenant (Azure AD).
+
+### EXAMPLE 3
+
+```powershell
+Get-MsIdAuthorityUri -Msa | Get-MsIdOpenIdProviderConfiguration
+```
+
+Get OpenId Provider Configuration for Microsoft consumer accounts (MSA).
+
+## PARAMETERS
+
+### -Issuer
+
+Identity Provider Authority URI
+
+```yaml
+Type: Uri
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -Keys
+
+Return configuration keys
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.Uri
+
+## OUTPUTS
+
+### System.Management.Automation.PSObject[]
+
+## NOTES
+
+## RELATED LINKS

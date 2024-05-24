@@ -1,0 +1,92 @@
+---
+sidebar_class_name: hidden
+description: Convert Azure AD connector space object Distinguished Name (DN) in AAD Connect
+id: ConvertFrom-MsIdAadcAadConnectorSpaceDn
+title: ConvertFrom-MsIdAadcAadConnectorSpaceDn
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/ConvertFrom-MsIdAadcAadConnectorSpaceDn.ps1
+---
+
+## SYNOPSIS
+
+Convert Azure AD connector space object Distinguished Name (DN) in AAD Connect
+
+## SYNTAX
+
+```powershell
+ConvertFrom-MsIdAadcAadConnectorSpaceDn [-InputObject] <String> [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+ConvertFrom-MsIdAadcAadConnectorSpaceDn 'CN={414141414141414141414141414141414141414141413D3D}'
+```
+
+Convert Azure AD connector space object DN in AAD Connect to sourceAnchor and sourceGuid.
+
+### EXAMPLE 2
+
+```powershell
+'CN={4F626A656374547970655F30303030303030302D303030302D303030302D303030302D303030303030303030303030}' | ConvertFrom-MsIdAadcAadConnectorSpaceDn
+```
+
+Convert Azure AD connector space object DN in AAD Connect to cloudAnchor and cloudGuid.
+
+## PARAMETERS
+
+### -InputObject
+
+Azure AD Connector Space DN from AAD Connect
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+### System.Management.Automation.PSObject
+
+## NOTES
+
+## RELATED LINKS

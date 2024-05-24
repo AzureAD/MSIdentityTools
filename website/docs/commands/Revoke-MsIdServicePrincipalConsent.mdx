@@ -1,0 +1,222 @@
+---
+sidebar_class_name: hidden
+description: Revoke Existing Consent to an Azure AD Service Principal.
+id: Revoke-MsIdServicePrincipalConsent
+title: Revoke-MsIdServicePrincipalConsent
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Revoke-MsIdServicePrincipalConsent.ps1
+---
+
+## SYNOPSIS
+
+Revoke Existing Consent to an Azure AD Service Principal.
+
+## SYNTAX
+
+### Granular (Default)
+
+```powershell
+Revoke-MsIdServicePrincipalConsent [-ClientId] <String[]> [-Scope <String[]>] [-UserConsent]
+ [-UserId <String[]>] [-AdminConsentDelegated] [-AdminConsentApplication] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+### All
+
+```powershell
+Revoke-MsIdServicePrincipalConsent [-ClientId] <String[]> [-Scope <String[]>] [-All]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+This command requires the MS Graph SDK PowerShell Module to have a minimum of the following consented scopes:
+Application.Read.All
+DelegatedPermissionGrant.ReadWrite.All or AppRoleAssignment.ReadWrite.All
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -All
+```
+
+Revoke all consent for servicePrincipal '10000000-0000-0000-0000-000000000001'.
+
+### EXAMPLE 2
+
+```powershell
+Get-MgServicePrincipal -ServicePrincipalId '10000000-0000-0000-0000-000000000001' | Revoke-MsIdServicePrincipalConsent -Scope User.Read.All -All
+```
+
+Revoke all consent of 'User.Read.All' scope for piped in servicePrincipal '10000000-0000-0000-0000-000000000001'.
+
+### EXAMPLE 3
+
+```powershell
+Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -UserId '20000000-0000-0000-0000-000000000002'
+```
+
+Revoke existing consent for servicePrincipal '10000000-0000-0000-0000-000000000001' by user '20000000-0000-0000-0000-000000000002'.
+
+### EXAMPLE 4
+
+```powershell
+Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -Scope User.Read.All -UserConsent -AdminConsentDelegated
+```
+
+Revoke 'User.Read.All' scope from all user consent and tenant-wide admin consent of delegated permissions for servicePrincipal '10000000-0000-0000-0000-000000000001'.
+
+### EXAMPLE 5
+
+```powershell
+Revoke-MsIdServicePrincipalConsent '10000000-0000-0000-0000-000000000001' -Scope 'User.Read.All','User.ReadWrite.All' -AdminConsentApplication
+```
+
+Revoke 'User.Read.All' scope from tenant-wide admin consent of application permissions for servicePrincipal '10000000-0000-0000-0000-000000000001'.
+
+## PARAMETERS
+
+### -ClientId
+
+AppId or ObjectId of service principal
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases: Id
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Scope
+
+Limit which scopes are cleared to specified list
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -All
+
+Revoke all existing consent for service principal
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: All
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UserConsent
+
+Revoke user consent for service principal
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Granular
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UserId
+
+Revoke user consent for service principal for specified users
+
+```yaml
+Type: String[]
+Parameter Sets: Granular
+Aliases: PrincipalId
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AdminConsentDelegated
+
+Revoke tenant-wide admin consent of user delegated permissions for service principal
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Granular
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AdminConsentApplication
+
+Revoke tenant-wide admin consent of application permissions for service principal
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: Granular
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

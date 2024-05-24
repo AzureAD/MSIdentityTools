@@ -1,0 +1,61 @@
+---
+sidebar_class_name: hidden
+description: Test & report for common mis-configuration issues with the Entra ID Certificate Trust Store
+id: Test-MsIdCBATrustStoreConfiguration
+title: Test-MsIdCBATrustStoreConfiguration
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Test-MsIdCBATrustStoreConfiguration.ps1
+---
+
+## SYNOPSIS
+
+Test & report for common mis-configuration issues with the Entra ID Certificate Trust Store
+
+## SYNTAX
+
+```powershell
+Test-MsIdCBATrustStoreConfiguration
+```
+
+## DESCRIPTION
+
+The following is a list of checks performed by this cmdlet.
+
+* CertificateRevocationListUrl Format Validation Test: Checks for a correctly formatted CRL Distribution Point (CDP) URL
+* Certificate Time Validity Test: Checks that the CA certificate being evaluated is time valid
+* CRL Download and Latency Test: Checks to make sure the Certificate Revocation List (CRL) can be downloaded from the configured CRL and that the download completes in less then 12 seconds
+* CRL Size Test: Checks that the CRL is less then 44MB
+* Certificate Trust Chain Test: Checks that any certificate that is not marked as a root has its issuer also present in the certificate store.
+* CRL Authority Test: Checks that the CRL downloaded from the configured CA lists the CA certificate being evaluated as the its authority.
+* CRL Time Validity Test: Checks that the CRL being evaluated is time valid
+* Additional CRL Information: This include properties of the tested CRL including thisUpdate(Issued), nextPublish, nextUpdate(Expiry) and amount of time remaining
+
+This Powershell cmdlet require Windows command line utility Certutil.
+This cmdlet can only be run from Windows device.
+
+Since the CRL Distribution Point (CDP) needs to be accessible to Entra ID.
+It is best to run this script from outside
+a corporate network on an internet connected Windows device.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Test-MsIdCBATrustStoreConfiguration
+```
+
+## PARAMETERS
+
+## INPUTS
+
+### None
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS
+
+[https://aka.ms/aadcba](https://aka.ms/aadcba)

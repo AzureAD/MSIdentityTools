@@ -1,0 +1,98 @@
+---
+sidebar_class_name: hidden
+description: Split elements of a connectedOrganization
+id: Split-MsIdEntitlementManagementConnectedOrganization
+title: Split-MsIdEntitlementManagementConnectedOrganization
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Split-MsIdEntitlementManagementConnectedOrganization.ps1
+---
+
+## SYNOPSIS
+
+Split elements of a connectedOrganization
+
+## SYNTAX
+
+```powershell
+Split-MsIdEntitlementManagementConnectedOrganization [-ConnectedOrganization <Object[]>] [-ByIdentitySource]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Split elements of one or more Azure AD entitlement management connected organizations, returned by Get-MgEntitlementManagementConnectedOrganization, to simplify reporting.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Get-MgEntitlementManagementConnectedOrganization -All |  Split-MsIdEntitlementManagementConnectedOrganization -ByIdentitySource | ft ConnectedOrganizationId,tenantId,domainName
+```
+
+Display one row for each identity source in all the connected organizations with the tenant id or domain name of the identity source.
+
+## PARAMETERS
+
+### -ConnectedOrganization
+
+The connected organization.
+
+```yaml
+Type: Object[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -ByIdentitySource
+
+Flag to indicate that the output should be split by identity source.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### Microsoft.Graph.PowerShell.Models.MicrosoftGraphConnectedOrganization
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS
