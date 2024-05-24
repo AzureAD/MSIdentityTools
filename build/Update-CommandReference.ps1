@@ -8,7 +8,6 @@ if (-not (Get-Module PlatyPS -ListAvailable)) { Install-Module PlatyPS -Scope Cu
 Import-Module Alt3.Docusaurus.Powershell
 Import-Module PlatyPS
 Import-Module ./src/MSIdentityTools.psm1 -Force
-Import-Module -Name MSIdentityTools
 
 # Generate the command reference markdown
 $commandsIndexFile = "./website/docs/commands/readme.md"
