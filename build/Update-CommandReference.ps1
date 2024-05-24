@@ -7,7 +7,6 @@ if (-not (Get-Module PlatyPS -ListAvailable)) { Install-Module PlatyPS -Scope Cu
 
 Import-Module Alt3.Docusaurus.Powershell
 Import-Module PlatyPS
-Import-Module ./src/MSIdentityTools.psm1 -Force
 
 # Generate the command reference markdown
 $commandsIndexFile = "./website/docs/commands/readme.md"
@@ -16,7 +15,7 @@ $readmeContent = Get-Content $commandsIndexFile  # Backup the readme.md since it
 # Get all the filenames in the ./powershell/internal folder wihtout the extension
 $internalCommands = Get-ChildItem ./src/internal -Filter *.ps1 | ForEach-Object { $_.BaseName }
 
-New-DocusaurusHelp -Module ./src/MSIdentityTools.psm1 -DocsFolder ./website/docs -NoPlaceHolderExamples -EditUrl https://github.com/maester365/maester/blob/main/powershell/public/ -Exclude $internalCommands
+New-DocusaurusHelp -Module ./src/MSIdentityTools.psd1 -DocsFolder ./website/docs -NoPlaceHolderExamples -EditUrl https://github.com/azuread/msidentitytools/blob/main/src/ -Exclude $internalCommands
 
 # Update the markdown to include the synopsis as description so it can be displayed correctly in the doc links.
 $cmdMarkdownFiles = Get-ChildItem ./website/docs/commands

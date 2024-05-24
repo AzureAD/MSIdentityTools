@@ -31,7 +31,7 @@
     Description          = 'Tools for managing, troubleshooting, and reporting on various aspects of Microsoft Identity products and services, primarily Azure AD.'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion    = '5.1'
+    PowerShellVersion    = '7.0'
 
     # Name of the Windows PowerShell host required by this module
     # PowerShellHostName = ''
