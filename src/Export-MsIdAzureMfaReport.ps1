@@ -4,6 +4,14 @@
     The report includes each user's MFA registration status.
     Required scopes: AuditLog.Read.All, UserAuthenticationMethod.Read.All
 
+    In addition to the delegated permissions, the signed-in user needs to belong to at least one of the following Microsoft Entra roles that allow them to read sign-in reports.
+
+    - Global Reader
+    - Reports Reader
+    - Security Administrator
+    - Security Operator
+    - Security Reader
+
 .DESCRIPTION
     - Entra ID free tenants have access to sign in logs for the last 7 days.
     - Entra ID premium tenants have access to sign in logs for the last 30 days.
@@ -13,7 +21,7 @@
 
 .EXAMPLE
     PS > Install-Module ImportExcel
-    PS > Connect-MgGragh -Scopes AuditLog.Read.All, User.Read.All, UserAuthenticationMethod.Read.All
+    PS > Connect-MgGragh -Scopes AuditLog.Read.All, UserAuthenticationMethod.Read.All
     PS > Export-MsIdAzureMfaReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
 
     Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
