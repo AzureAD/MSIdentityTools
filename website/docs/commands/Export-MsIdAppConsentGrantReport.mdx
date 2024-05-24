@@ -5,7 +5,7 @@ id: Export-MsIdAppConsentGrantReport
 title: Export-MsIdAppConsentGrantReport
 hide_title: false
 hide_table_of_contents: false
-custom_edit_url: https://github.com/maester365/maester/blob/main/powershell/public/Export-MsIdAppConsentGrantReport.ps1
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Export-MsIdAppConsentGrantReport.ps1
 ---
 
 ## SYNOPSIS
@@ -40,7 +40,7 @@ This cmdlet requires the `ImportExcel` module to be installed if you use the `-R
 
 ```powershell
 Install-Module ImportExcel
-PS > Connect-MgGragh -Scopes Directory.Read.All
+PS > Connect-MgGraph -Scopes Directory.Read.All
 PS > Export-MsIdAppConsentGrantReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
 ```
 

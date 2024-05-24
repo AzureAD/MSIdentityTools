@@ -1,0 +1,215 @@
+---
+sidebar_class_name: hidden
+description: Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell.
+id: Export-MsIdAzureMfaReport
+title: Export-MsIdAzureMfaReport
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Export-MsIdAzureMfaReport.ps1
+---
+
+## SYNOPSIS
+
+Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell.
+The report includes each user's MFA registration status.
+Required scopes: AuditLog.Read.All, UserAuthenticationMethod.Read.All
+
+In addition to the delegated permissions, the signed-in user needs to belong to at least one of the following Microsoft Entra roles that allow them to read sign-in reports.
+
+- Global Reader
+- Reports Reader
+- Security Administrator
+- Security Operator
+- Security Reader
+
+## SYNTAX
+
+### Excel
+
+```powershell
+Export-MsIdAzureMfaReport [-ExcelWorkbookPath] <String> [[-ReportOutputType] <String>] [-Days <Int32>]
+ [-Users <Array>] [-UsersMfa <Array>] [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+### PowerShell
+
+```powershell
+Export-MsIdAzureMfaReport [[-ReportOutputType] <String>] [-Days <Int32>] [-Users <Array>] [-UsersMfa <Array>]
+ [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+- Entra ID free tenants have access to sign in logs for the last 7 days.
+- Entra ID premium tenants have access to sign in logs for the last 30 days.
+- The cmdlet will query the sign in log from the most recent day and work backwards.
+
+This cmdlet requires the `ImportExcel` module to be installed if you use the `-ReportOutputType ExcelWorkbook` parameter.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Install-Module ImportExcel
+PS > Connect-MgGragh -Scopes AuditLog.Read.All, UserAuthenticationMethod.Read.All
+PS > Export-MsIdAzureMfaReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
+```
+
+Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
+
+### EXAMPLE 2
+
+```powershell
+Export-MsIdAzureMfaReport -Days 3 -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
+```
+
+Queries sign in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
+
+### EXAMPLE 3
+
+```powershell
+Export-MsIdAzureMfaReport -ReportOutputType PowerShellObjects
+```
+
+Returns the results as a PowerShell object for further processing.
+
+### EXAMPLE 4
+
+```powershell
+Export-MsIdAzureAdminMfaReport
+```
+
+Returns the results as a PowerShell object for further processing.
+
+## PARAMETERS
+
+### -ExcelWorkbookPath
+
+Output file location for Excel Workbook
+
+```yaml
+Type: String
+Parameter Sets: Excel
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ReportOutputType
+
+Output type for the report.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: ExcelWorkbook
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Days
+
+Number of days to query sign in logs.
+Defaults to 30 days for premium tenants and 7 days for free tenants
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Users
+
+Optional.
+Hashtable with a pre-defined list of User objects (Use Get-MsIdAzureUsers).
+
+```yaml
+Type: Array
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UsersMfa
+
+Optional.
+Hashtable with a pre-defined list of User objects with auth methods.
+Used for generating spreadhsheet.
+
+```yaml
+Type: Array
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UseAuthenticationMethodEndPoint
+
+If enabled, the user auth method will be used (slower) instead of the reporting API.
+Not applicable for Free tenants since they don't have access to the reporting API.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

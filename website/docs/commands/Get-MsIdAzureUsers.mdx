@@ -1,0 +1,91 @@
+---
+sidebar_class_name: hidden
+description: Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell.
+id: Get-MsIdAzureUsers
+title: Get-MsIdAzureUsers
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Get-MsIdAzureUsers.ps1
+---
+
+## SYNOPSIS
+
+Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell.
+
+## SYNTAX
+
+```powershell
+Get-MsIdAzureUsers [[-Days] <Int32>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+- Entra ID free tenants have access to sign in logs for the last 7 days.
+- Entra ID premium tenants have access to sign in logs for the last 30 days.
+- The cmdlet will query the sign in log from the most recent day and work backwards.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Connect-MgGragh -Scopes AuditLog.Read.All
+PS > Get-MsIdAzureUsers
+```
+
+Queries all available logs and returns all the users that have signed into Azure.
+
+### EXAMPLE 2
+
+```powershell
+Get-MsIdAzureUsers -Days 3
+```
+
+Queries the logs for the last three days and returns all the users that have signed into Azure during this period.
+
+## PARAMETERS
+
+### -Days
+
+Number of days to query sign in logs.
+Defaults to 30 days for premium tenants and 7 days for free tenants
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS
