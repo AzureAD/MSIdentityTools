@@ -50,9 +50,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./website/build/
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
