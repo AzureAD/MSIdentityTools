@@ -1,13 +1,14 @@
 name: Update Wiki
 
 on:
-  push:
-    branches:
-    - main
-    paths: 
-    - '.github/workflows/wiki.yml'
-    - 'src/**'
-    - 'build/*Wiki.ps1'
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #   - main
+  #   paths: 
+  #   - '.github/workflows/wiki.yml'
+  #   - 'src/**'
+  #   - 'build/*Wiki.ps1'
 
 jobs:
   update:
