@@ -1,16 +1,10 @@
 ﻿<#
 .SYNOPSIS
-    Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell.
+    Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
     The report includes each user's MFA registration status.
-    Required scopes: AuditLog.Read.All, UserAuthenticationMethod.Read.All
 
-    In addition to the delegated permissions, the signed-in user needs to belong to at least one of the following Microsoft Entra roles that allow them to read sign-in reports.
-
-    - Global Reader
-    - Reports Reader
-    - Security Administrator
-    - Security Operator
-    - Security Reader
+    Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
+    Required Microsoft Entra role: **Global Reader**
 
 .DESCRIPTION
     - Entra ID free tenants have access to sign in logs for the last 7 days.
@@ -21,7 +15,7 @@
 
 .EXAMPLE
     PS > Install-Module ImportExcel
-    PS > Connect-MgGragh -Scopes AuditLog.Read.All, UserAuthenticationMethod.Read.All
+    PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
     PS > Export-MsIdAzureMfaReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
 
     Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
@@ -44,24 +38,21 @@
 #>
 function Export-MsIdAzureMfaReport {
     param (
-        # Output file location for Excel Workbook
-        [Parameter(ParameterSetName = 'Excel', Mandatory = $true, Position = 1)]
+        # Output file location for Excel Workbook. e.g. .\report.xlsx
+        [string]
+        [Parameter(Position = 1)]
         [string]
         $ExcelWorkbookPath,
 
-        # Output type for the report.
-        [ValidateSet("ExcelWorkbook", "PowerShellObjects")]
-        [Parameter(ParameterSetName = 'Excel', Mandatory = $false, Position = 2)]
-        [Parameter(ParameterSetName = 'PowerShell', Mandatory = $false, Position = 1)]
-        [string]
-        $ReportOutputType = "ExcelWorkbook",
+        # Switch to include the results in the output
+        [switch]
+        $PassThru,
 
         # Number of days to query sign in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
         [ValidateScript({
                 $_ -ge 0 -and $_ -le 30
             },
-            ErrorMessage = "Logs are only available for the last 7 days for free tenants and 30 days for premium tenants. Please enter a number between 0 and 30."
-        )]
+            ErrorMessage = "Logs are only available for the last 7 days for free tenants and 30 days for premium tenants. Please enter a number between 0 and 30.")]
         [int]
         $Days,
 
@@ -73,22 +64,24 @@ function Export-MsIdAzureMfaReport {
         [array]
         $UsersMfa,
 
-        # If enabled, the user auth method will be used (slower) instead of the reporting API. Not applicable for Free tenants since they don't have access to the reporting API.
+        # If enabled, the user auth method will be used (slower) instead of the reporting API. This is the default for free tenants as the reporting API requires a premium license.
         [switch]
         $UseAuthenticationMethodEndPoint
     )
-
     function Main() {
 
-        if ("ExcelWorkbook" -eq $ReportOutputType) {
+        if (-not (Test-MgModulePrerequisites @('AuditLog.Read.All', 'Directory.Read.All', 'UserAuthenticationMethod.Read.All'))) { return }
+
+        $isExcel = ![string]::IsNullOrEmpty($ExcelWorkbookPath)
+        if ($isExcel) {
             # Determine if the ImportExcel module is installed since the parameter was included
             if ($null -eq (Get-Module -Name ImportExcel -ListAvailable)) {
-                throw "The ImportExcel module is not installed. This is used to export the results to an Excel worksheet. Please install the ImportExcel Module before using this parameter or run without this parameter."
+                Write-Error "The ImportExcel module is not installed. This is used to export the results to an Excel worksheet. Please install the ImportExcel Module before using this parameter or run without this parameter." -ErrorAction Stop
             }
-        }
 
-        if ($null -eq (Get-MgContext)) {
-            throw "You must connect to the Microsoft Graph before running this command."
+            if ([IO.Path]::GetExtension($ExcelWorkbookPath) -notmatch ".xlsx") {
+                Write-Error "The ExcelWorkbookPath '$ExcelWorkbookPath' is not a valid Excel file. Please provide a valid Excel file path. E.g. .\report.xlsx" -ErrorAction Stop
+            }
         }
 
         if ($null -eq $Users -and $null -eq $UsersMfa) {
@@ -98,11 +91,12 @@ function Export-MsIdAzureMfaReport {
         if ($UsersMfa) { $azureUsersMfa = $UsersMfa }
         else { $azureUsersMfa = GetUserMfaInsight $Users }
 
-        if ("PowerShellObjects" -eq $ReportOutputType) {
-            return $azureUsersMfa
-        }
-        else {
+        if ($isExcel) {
             GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
+        }
+
+        if (-not ($isExcel) -or ($isExcel -and $PassThru)) {
+            return $azureUsersMfa
         }
     }
 
@@ -198,6 +192,10 @@ function Export-MsIdAzureMfaReport {
     # Get the authentication method state for each user
     function GetUserMfaInsight($users) {
 
+        if(!$users) {
+            Write-Error "No users available to create MFA report." -ErrorAction Stop
+        }
+
         if ($UseAuthenticationMethodEndPoint) { $isPremiumTenant = $false } # Force into free tenant mode
         else { $isPremiumTenant = GetIsPremiumTenant $users }
 
@@ -217,21 +215,21 @@ function Export-MsIdAzureMfaReport {
             if ($isPremiumTenant) {
                 $graphUri = (GetGraphBaseUri) + "/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
             }
-            $resultJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
-            $err = Get-ObjectPropertyValue $resultJson -Property "error"
+            $resultsJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+            $err = Get-ObjectPropertyValue $resultsJson -Property "error"
 
             if ($err) {
-                $note = "Could not retrieve authentication methods for user."
-
-                if ($null -ne $err) {
-                    $note = $err.message
+                if($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
+                    $message += $err.message + " The signed-in user needs to be assigned the Microsoft Entra Global Reader role."
+                    Write-Error $message -ErrorAction Stop
                 }
-                $user.Note = $note
+
+                $user.Note = $err.message
                 continue
             }
 
             if ($isPremiumTenant) {
-                $methodsRegistered = Get-ObjectPropertyValue $resultJson -Property 'methodsRegistered'
+                $methodsRegistered = Get-ObjectPropertyValue $resultsJson -Property 'methodsRegistered'
                 $userAuthMethod = @()
                 foreach ($method in $methodsRegistered) {
                     $methodInfo = $authMethods | Where-Object { $_.ReportType -eq $method }
@@ -239,10 +237,10 @@ function Export-MsIdAzureMfaReport {
                     else { $userAuthMethod += $methodInfo.DisplayName }
                 }
                 $user.AuthenticationMethods = $userAuthMethod -join ', '
-                $user.IsMfaRegistered = Get-ObjectPropertyValue $resultJson -Property 'isMfaRegistered'
+                $user.IsMfaRegistered = Get-ObjectPropertyValue $resultsJson -Property 'isMfaRegistered'
             }
             else {
-                $graphMethods = Get-ObjectPropertyValue $resultJson -Property "value"
+                $graphMethods = Get-ObjectPropertyValue $resultsJson -Property "value"
                 $userAuthMethods = @()
                 $isMfaRegistered = $false
                 $types = $graphMethods | Select-Object '@odata.type' -Unique
@@ -269,8 +267,8 @@ function Export-MsIdAzureMfaReport {
         if ($users -and $users.Count -gt 0) {
             $user = $users[0]
             $graphUri = (GetGraphBaseUri) + "/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
-            $resultJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
-            $err = Get-ObjectPropertyValue $resultJson -Property "error"
+            $resultsJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+            $err = Get-ObjectPropertyValue $resultsJson -Property "error"
 
             if ($err) {
                 $isPremiumTenant = $err.code -ne "Authentication_RequestFromNonPremiumTenantOrB2CTenant"

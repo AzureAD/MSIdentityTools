@@ -1,6 +1,9 @@
 ﻿<#
 .SYNOPSIS
-    Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell.
+    Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
+
+    Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
+    Required Microsoft Entra role: **Global Reader**
 
 .DESCRIPTION
     - Entra ID free tenants have access to sign in logs for the last 7 days.
@@ -8,7 +11,7 @@
     - The cmdlet will query the sign in log from the most recent day and work backwards.
 
 .EXAMPLE
-    PS > Connect-MgGragh -Scopes AuditLog.Read.All
+    PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All
     PS > Get-MsIdAzureUsers
 
     Queries all available logs and returns all the users that have signed into Azure.
@@ -49,6 +52,8 @@ function Get-MsIdAzureUsers {
 
     function Main() {
 
+        if (!(Test-MgModulePrerequisites @('AuditLog.Read.All', 'Directory.Read.All'))) { return }
+
         $users = GetAzureUsers $Days
         if ($users) {
             $users.Values
@@ -78,7 +83,7 @@ function Get-MsIdAzureUsers {
             return
         }
 
-        $graphUri = (GetGraphBaseUri) + "/v1.0/auditLogs/signIns?`$select=$select&`$filter=$filter"
+        $graphUri = (GetGraphBaseUri) + "/beta/auditLogs/signIns?`$select=$select&`$filter=$filter"
 
         Write-Verbose "Getting sign in logs $graphUri"
         $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET
@@ -150,10 +155,19 @@ function Get-MsIdAzureUsers {
 
     function GetEarliestDate($filter) {
 
-        $graphUri = (GetGraphBaseUri) + "/v1.0/auditLogs/signIns?`$select=createdDateTime&`$filter=$filter&`$top=1&`$orderby=createdDateTime asc"
+        $graphUri = (GetGraphBaseUri) + "/beta/auditLogs/signIns?`$select=createdDateTime&`$filter=$filter&`$top=1&`$orderby=createdDateTime asc"
 
         Write-Verbose "Getting earliest date in logs $graphUri"
-        $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET
+        $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
+
+        $err = Get-ObjectPropertyValue $resultsJson -Property "error"
+        if ($err) {
+            $message = $err.message
+            if($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
+                $message += " The signed-in user needs to be assigned the Microsoft Entra Global Reader role."
+            }
+            Write-Error $message -ErrorAction Stop
+        }
 
         $minDate = $null
         if ($resultsJson.value.Count -ne 0) {

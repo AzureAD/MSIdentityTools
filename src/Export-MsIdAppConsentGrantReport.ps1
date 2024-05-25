@@ -1,7 +1,8 @@
 ﻿<#
 .SYNOPSIS
     Lists and categorizes privilege for delegated permissions (OAuth2PermissionGrants) and application permissions (AppRoleAssignments).
-    NOTE: This cmdlet can take many hours to run on large tenants.
+
+    Watch the video [Run a quick OAuth app audit of your Microsoft Entra tenant](https://youtu.be/vO0m5yE3dZA?list=PL06Jj3_onEzGBkrZXybUZZWpJpbn1OpiK) for a quick walkthrough and demo of this command.
 
 .DESCRIPTION
     This cmdlet requires the `ImportExcel` module to be installed if you use the `-ReportOutputType ExcelWorkbook` parameter.

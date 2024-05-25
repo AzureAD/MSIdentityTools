@@ -28,7 +28,7 @@
     Copyright            = '(c) 2023 Microsoft Corporation. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description          = 'Tools for managing, troubleshooting, and reporting on various aspects of Microsoft Identity products and services, primarily Azure AD.'
+    Description          = 'Tools for managing, troubleshooting, and reporting on various aspects of Microsoft Identity products and services, primarily Microsoft Entra ID.'
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion    = '7.0'
@@ -50,7 +50,8 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules      = @(
-        @{ ModuleName = 'Microsoft.Graph.Authentication'; Guid = '883916f2-9184-46ee-b1f8-b6a2fb784cee'; ModuleVersion = '1.9.2' }
+        @{ ModuleName = 'Microsoft.Graph.Authentication'; Guid = '883916f2-9184-46ee-b1f8-b6a2fb784cee'; ModuleVersion = '1.9.2' },
+        @{ ModuleName = 'ImportExcel'; Guid = '60dd4136-feff-401a-ba27-a84458c57ede'; ModuleVersion = '7.8.6'}
     )
 
     # Assemblies that must be loaded prior to importing this module
@@ -245,7 +246,7 @@
             LicenseUri = 'https://raw.githubusercontent.com/AzureAD/MSIdentityTools/main/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri = 'https://github.com/AzureAD/MSIdentityTools'
+            ProjectUri = 'https://aka.ms/msid'
 
             # A URL to an icon representing this module.
             # IconUri = ''
