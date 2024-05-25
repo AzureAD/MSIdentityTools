@@ -2,8 +2,8 @@
 .SYNOPSIS
     Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
 
-    Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
-    Required Microsoft Entra role: **Global Reader**
+    - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
+    - Required Microsoft Entra role: **Global Reader**
 
 .DESCRIPTION
     - Entra ID free tenants have access to sign in logs for the last 7 days.
@@ -11,7 +11,7 @@
     - The cmdlet will query the sign in log from the most recent day and work backwards.
 
 .EXAMPLE
-    PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All
+    PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
     PS > Get-MsIdAzureUsers
 
     Queries all available logs and returns all the users that have signed into Azure.

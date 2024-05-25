@@ -14,26 +14,21 @@
     This cmdlet requires the `ImportExcel` module to be installed if you use the `-ReportOutputType ExcelWorkbook` parameter.
 
 .EXAMPLE
-    PS > Install-Module ImportExcel
-    PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
-    PS > Export-MsIdAzureMfaReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
+    Install-Module MsIdentityTools -Scope CurrentUser
+    Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
+    Export-MsIdAzureMfaReport .\report.xlsx
 
     Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
 
 .EXAMPLE
-    PS > Export-MsIdAzureMfaReport -Days 3 -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
+    Export-MsIdAzureMfaReport \report.xlsx -Days 3
 
     Queries sign in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
 
 .EXAMPLE
-    PS > Export-MsIdAzureMfaReport -ReportOutputType PowerShellObjects
+    Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
 
-    Returns the results as a PowerShell object for further processing.
-
-.EXAMPLE
-    PS > Export-MsIdAzureAdminMfaReport
-
-    Returns the results as a PowerShell object for further processing.
+    Returns the results and exports them to a CSV file.
 
 #>
 function Export-MsIdAzureMfaReport {
