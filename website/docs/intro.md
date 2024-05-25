@@ -9,19 +9,32 @@ title: Introduction
 
 ## Overview
 
-[![PSGallery Version](https://img.shields.io/powershellgallery/v/MSIdentityTools.svg?style=flat&logo=powershell&label=PSGallery%20Version)](https://www.powershellgallery.com/packages/MSIdentityTools) 
+[![PSGallery Version](https://img.shields.io/powershellgallery/v/MSIdentityTools.svg?style=flat&logo=powershell&label=PSGallery%20Version)](https://www.powershellgallery.com/packages/MSIdentityTools)
 [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/MSIdentityTools.svg?style=flat&logo=powershell&label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/MSIdentityTools)
 [![PSGallery Platform](https://img.shields.io/powershellgallery/p/MSIdentityTools.svg?style=flat&logo=powershell&label=PSGallery%20Platform)](https://www.powershellgallery.com/packages/MSIdentityTools)
+[![GitHub issues](https://img.shields.io/github/issues/AzureAD/MSIdentityTools)](https://github.com/AzureAD/MSIdentityTools/issues)
 
-The Microsoft Identity Tools PowerShell module is built by the Microsoft Entra Customer Experience Engineering team and provides various tools for performing enhanced Identity administration activities. It is intended to address more complex business scenarios that can't be met solely with the use of MS Graph PowerShell SDK module.
+The Microsoft Identity Tools is an open-source PowerShell module built by the Microsoft Entra Customer Experience Engineering team and provides various tools for performing enhanced Identity administration activities. This module is built using [Microsoft Graph PowerShell](https://aka.ms/graphps).
 
 ## What is contained in the MSIdentityTools module?
 
-A collection of cmdlets that use the MS Graph SDK PowerShell module to simplify common tasks for administrators of Azure AD tenants.
+A collection of commands that use the MS Graph SDK PowerShell module to simplify common tasks for administrators. See the [Command Reference](/commands) for a list of available commands.
 
 ## How do I install the module?
 
-The module can be found and installed from the PowerShell gallery at [PowerShell Gallery: MSIdentity Tools](https://www.powershellgallery.com/packages/MSIdentityTools) or can be downloaded from the releases page on this repo.
+The module can be installed from the PowerShell gallery.
+
+```powershell
+Install-Module MSIdentityTools
+```
+
+MSIdentity Tools is also available in the [PowerShell Gallery](https://www.powershellgallery.com/packages/MSIdentityTools) or can be downloaded from the [releases](https://github.com/AzureAD/MSIdentityTools/releases) page on GitHub.
+
+## Popular commands
+
+A popular use of this module is to run a quick OAuth app audit of your tenant using the `Get-MgOAuth2PermissionGrant` command. This command will return all the OAuth2PermissionGrants in your tenant, which can help you identify any risky permissions that have been granted to applications.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/vO0m5yE3dZA" title="Run a quick OAuth app audit of your tenant using this command and protect yourself" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Support
 
