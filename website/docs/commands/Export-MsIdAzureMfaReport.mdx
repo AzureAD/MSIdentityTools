@@ -1,6 +1,6 @@
 ---
 sidebar_class_name: hidden
-description: Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell.
+description: Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
 id: Export-MsIdAzureMfaReport
 title: Export-MsIdAzureMfaReport
 hide_title: false
@@ -10,33 +10,18 @@ custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Export
 
 ## SYNOPSIS
 
-Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell.
+Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
 The report includes each user's MFA registration status.
-Required scopes: AuditLog.Read.All, UserAuthenticationMethod.Read.All
 
-In addition to the delegated permissions, the signed-in user needs to belong to at least one of the following Microsoft Entra roles that allow them to read sign-in reports.
-
-- Global Reader
-- Reports Reader
-- Security Administrator
-- Security Operator
-- Security Reader
+Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
+Required Microsoft Entra role: **Global Reader**
 
 ## SYNTAX
 
-### Excel
-
 ```powershell
-Export-MsIdAzureMfaReport [-ExcelWorkbookPath] <String> [[-ReportOutputType] <String>] [-Days <Int32>]
- [-Users <Array>] [-UsersMfa <Array>] [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>]
+Export-MsIdAzureMfaReport [[-ExcelWorkbookPath] <String>] [-PassThru] [-Days <Int32>] [-Users <Array>]
+ [-UsersMfa <Array>] [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>]
  [<CommonParameters>]
-```
-
-### PowerShell
-
-```powershell
-Export-MsIdAzureMfaReport [[-ReportOutputType] <String>] [-Days <Int32>] [-Users <Array>] [-UsersMfa <Array>]
- [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -53,7 +38,7 @@ This cmdlet requires the `ImportExcel` module to be installed if you use the `-R
 
 ```powershell
 Install-Module ImportExcel
-PS > Connect-MgGragh -Scopes AuditLog.Read.All, UserAuthenticationMethod.Read.All
+PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
 PS > Export-MsIdAzureMfaReport -ReportOutputType ExcelWorkbook -ExcelWorkbookPath .\report.xlsx
 ```
 
@@ -87,23 +72,9 @@ Returns the results as a PowerShell object for further processing.
 
 ### -ExcelWorkbookPath
 
-Output file location for Excel Workbook
-
-```yaml
-Type: String
-Parameter Sets: Excel
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ReportOutputType
-
-Output type for the report.
+Output file location for Excel Workbook.
+e.g.
+.\report.xlsx
 
 ```yaml
 Type: String
@@ -111,8 +82,24 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
-Default value: ExcelWorkbook
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PassThru
+
+Switch to include the results in the output
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -172,7 +159,7 @@ Accept wildcard characters: False
 ### -UseAuthenticationMethodEndPoint
 
 If enabled, the user auth method will be used (slower) instead of the reporting API.
-Not applicable for Free tenants since they don't have access to the reporting API.
+This is the default for free tenants as the reporting API requires a premium license.
 
 ```yaml
 Type: SwitchParameter

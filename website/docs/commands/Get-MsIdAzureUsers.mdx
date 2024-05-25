@@ -1,6 +1,6 @@
 ---
 sidebar_class_name: hidden
-description: Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell.
+description: Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
 id: Get-MsIdAzureUsers
 title: Get-MsIdAzureUsers
 hide_title: false
@@ -10,7 +10,10 @@ custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Get-Ms
 
 ## SYNOPSIS
 
-Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell.
+Returns a list of all the users that have signed into the Azure portal, CLI, PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
+
+Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
+Required Microsoft Entra role: **Global Reader**
 
 ## SYNTAX
 
@@ -29,7 +32,7 @@ Get-MsIdAzureUsers [[-Days] <Int32>] [-ProgressAction <ActionPreference>] [<Comm
 ### EXAMPLE 1
 
 ```powershell
-Connect-MgGragh -Scopes AuditLog.Read.All
+Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All
 PS > Get-MsIdAzureUsers
 ```
 
