@@ -234,7 +234,9 @@ function Export-MsIdAzureMfaReport {
                 foreach ($method in $methodsRegistered) {
                     $methodInfo = $authMethods | Where-Object { $_.ReportType -eq $method }
                     if ($null -eq $methodInfo) { $userAuthMethod += $method }
-                    else { $userAuthMethod += $methodInfo.DisplayName }
+                    else {
+                        if($methodInfo.IsMfa) { $userAuthMethod += $methodInfo.DisplayName }
+                    }
                 }
                 $user.AuthenticationMethods = $userAuthMethod -join ', '
                 $user.IsMfaRegistered = Get-ObjectPropertyValue $resultsJson -Property 'isMfaRegistered'
@@ -340,10 +342,8 @@ function Export-MsIdAzureMfaReport {
         Write-Progress -Id 0 -Activity $activity -PercentComplete $percent -Status $Status
     }
 
-    # #, Mobile phone, Office phone, Alternate mobile phone, Security question, , , Hardware OATH token, FIDO2 security key, , Microsoft Passwordless phone sign-in, ,  , Passkey (Microsoft Authenticator), Passkey (Windows Hello)
-
     function GetAuthMethodInfo($type) {
-        $methodInfo = $authMethods | Where-Object { $_.Type -eq $type }
+        $methodInfo = $authMethods | Where-Object { $_.Type -eq $type}
         if ($null -eq $methodInfo) {
             # Default to the type and assume it is MFA
             $methodInfo = @{

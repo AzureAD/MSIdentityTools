@@ -83,6 +83,8 @@ function Get-MsIdAzureUsers {
             return
         }
 
+        $dayDiff = (Get-Date).Subtract($earliestDate).Days
+        Write-Host "Getting sign in logs for the last $dayDiff days (from $earliestDate to now)..." -ForegroundColor Green
         $graphUri = (GetGraphBaseUri) + "/beta/auditLogs/signIns?`$select=$select&`$filter=$filter"
 
         Write-Verbose "Getting sign in logs $graphUri"
