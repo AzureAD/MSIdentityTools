@@ -1,17 +1,38 @@
 ﻿<#
 .SYNOPSIS
-    Exports a spreadsheet with a list of all the users that have signed into the Azure portal, CLI, or PowerShell (past 30 days for Entra ID premium tenants and 7 days for free tenants).
-    The report includes each user's MFA registration status.
+    Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
 
-    Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
-    Required Microsoft Entra role: **Global Reader**
+    The report also includes each user's multi-factor authentication (MFA) registration status from Microsoft Entra.
+
+    ```powershell
+    Install-Module MsIdentityTools -Scope CurrentUser
+    Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
+    Export-MsIdAzureMfaReport .\report.xlsx
+    ```
+
+    ### Permissions and roles
+    - Required Microsoft Entra role: **Global Reader**
+    - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
+
+
+    *This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.*
+
+    ![Screenshot of a sample Azure MFA report](../assets/export-msidazuremfareport-sample.png)
 
 .DESCRIPTION
-    - Entra ID free tenants have access to sign in logs for the last 7 days.
-    - Entra ID premium tenants have access to sign in logs for the last 30 days.
-    - The cmdlet will query the sign in log from the most recent day and work backwards.
+    ### Consenting to permissions
+        If this is the first time running `Connect-MgGraph` with the permission scopes listed above, the user consenting to the permissions will need to be in one of the following roles:
+        - **Cloud Application Administrator**
+        - **Application Administrator**
+        - **Privileged Role Administrator**
 
-    This cmdlet requires the `ImportExcel` module to be installed if you use the `-ReportOutputType ExcelWorkbook` parameter.
+        After the initial consent the `Export-MsIdAzureMfaReport` cmdlet can be run by any user with the Microsoft Entra **Global Reader** role.
+
+    ### Third party multi-factor authentication
+        The `MFA status` in this report is based on authentication methods registered by the user in Microsoft Entra. The `MFA status` is not applicable if your tenant uses a third party multi-factor authentication provider (including [Custom Controls](https://learn.microsoft.com/entra/identity/conditional-access/controls)).
+
+    ### PowerShell 7.0
+        This cmdlet requires [PowerShell 7.0](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) or later.
 
 .EXAMPLE
     Install-Module MsIdentityTools -Scope CurrentUser
@@ -21,7 +42,7 @@
     Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
 
 .EXAMPLE
-    Export-MsIdAzureMfaReport \report.xlsx -Days 3
+    Export-MsIdAzureMfaReport .\report.xlsx -Days 3
 
     Queries sign in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
 
