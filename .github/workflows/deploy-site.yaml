@@ -10,6 +10,7 @@ on:
 
 jobs:
   build-doc:
+    name: Build cmdlet ref
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +19,8 @@ jobs:
         shell: pwsh
 
   build-site:
-    name: Build Docusaurus
+    name: Build website
+    needs: build-doc
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,7 +47,7 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: build
+    needs: build-site
 
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
