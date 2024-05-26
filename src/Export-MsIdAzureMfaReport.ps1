@@ -35,7 +35,6 @@
         This cmdlet requires [PowerShell 7.0](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) or later.
 
 .EXAMPLE
-    Install-Module MsIdentityTools -Scope CurrentUser
     Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
     Export-MsIdAzureMfaReport .\report.xlsx
 
