@@ -16,6 +16,10 @@ jobs:
       run:
         working-directory: ./website/
     steps:
+      - name: Update command reference
+        run: ./build/Update-CommandReference.ps1
+        shell: pwsh
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
