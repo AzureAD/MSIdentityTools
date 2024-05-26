@@ -28,7 +28,7 @@ function Find-MsIdUnprotectedUsersWithAdminRoles {
     begin {
         ## Initialize Critical Dependencies
         $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'Get-MgUserAuthenticationMethod', 'Get-MgGroupMember', 'Get-MgRoleManagementDirectoryRoleDefinition', 'Get-MgRoleManagementDirectoryRoleAssignmentSchedule', 'Get-MgRoleManagementDirectoryRoleEligibilitySchedule', 'Get-MgAuditLogSignIn' -ApiVersion beta -MinimumVersion 2.8.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
+        if (!(Test-MgCommandPrerequisites 'Get-MgUser', 'Get-MgUserAuthenticationMethod', 'Get-MgGroupMember', 'Get-MgRoleManagementDirectoryRoleDefinition', 'Get-MgRoleManagementDirectoryRoleAssignmentSchedule', 'Get-MgRoleManagementDirectoryRoleEligibilitySchedule', 'Get-MgAuditLogSignIn' -MinimumVersion 2.8.0 -RequireListPermissions -ErrorVariable CriticalError)) { return }
 
 
         if ($VerbosePreference -eq 'SilentlyContinue') {
