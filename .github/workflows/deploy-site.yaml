@@ -9,17 +9,21 @@ on:
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
 jobs:
-  build:
+  build-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update command reference
+        run: ./build/Update-CommandReference.ps1
+        shell: pwsh
+
+  build-site:
     name: Build Docusaurus
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./website/
     steps:
-      - name: Update command reference
-        run: ./build/Update-CommandReference.ps1
-        shell: pwsh
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
