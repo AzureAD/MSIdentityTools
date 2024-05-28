@@ -1,13 +1,13 @@
 ﻿<#
 .SYNOPSIS
-    Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
+    Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
 
     - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**
     - Required Microsoft Entra role: **Global Reader**
 
 .DESCRIPTION
-    - Entra ID free tenants have access to sign in logs for the last 7 days.
-    - Entra ID premium tenants have access to sign in logs for the last 30 days.
+    - Entra ID free tenants have access to sign-in logs for the last 7 days.
+    - Entra ID premium tenants have access to sign-in logs for the last 30 days.
 
 .EXAMPLE
     PS > Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All
@@ -22,9 +22,9 @@
 #>
 
 function Get-MsIdAzureUsers {
-    [CmdletBinding()]
+    [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Get-MsIdAzureUsers')]
     param (
-        # Number of days to query sign in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
+        # Number of days to query sign-in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
         [ValidateScript({
                 $_ -ge 0 -and $_ -le 30
             },
@@ -74,19 +74,20 @@ function Get-MsIdAzureUsers {
         Write-Verbose "Graph filter: $filter"
         $select = "userId,userPrincipalName,userDisplayName,appId,createdDateTime"
 
-        Write-Progress -Activity "Querying sign in logs..."
+        Write-Progress -Activity "Querying sign-in logs..."
 
         $earliestDate = GetEarliestDate $filter
         if ($null -eq $earliestDate) {
-            Write-Warning "No Azure sign ins found."
+            Write-Host "No Azure sign-ins found." -ForegroundColor Green
             return
         }
 
-        $dayDiff = (Get-Date).Subtract($earliestDate).Days
-        Write-Host "Getting sign in logs for the last $dayDiff days (from $earliestDate to now)..." -ForegroundColor Green
-        $graphUri = (GetGraphBaseUri) + "/beta/auditLogs/signIns?`$select=$select&`$filter=$filter"
+        if ($Days) { $dayDiff = $Days }
+        else { $dayDiff = (Get-Date).Subtract($earliestDate).Days }
+        Write-Host "Getting sign-in logs for the last $dayDiff days (from $earliestDate to now)..." -ForegroundColor Green
+        $graphUri = "$graphBaseUri/beta/auditLogs/signIns?`$select=$select&`$filter=$filter"
 
-        Write-Verbose "Getting sign in logs $graphUri"
+        Write-Verbose "Getting sign-in logs $graphUri"
         $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET
         $nextLink = Get-ObjectPropertyValue $resultsJson -Property '@odata.nextLink'
 
@@ -125,7 +126,7 @@ function Get-MsIdAzureUsers {
                 Write-Verbose $percent
                 $formattedDate = GetDateDisplayFormat $latestProcessedDate
                 $status = "Found $($azureUsers.Count) Azure users. Now processing $formattedDate ($([int]$percent)% completed)"
-                Write-Progress -Activity "Checking sign in logs" -Status $status -PercentComplete $percent
+                Write-Progress -Activity "Checking sign-in logs" -Status $status -PercentComplete $percent
                 $resultsJson = Invoke-GraphRequest -Uri $nextLink
             }
             $nextLink = Get-ObjectPropertyValue $resultsJson -Property '@odata.nextLink'
@@ -156,7 +157,7 @@ function Get-MsIdAzureUsers {
 
     function GetEarliestDate($filter) {
 
-        $graphUri = (GetGraphBaseUri) + "/beta/auditLogs/signIns?`$select=createdDateTime&`$filter=$filter&`$top=1&`$orderby=createdDateTime asc"
+        $graphUri = "$graphBaseUri/beta/auditLogs/signIns?`$select=createdDateTime&`$filter=$filter&`$top=1&`$orderby=createdDateTime asc"
 
         Write-Verbose "Getting earliest date in logs $graphUri"
         $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
@@ -164,7 +165,7 @@ function Get-MsIdAzureUsers {
         $err = Get-ObjectPropertyValue $resultsJson -Property "error"
         if ($err) {
             $message = $err.message
-            if($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
+            if ($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
                 $message += " The signed-in user needs to be assigned the Microsoft Entra Global Reader role."
             }
             Write-Error $message -ErrorAction Stop
@@ -181,7 +182,7 @@ function Get-MsIdAzureUsers {
     function GetDateFilter($pastDays) {
         # Get the date range to query by subtracting the number of days from today set to midnight
         $dateFilter = $null
-        if ($pastDays -or $pastDays -gt 0) {
+        if ($pastDays -and $pastDays -gt 0) {
             $dateStart = (Get-Date -Hour 0 -Minute 0 -Second 0).AddDays(-$pastDays)
 
             # convert the date to the correct format
@@ -199,10 +200,6 @@ function Get-MsIdAzureUsers {
         return $allAppFilter
     }
 
-    function GetGraphBaseUri() {
-        return $((Get-MgEnvironment -Name (Get-MgContext).Environment).GraphEndpoint)
-    }
-
     function WriteExportProgress(
         # The current step of the overal generation
         [ValidateSet("Logs")]
@@ -215,7 +212,7 @@ function Get-MsIdAzureUsers {
         switch ($MainStep) {
             "Logs" {
                 $percent = GetNextPercent $ChildPercent 0 100
-                $activity = "Checking sign in logs"
+                $activity = "Checking sign-in logs"
             }
         }
 
@@ -235,6 +232,7 @@ function Get-MsIdAzureUsers {
         return $date.ToString("dd MMM yyyy h:00 tt")
     }
 
+    $graphBaseUri = Get-GraphBaseUri
     # Call main function
     Main
 }

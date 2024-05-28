@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
+    Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
 
     The report also includes each user's multi-factor authentication (MFA) registration status from Microsoft Entra.
 
@@ -38,12 +38,12 @@
     Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
     Export-MsIdAzureMfaReport .\report.xlsx
 
-    Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
+    Queries last 30 days (7 days for Free tenants) sign-in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
 
 .EXAMPLE
     Export-MsIdAzureMfaReport .\report.xlsx -Days 3
 
-    Queries sign in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
+    Queries sign-in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
 
 .EXAMPLE
     Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
@@ -52,6 +52,7 @@
 
 #>
 function Export-MsIdAzureMfaReport {
+    [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Export-MsIdAzureMfaReport')]
     param (
         # Output file location for Excel Workbook. e.g. .\report.xlsx
         [string]
@@ -63,7 +64,7 @@ function Export-MsIdAzureMfaReport {
         [switch]
         $PassThru,
 
-        # Number of days to query sign in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
+        # Number of days to query sign-in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
         [ValidateScript({
                 $_ -ge 0 -and $_ -le 30
             },
@@ -99,15 +100,26 @@ function Export-MsIdAzureMfaReport {
             }
         }
 
-        if ($null -eq $Users -and $null -eq $UsersMfa) {
-            $Users = Get-MsIdAzureUsers -Days $Days
+        if ($UsersMfa) {
+            # We only need to generate the report.
+            $azureUsersMfa = $UsersMfa
+        }
+        else {
+            # Get the users and their MFA status
+            if ($null -eq $Users) {
+                # Get the users
+                $Users = Get-MsIdAzureUsers -Days $Days
+            }
+            $azureUsersMfa = GetUserMfaInsight $Users # Get the MFA status
         }
 
-        if ($UsersMfa) { $azureUsersMfa = $UsersMfa }
-        else { $azureUsersMfa = GetUserMfaInsight $Users }
-
         if ($isExcel) {
-            GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
+            if ($null -eq $azureUsersMfa) {
+                Write-Host 'Excel workbook not generated as there are no users to report on.' -ForegroundColor Yellow
+            }
+            else {
+                GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
+            }
         }
 
         if (-not ($isExcel) -or ($isExcel -and $PassThru)) {
@@ -207,10 +219,7 @@ function Export-MsIdAzureMfaReport {
     # Get the authentication method state for each user
     function GetUserMfaInsight($users) {
 
-        if(!$users) {
-            Write-Error "No users available to create MFA report." -ErrorAction Stop
-        }
-
+        if (-not $users) { return $null }
         if ($UseAuthenticationMethodEndPoint) { $isPremiumTenant = $false } # Force into free tenant mode
         else { $isPremiumTenant = GetIsPremiumTenant $users }
 
@@ -226,15 +235,15 @@ function Export-MsIdAzureMfaReport {
             AddMfaProperties $user
             UpdateProgress $currentCount $totalCount $user
 
-            $graphUri = (GetGraphBaseUri) + "/v1.0/users/$($user.UserId)/authentication/methods"
+            $graphUri = "$graphBaseUri/v1.0/users/$($user.UserId)/authentication/methods"
             if ($isPremiumTenant) {
-                $graphUri = (GetGraphBaseUri) + "/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
+                $graphUri = "$graphBaseUri/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
             }
             $resultsJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
             $err = Get-ObjectPropertyValue $resultsJson -Property "error"
 
             if ($err) {
-                if($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
+                if ($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
                     $message += $err.message + " The signed-in user needs to be assigned the Microsoft Entra Global Reader role."
                     Write-Error $message -ErrorAction Stop
                 }
@@ -250,7 +259,7 @@ function Export-MsIdAzureMfaReport {
                     $methodInfo = $authMethods | Where-Object { $_.ReportType -eq $method }
                     if ($null -eq $methodInfo) { $userAuthMethod += $method }
                     else {
-                        if($methodInfo.IsMfa) { $userAuthMethod += $methodInfo.DisplayName }
+                        if ($methodInfo.IsMfa) { $userAuthMethod += $methodInfo.DisplayName }
                     }
                 }
                 $user.AuthenticationMethods = $userAuthMethod -join ', '
@@ -283,7 +292,7 @@ function Export-MsIdAzureMfaReport {
         $isPremiumTenant = $true
         if ($users -and $users.Count -gt 0) {
             $user = $users[0]
-            $graphUri = (GetGraphBaseUri) + "/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
+            $graphUri = "$graphBaseUri/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
             $resultsJson = Invoke-MgGraphRequest -Uri $graphUri -Method GET -SkipHttpErrorCheck
             $err = Get-ObjectPropertyValue $resultsJson -Property "error"
 
@@ -309,10 +318,6 @@ function Export-MsIdAzureMfaReport {
         $percent = [math]::Round(($currentCount / $totalCount) * 100)
 
         Write-Progress -Activity "Getting authentication method" -Status "[$currentCount of $totalCount] Checking $userStatusDisplay. $percent% complete" -PercentComplete $percent
-
-    }
-    function GetGraphBaseUri() {
-        return $((Get-MgEnvironment -Name (Get-MgContext).Environment).GraphEndpoint)
     }
 
     function WriteExportProgress(
@@ -358,7 +363,7 @@ function Export-MsIdAzureMfaReport {
     }
 
     function GetAuthMethodInfo($type) {
-        $methodInfo = $authMethods | Where-Object { $_.Type -eq $type}
+        $methodInfo = $authMethods | Where-Object { $_.Type -eq $type }
         if ($null -eq $methodInfo) {
             # Default to the type and assume it is MFA
             $methodInfo = @{
@@ -439,6 +444,7 @@ function Export-MsIdAzureMfaReport {
         }
     )
 
+    $graphBaseUri = Get-GraphBaseUri
     # Call main function
     Main
 }

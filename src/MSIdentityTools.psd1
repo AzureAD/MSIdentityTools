@@ -82,6 +82,7 @@
         '.\internal\ConvertTo-PsString.ps1'
         '.\internal\ConvertTo-QueryString.ps1'
         '.\internal\Expand-Data.ps1'
+        '.\internal\Get-GraphBaseUri.ps1'
         '.\internal\Get-MsftUserRealm.ps1'
         '.\internal\Get-ObjectPropertyValue.ps1'
         '.\internal\Get-OpenIdProviderConfiguration.ps1'
