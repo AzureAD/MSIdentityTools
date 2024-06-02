@@ -1,6 +1,6 @@
 ---
 sidebar_class_name: hidden
-description: Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs.
+description: Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs.
 id: Get-MsIdAzureUsers
 title: Get-MsIdAzureUsers
 hide_title: false
@@ -10,8 +10,9 @@ custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Get-Ms
 
 ## SYNOPSIS
 
-Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs.
-In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
+Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs.
+
+If your tenant is a [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports), the sign-in logs need to be downloaded from
 
 - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**
 - Required Microsoft Entra role: **Global Reader**
@@ -19,13 +20,14 @@ In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitori
 ## SYNTAX
 
 ```powershell
-Get-MsIdAzureUsers [[-Days] <Int32>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-MsIdAzureUsers [[-SignInsJsonPath] <String>] [[-Days] <Int32>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-- Entra ID free tenants have access to sign in logs for the last 7 days.
-- Entra ID premium tenants have access to sign in logs for the last 30 days.
+- Entra ID free tenants have access to sign-in logs for the last 7 days.
+- Entra ID premium tenants have access to sign-in logs for the last 30 days.
 
 ## EXAMPLES
 
@@ -46,11 +48,37 @@ Get-MsIdAzureUsers -Days 3
 
 Queries the logs for the last three days and returns all the users that have signed into Azure during this period.
 
+### EXAMPLE 3
+
+```powershell
+Get-MsIdAzureUsers -SignInsJsonPath ./signIns.json
+```
+
+Uses the sign-ins json file downloaded from the Microsoft Portal and returns all the users that have signed into Azure during this period.
+
 ## PARAMETERS
+
+### -SignInsJsonPath
+
+Optional.
+Path to the sign-ins JSON file.
+If provided, the report will be generated from this file instead of querying the sign-ins.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### -Days
 
-Number of days to query sign in logs.
+Number of days to query sign-in logs.
 Defaults to 30 days for premium tenants and 7 days for free tenants
 
 ```yaml
@@ -59,7 +87,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 2
 Default value: 0
 Accept pipeline input: False
 Accept wildcard characters: False

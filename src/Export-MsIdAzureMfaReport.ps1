@@ -1,6 +1,7 @@
 ﻿<#
 .SYNOPSIS
-    Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
+    Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs.
+    In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
 
     The report also includes each user's multi-factor authentication (MFA) registration status from Microsoft Entra.
 
@@ -50,6 +51,38 @@
 
     Returns the results and exports them to a CSV file.
 
+.EXAMPLE
+    Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
+
+    Returns the results and exports them to a CSV file.
+
+.EXAMPLE
+    Export-MsIdAzureMfaReport .\report.xlsx -SignInsJsonPath ./signIns.json
+
+    Generates the report from the sign-ins JSON file downloaded from the Entra portal. This is required for Entra ID Free tenants.
+
+
+.NOTES
+
+    ### Entra ID Free tenants
+
+    If you are using an Entra ID Free tenant, additional steps are required to download the sign-in logs
+
+    Follow these steps to download the sign-in logs.
+
+    - Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)**
+    - From the left navigation select: **Identity** → **Monitoring & health** → **Sign-in logs**.
+    - Select the **Date** filter and set to **Last 7 days**
+    - Select **Add filters** → **Application** and type in: **Azure**
+    - Select **Download** → **Download JSON**
+    - Set the **File Name** of the first textbox to **signins** and select it's **Download** button.
+    - Once the file is downloaded, copy it to the folder where the export command will be run.
+
+    Re-run this command with the **-SignInsJsonPath** option.
+    ```powershell
+    Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json
+    ```
+
 #>
 function Export-MsIdAzureMfaReport {
     [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Export-MsIdAzureMfaReport')]
@@ -60,11 +93,15 @@ function Export-MsIdAzureMfaReport {
         [string]
         $ExcelWorkbookPath,
 
+        # Optional. Path to the sign-ins JSON file. If provided, the report will be generated from this file instead of querying the sign-ins.
+        [string]
+        $SignInsJsonPath,
+
         # Switch to include the results in the output
         [switch]
         $PassThru,
 
-        # Number of days to query sign-in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
+        # Optional. Number of days to query sign-in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
         [ValidateScript({
                 $_ -ge 0 -and $_ -le 30
             },
@@ -105,8 +142,12 @@ function Export-MsIdAzureMfaReport {
             $azureUsersMfa = $UsersMfa
         }
         else {
+            if ($null -ne $SignInsJsonPath) {
+                # Don't look up graph if we have the sign-ins json (usually free tenant download from portal)
+                $Users = Get-MsIdAzureUsers -SignInsJsonPath $SignInsJsonPath
+            }
             # Get the users and their MFA status
-            if ($null -eq $Users) {
+            elseif ($null -eq $Users) {
                 # Get the users
                 $Users = Get-MsIdAzureUsers -Days $Days
             }

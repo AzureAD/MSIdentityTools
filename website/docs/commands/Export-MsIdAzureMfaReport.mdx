@@ -1,6 +1,6 @@
 ---
 sidebar_class_name: hidden
-description: Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs.
+description: Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs.
 id: Export-MsIdAzureMfaReport
 title: Export-MsIdAzureMfaReport
 hide_title: false
@@ -10,7 +10,7 @@ custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Export
 
 ## SYNOPSIS
 
-Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign in logs.
+Exports the list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs.
 In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
 
 The report also includes each user's multi-factor authentication (MFA) registration status from Microsoft Entra.
@@ -34,9 +34,9 @@ Export-MsIdAzureMfaReport .\report.xlsx
 ## SYNTAX
 
 ```powershell
-Export-MsIdAzureMfaReport [[-ExcelWorkbookPath] <String>] [-PassThru] [-Days <Int32>] [-Users <Array>]
- [-UsersMfa <Array>] [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>]
- [<CommonParameters>]
+Export-MsIdAzureMfaReport [[-ExcelWorkbookPath] <String>] [-SignInsJsonPath <String>] [-PassThru]
+ [-Days <Int32>] [-Users <Array>] [-UsersMfa <Array>] [-UseAuthenticationMethodEndPoint]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -63,12 +63,11 @@ The `MFA status` is not applicable if your tenant uses a third party multi-facto
 ### EXAMPLE 1
 
 ```powershell
-Install-Module MsIdentityTools -Scope CurrentUser
 Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
 Export-MsIdAzureMfaReport .\report.xlsx
 ```
 
-Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
+Queries last 30 days (7 days for Free tenants) sign-in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
 
 ### EXAMPLE 2
 
@@ -76,7 +75,7 @@ Queries last 30 days (7 days for Free tenants) sign in logs and outputs a report
 Export-MsIdAzureMfaReport .\report.xlsx -Days 3
 ```
 
-Queries sign in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
+Queries sign-in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
 
 ### EXAMPLE 3
 
@@ -85,6 +84,23 @@ Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
 ```
 
 Returns the results and exports them to a CSV file.
+
+### EXAMPLE 4
+
+```powershell
+Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
+```
+
+Returns the results and exports them to a CSV file.
+
+### EXAMPLE 5
+
+```powershell
+Export-MsIdAzureMfaReport .\report.xlsx -SignInsJsonPath ./signIns.json
+```
+
+Generates the report from the sign-ins JSON file downloaded from the Entra portal.
+This is required for Entra ID Free tenants.
 
 ## PARAMETERS
 
@@ -101,6 +117,24 @@ Aliases:
 
 Required: False
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -SignInsJsonPath
+
+Optional.
+Path to the sign-ins JSON file.
+If provided, the report will be generated from this file instead of querying the sign-ins.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -124,7 +158,8 @@ Accept wildcard characters: False
 
 ### -Days
 
-Number of days to query sign in logs.
+Optional.
+Number of days to query sign-in logs.
 Defaults to 30 days for premium tenants and 7 days for free tenants
 
 ```yaml
@@ -216,5 +251,24 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ## NOTES
+
+### Entra ID Free tenants
+
+If you are using an Entra ID Free tenant, additional steps are required to download the sign-in logs
+
+Follow these steps to download the sign-in logs.
+
+- Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)
+- From the left navigation select: **Identity** → **Monitoring & health** → **Sign-in logs**.
+- Select the **Date** filter and set to **Last 7 days**
+- Select **Add filters** → **Application** and type in: **Azure**
+- Select **Download** → **Download JSON**
+- Set the **File Name** of the first textbox to **signins' and select it's **Download** button.
+- Once the file is downloaded, copy it to the folder where the export command will be run.
+
+Re-run this command with the **-SignInsJsonPath** option.
+```powershell
+Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json
+```
 
 ## RELATED LINKS

@@ -1,6 +1,8 @@
 ﻿<#
 .SYNOPSIS
-    Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs. In [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports) tenants, sign-in log retention is limited to seven days.
+    Returns a list of users that have signed into the Azure portal, Azure CLI, or Azure PowerShell over the last 30 days by querying the sign-in logs.
+
+    If your tenant is a [Microsoft Entra ID Free](https://learn.microsoft.com/entra/identity/monitoring-health/reference-reports-data-retention#activity-reports), the sign-in logs need to be downloaded from
 
     - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**
     - Required Microsoft Entra role: **Global Reader**
@@ -19,11 +21,21 @@
     PS > Get-MsIdAzureUsers -Days 3
 
     Queries the logs for the last three days and returns all the users that have signed into Azure during this period.
+
+.EXAMPLE
+    PS > Get-MsIdAzureUsers -SignInsJsonPath ./signIns.json
+
+    Uses the sign-ins json file downloaded from the Microsoft Portal and returns all the users that have signed into Azure during this period.
+
 #>
 
 function Get-MsIdAzureUsers {
     [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Get-MsIdAzureUsers')]
     param (
+        # Optional. Path to the sign-ins JSON file. If provided, the report will be generated from this file instead of querying the sign-ins.
+        [string]
+        $SignInsJsonPath,
+
         # Number of days to query sign-in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
         [ValidateScript({
                 $_ -ge 0 -and $_ -le 30
@@ -53,7 +65,13 @@ function Get-MsIdAzureUsers {
 
         if (!(Test-MgModulePrerequisites @('AuditLog.Read.All', 'Directory.Read.All'))) { return }
 
-        $users = GetAzureUsers $Days
+        if ($SignInsJsonPath) {
+            $users = Get-JsonFileContent -SignInsJsonPath $SignInsJsonPath
+        }
+        else {
+            $users = GetAzureUsers $Days
+        }
+
         if ($users) {
             $users.Values
         }
@@ -164,11 +182,25 @@ function Get-MsIdAzureUsers {
 
         $err = Get-ObjectPropertyValue $resultsJson -Property "error"
         if ($err) {
-            $message = $err.message
             if ($err.code -eq "Authentication_RequestFromUnsupportedUserRole") {
-                $message += " The signed-in user needs to be assigned the Microsoft Entra Global Reader role."
+                Write-Host "The signed-in user needs to be assigned the Microsoft Entra Global Reader role." -ForegroundColor Green
             }
-            Write-Error $message -ErrorAction Stop
+            elseif ($err.code -eq "Authentication_RequestFromNonPremiumTenantOrB2CTenant") {
+                Write-Host "You are using an Entra ID Free tenant which requires additional steps to download the sign-in logs." -ForegroundColor Green
+                Write-Host
+                Write-Host "Follow these steps to download the sign-in logs." -ForegroundColor Green
+                Write-Host "- Sign-in to https://entra.microsoft.com" -ForegroundColor Green
+                Write-Host "- From the left navigation select: Identity → Monitoring & health → Sign-in logs." -ForegroundColor Green
+                Write-Host "- Select the 'Date' filter and set to 'Last 7 days'" -ForegroundColor Green
+                Write-Host "- Select 'Add filters' → 'Application' and type in: Azure" -ForegroundColor Green
+                Write-Host "- Select 'Download → Download JSON" -ForegroundColor Green
+                Write-Host "- Set the 'File Name' of the first textbox to 'signins' and select it's Download button." -ForegroundColor Green
+                Write-Host "- Once the file is downloaded, copy it to the folder where the export command will be run." -ForegroundColor Green
+                Write-Host
+                Write-Host "Re-run this command with the -SignInsJsonPath parameter." -ForegroundColor Green
+                Write-Host "E.g.> Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json" -ForegroundColor Yellow
+            }
+            Write-Error $err.message -ErrorAction Stop
         }
 
         $minDate = $null
@@ -198,6 +230,50 @@ function Get-MsIdAzureUsers {
         $allAppFilter = $mfaEnforcedApps.AppId -join "' or appid eq '"
         $allAppFilter = "(appid eq '$allAppFilter')"
         return $allAppFilter
+    }
+
+    function Get-JsonFileContent ($signInsJsonPath) {
+        Write-Verbose "Reading sign-ins from $signInsJsonPath"
+        $signIns = Get-Content $signInsJsonPath -Raw | ConvertFrom-Json
+
+        $azureUsers = @{}
+        $count = 0
+
+        foreach ($item in $signIns) {
+            $count++
+            # Check if user exists in the dictionary and create a new object if not
+            [string]$userId = $item.userId
+            $user = $azureUsers[$userId]
+            if ($null -eq $user) {
+                $user = [pscustomobject]@{
+                    UserId            = $item.userId
+                    UserPrincipalName = $item.userPrincipalName
+                    UserDisplayName   = $item.userDisplayName
+                    AzureAppName      = ""
+                    AzureAppId        = @($item.appId)
+                }
+                $azureUsers[$userId] = $user
+            }
+            else {
+                # Add the app if it doesn't already exist
+                if ($user.AzureAppId -notcontains $item.appId) {
+                    $user.AzureAppId += $item.appId
+                }
+            }
+        }
+
+        # Update the Azure App name for each user
+        foreach ($user in $azureUsers.Values) {
+            $appNames = @()
+            foreach ($appId in $user.AzureAppId) {
+                $app = $mfaEnforcedApps | Where-Object { $_.AppId -eq $appId }
+                if ($app) {
+                    $appNames += $app.DisplayName
+                }
+            }
+            $user.AzureAppName = $appNames -join ", "
+        }
+        return $azureUsers
     }
 
     function WriteExportProgress(
