@@ -17,10 +17,10 @@
     - Required Microsoft Entra role: **Global Reader**
     - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
 
-
-    * This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.*
-
+    ### Output
     ![Screenshot of a sample Azure MFA report](../assets/export-msidazuremfareport-sample.png)
+
+    * This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.
 
 .DESCRIPTION
     ### Consenting to permissions
@@ -31,8 +31,9 @@
 
         After the initial consent the `Export-MsIdAzureMfaReport` cmdlet can be run by any user with the Microsoft Entra **Global Reader** role.
 
-    ### Third party multi-factor authentication
-        The `MFA status` in this report is based on authentication methods registered by the user in Microsoft Entra. The `MFA status` is not applicable if your tenant uses a third party multi-factor authentication provider (including [Custom Controls](https://learn.microsoft.com/entra/identity/conditional-access/controls)).
+    ### Identity federation and third-party multi-factor authentication
+
+        The `MFA status` in this report may not be accurate if you use identity federation or a third-party multi-factor authentication provider. See [MFA Status when using identity federation](#mfa-status-when-using-identity-federation).
 
     ### PowerShell 7.0
         This cmdlet requires [PowerShell 7.0](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) or later.
@@ -84,21 +85,21 @@
     Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json
     ```
 
-    ### MFA Status and Authentication Methods
+    ### Delay in reporting MFA Status and Authentication Methods
 
-    The 'MFA Status' does not immediately reflect changes made to the user's authentication methods. Expect a delay of up to 24 hours for the report to reflect the latest MFA status.
+    The **MFA Status** does not immediately reflect changes made to the user's authentication methods. Expect a delay of up to 24 hours for the report to reflect the latest MFA status.
 
-    To get the latest MFA status use the `-UseAuthenticationMethodEndPoint` switch. This will use the user authentication method endpoint which is slower but reflects the latest MFA status.
+    To get the latest MFA status use the `-UseAuthenticationMethodEndPoint` switch. This option will get the latest user details but will take longer to export.
 
-    ### Incorrect MFA Status when using identity federation
+    ### MFA Status when using identity federation
 
-    Tenants configured with identity federation may not have accurate an **MFA Status** in this report unless MFA is enforced for Azure Portal access.
+    Tenants configured with identity federation may not have an accurate **MFA Status** in this report unless MFA is enforced for Azure Portal access.
 
     To resolve this:
 
     - Enforce MFA for these users using Conditional Access or Security Defaults.
-      - Entra ID premium tenants: [Conditional Access policy - Require MFA for Azure management](https://learn.microsoft.com/entra/identity/conditional-access/howto-conditional-access-policy-azure-management)
-      - Entra ID free tenants: [Security Defaults](https://learn.microsoft.com/entra/fundamentals/security-defaults)
+      - [Conditional Access policy - Require MFA for Azure management](https://learn.microsoft.com/entra/identity/conditional-access/howto-conditional-access-policy-azure-management) for Entra ID premium tenants.
+      - [Security Defaults](https://learn.microsoft.com/entra/fundamentals/security-defaults) for Entra ID free tenants.
     - Request users to sign in to the Azure portal.
     - Re-run this report to confirm their MFA status.
 #>
