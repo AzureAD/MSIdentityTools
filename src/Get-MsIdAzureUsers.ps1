@@ -90,7 +90,7 @@ function Get-MsIdAzureUsers {
         # Create an array of filter and join with 'and'
         $filter = "$appFilter $statusFilter $dateFilter"
         Write-Verbose "Graph filter: $filter"
-        $select = "userId,userPrincipalName,userDisplayName,appId,createdDateTime"
+        $select = "userId,userPrincipalName,userDisplayName,appId,createdDateTime,authenticationRequirement"
 
         Write-Progress -Activity "Querying sign-in logs..."
 
@@ -122,11 +122,12 @@ function Get-MsIdAzureUsers {
                 $user = $azureUsers[$userId]
                 if ($null -eq $user) {
                     $user = [pscustomobject]@{
-                        UserId            = $item.userId
-                        UserPrincipalName = $item.userPrincipalName
-                        UserDisplayName   = $item.userDisplayName
-                        AzureAppName      = ""
-                        AzureAppId        = @($item.appId)
+                        UserId                    = $item.userId
+                        UserPrincipalName         = $item.userPrincipalName
+                        UserDisplayName           = $item.userDisplayName
+                        AzureAppName              = ""
+                        AzureAppId                = @($item.appId)
+                        AuthenticationRequirement = $item.authenticationRequirement
                     }
                     $azureUsers[$userId] = $user
                 }
@@ -134,6 +135,11 @@ function Get-MsIdAzureUsers {
                     # Add the app if it doesn't already exist
                     if ($user.AzureAppId -notcontains $item.appId) {
                         $user.AzureAppId += $item.appId
+                    }
+                    # Flag as MFA if user signed in at least once
+                    if ($user.AuthenticationRequirement -ne "multiFactorAuthentication" `
+                            -and $item.authenticationRequirement -eq "multiFactorAuthentication") {
+                        $user.AuthenticationRequirement = $item.authenticationRequirement
                     }
                 }
             }
@@ -246,11 +252,12 @@ function Get-MsIdAzureUsers {
             $user = $azureUsers[$userId]
             if ($null -eq $user) {
                 $user = [pscustomobject]@{
-                    UserId            = $item.userId
-                    UserPrincipalName = $item.userPrincipalName
-                    UserDisplayName   = $item.userDisplayName
-                    AzureAppName      = ""
-                    AzureAppId        = @($item.appId)
+                    UserId                    = $item.userId
+                    UserPrincipalName         = $item.userPrincipalName
+                    UserDisplayName           = $item.userDisplayName
+                    AzureAppName              = ""
+                    AzureAppId                = @($item.appId)
+                    AuthenticationRequirement = $item.authenticationRequirement
                 }
                 $azureUsers[$userId] = $user
             }
@@ -258,6 +265,11 @@ function Get-MsIdAzureUsers {
                 # Add the app if it doesn't already exist
                 if ($user.AzureAppId -notcontains $item.appId) {
                     $user.AzureAppId += $item.appId
+                }
+                # Flag as MFA if user signed in at least once
+                if ($user.AuthenticationRequirement -ne "multiFactorAuthentication" `
+                        -and $item.authenticationRequirement -eq "multiFactorAuthentication") {
+                    $user.AuthenticationRequirement = $item.authenticationRequirement
                 }
             }
         }

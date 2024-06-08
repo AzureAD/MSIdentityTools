@@ -16,7 +16,7 @@
     - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
 
 
-    *This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.*
+    * This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.*
 
     ![Screenshot of a sample Azure MFA report](../assets/export-msidazuremfareport-sample.png)
 
@@ -39,12 +39,12 @@
     Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
     Export-MsIdAzureMfaReport .\report.xlsx
 
-    Queries last 30 days (7 days for Free tenants) sign-in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
+    Queries the last 30 days sign-in logs and creates a report of users accessing Azure and their MFA status in Excel format.
 
 .EXAMPLE
     Export-MsIdAzureMfaReport .\report.xlsx -Days 3
 
-    Queries sign-in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
+    Queries sign-in logs for the past 3 days and creates a report of Azure users and their MFA status in Excel format.
 
 .EXAMPLE
     Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
@@ -60,7 +60,6 @@
     Export-MsIdAzureMfaReport .\report.xlsx -SignInsJsonPath ./signIns.json
 
     Generates the report from the sign-ins JSON file downloaded from the Entra portal. This is required for Entra ID Free tenants.
-
 
 .NOTES
 
@@ -83,6 +82,23 @@
     Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json
     ```
 
+    ### MFA Status and Authentication Methods
+
+    The 'MFA Status' does not immediately reflect changes made to the user's authentication methods. Expect a delay of up to 24 hours for the report to reflect the latest MFA status.
+
+    To get the latest MFA status use the `-UseAuthenticationMethodEndPoint` switch. This will use the user authentication method endpoint which is slower but reflects the latest MFA status.
+
+    ### Incorrect MFA Status when using identity federation
+
+    Tenants configured with identity federation may not have accurate an **MFA Status** in this report unless MFA is enforced for Azure Portal access.
+
+    To resolve this:
+
+    - Enforce MFA for these users using Conditional Access or Security Defaults.
+      - Entra ID premium tenants: [Conditional Access policy - Require MFA for Azure management](https://learn.microsoft.com/entra/identity/conditional-access/howto-conditional-access-policy-azure-management)
+      - Entra ID free tenants: [Security Defaults](https://learn.microsoft.com/entra/fundamentals/security-defaults)
+    - Request users to sign in to the Azure portal.
+    - Re-run this report to confirm their MFA status.
 #>
 function Export-MsIdAzureMfaReport {
     [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Export-MsIdAzureMfaReport')]
@@ -101,11 +117,11 @@ function Export-MsIdAzureMfaReport {
         [switch]
         $PassThru,
 
-        # Optional. Number of days to query sign-in logs. Defaults to 30 days for premium tenants and 7 days for free tenants
+        # Optional. Number of days to query sign-in logs. Defaults to 30 days.
         [ValidateScript({
                 $_ -ge 0 -and $_ -le 30
             },
-            ErrorMessage = "Logs are only available for the last 7 days for free tenants and 30 days for premium tenants. Please enter a number between 0 and 30.")]
+            ErrorMessage = "Logs are only available for 30 days. Please enter a number between 0 and 30.")]
         [int]
         $Days,
 
@@ -113,13 +129,13 @@ function Export-MsIdAzureMfaReport {
         [array]
         $Users,
 
-        # Optional. Hashtable with a pre-defined list of User objects with auth methods. Used for generating spreadhsheet.
-        [array]
-        $UsersMfa,
-
         # If enabled, the user auth method will be used (slower) instead of the reporting API. This is the default for free tenants as the reporting API requires a premium license.
         [switch]
         $UseAuthenticationMethodEndPoint
+
+        # # Used for dev. Hashtable with a pre-defined list of User objects with auth methods. Used for generating spreadhsheet.
+        # [array]
+        # $UsersMfa,
     )
     function Main() {
 
@@ -142,7 +158,7 @@ function Export-MsIdAzureMfaReport {
             $azureUsersMfa = $UsersMfa
         }
         else {
-            if ($null -ne $SignInsJsonPath) {
+            if (![string]::IsNullOrEmpty($SignInsJsonPath)) {
                 # Don't look up graph if we have the sign-ins json (usually free tenant download from portal)
                 $Users = Get-MsIdAzureUsers -SignInsJsonPath $SignInsJsonPath
             }
@@ -160,6 +176,7 @@ function Export-MsIdAzureMfaReport {
             }
             else {
                 GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
+                Write-Host "Note: The 'MFA Status' column does not apply for users signing in using Certificate Based Authentication and/or third-party MFA providers." -ForegroundColor Yellow
             }
         }
 
@@ -172,7 +189,7 @@ function Export-MsIdAzureMfaReport {
 
         $maxRows = $UsersMfa.Count + 1
 
-        $UsersMfa = $UsersMfa | Sort-Object -Property IsMfaRegistered, UserDisplayName
+        $UsersMfa = $UsersMfa | Sort-Object -Property @{Expression = "MfaStatusIcon"; Descending = $true }, MfaStatus, UserDisplayName
 
         # Delete the existing output file if it already exists
         $OutputFileExists = Test-Path $Path
@@ -187,8 +204,8 @@ function Export-MsIdAzureMfaReport {
             New-ExcelStyle -Range "A1:J1" -FontColor White -BackgroundColor $headerBgColour -Bold -HorizontalAlignment Center
             New-ExcelStyle -Range "A2:A$maxRows" -FontColor Blue -Underline
             New-ExcelStyle -Range "D2:D$maxRows" -FontColor Blue -Underline
-            New-ExcelStyle -Range "E2:G$maxRows" -FontColor Blue
-            New-ExcelStyle -Range "C2:G$maxRows" -HorizontalAlignment Center
+            New-ExcelStyle -Range "E2:G$maxRows" -FontColor Blue -HorizontalAlignment Center
+            New-ExcelStyle -Range "C2:C$maxRows" -HorizontalAlignment Center
             New-ExcelStyle -Range "I2:I$maxRows" -FontColor $darkGrayColour -HorizontalAlignment Fill
         )
 
@@ -197,22 +214,16 @@ function Export-MsIdAzureMfaReport {
 
         $report = $UsersMfa | Select-Object `
         @{name = 'Name'; expression = { GetLink $userBlade $_.UserId $_.UserDisplayName } }, UserPrincipalName, `
-        @{name = ' '; expression = {
-                if ($_.IsMfaRegistered) { $mfa = '✅' } else { $mfa = '❌' }
-                $mfa
-            }
-        }, `
+        @{name = ' '; expression = { $_.MfaStatusIcon } }, `
         @{name = 'MFA Status'; expression = {
-                if ($_.IsMfaRegistered) { $mfa = 'MFA Registered' } else { $mfa = 'No MFA Registered' }
-                GetLink $authMethodBlade $_.UserId $mfa
+                GetLink $authMethodBlade $_.UserId $_.MfaStatus
             }
         }, `
         @{name = 'Az Portal'; expression = { GetTickSymbol $_.AzureAppName "Azure Portal" } }, `
         @{name = 'Az CLI'; expression = { GetTickSymbol $_.AzureAppName "Azure CLI" } }, `
         @{name = 'Az PowerShell'; expression = { GetTickSymbol $_.AzureAppName "Azure PowerShell" } }, `
         @{name = 'Authentication Methods'; expression = { $_.AuthenticationMethods -join ', ' } }, UserId, `
-        @{name = 'Notes'; expression = { if ([string]::IsNullOrEmpty($_.Notes)) { "' " } else { $_.Notes } } } `
-
+        @{name = 'Notes'; expression = { if (![string]::IsNullOrEmpty($_.Notes)) { $_.Notes } } } `
 
         $excel = $report | Export-Excel -Path $Path -WorksheetName "MFA Report" `
             -FreezeTopRow `
@@ -226,7 +237,7 @@ function Export-MsIdAzureMfaReport {
         $sheet.Column(1).Width = 35 #DisplayName
         $sheet.Column(2).Width = 35 #UPN
         $sheet.Column(3).Width = 6 #MFA Icon
-        $sheet.Column(4).Width = 22 #MFA Registered
+        $sheet.Column(4).Width = 34 #MFA Registered
         $sheet.Column(5).Width = 17 #Azure Portal
         $sheet.Column(6).Width = 17 #Azure CLI
         $sheet.Column(7).Width = 17 #Azure PowerShell
@@ -276,6 +287,11 @@ function Export-MsIdAzureMfaReport {
             AddMfaProperties $user
             UpdateProgress $currentCount $totalCount $user
 
+            if ($user.AuthenticationRequirement -eq "multiFactorAuthentication") {
+                $user.MfaStatus = "MFA Capable + Signed in with MFA"
+                $user.MfaStatusIcon = "✅"
+            }
+
             $graphUri = "$graphBaseUri/v1.0/users/$($user.UserId)/authentication/methods"
             if ($isPremiumTenant) {
                 $graphUri = "$graphBaseUri/v1.0/reports/authenticationMethods/userRegistrationDetails/$($user.UserId)"
@@ -289,7 +305,7 @@ function Export-MsIdAzureMfaReport {
                     Write-Error $message -ErrorAction Stop
                 }
 
-                $user.Note = $err.message
+                $user.Notes = "Unable to retrieve MFA info for user. $($err.message) ($($err.code))"
                 continue
             }
 
@@ -305,6 +321,7 @@ function Export-MsIdAzureMfaReport {
                 }
                 $user.AuthenticationMethods = $userAuthMethod -join ', '
                 $user.IsMfaRegistered = Get-ObjectPropertyValue $resultsJson -Property 'isMfaRegistered'
+                $user.IsMfaCapable = Get-ObjectPropertyValue $resultsJson -Property 'isMfaCapable'
             }
             else {
                 $graphMethods = Get-ObjectPropertyValue $resultsJson -Property "value"
@@ -322,6 +339,18 @@ function Export-MsIdAzureMfaReport {
                 }
                 $user.AuthenticationMethods = $userAuthMethods
                 $user.IsMfaRegistered = $isMfaRegistered
+                $user.IsMfaCapable = $isMfaRegistered
+            }
+
+            if ($user.AuthenticationRequirement -ne "multiFactorAuthentication") {
+                if ($user.IsMfaCapable) {
+                    $user.MfaStatus = "MFA Capable"
+                    $user.MfaStatusIcon = "✅"
+                }
+                else {
+                    $user.MfaStatus = "Not MFA Capable"
+                    $user.MfaStatusIcon = "❌"
+                }
             }
         }
 
@@ -344,9 +373,12 @@ function Export-MsIdAzureMfaReport {
         return $isPremiumTenant
     }
     function AddMfaProperties($user) {
-        $user | Add-Member -MemberType NoteProperty -Name "Note" -Value $null -ErrorAction SilentlyContinue
+        $user | Add-Member -MemberType NoteProperty -Name "Notes" -Value $null -ErrorAction SilentlyContinue
         $user | Add-Member -MemberType NoteProperty -Name "AuthenticationMethods" -Value $null -ErrorAction SilentlyContinue
         $user | Add-Member -MemberType NoteProperty -Name "IsMfaRegistered" -Value $null -ErrorAction SilentlyContinue
+        $user | Add-Member -MemberType NoteProperty -Name "IsMfaCapable" -Value $null -ErrorAction SilentlyContinue
+        $user | Add-Member -MemberType NoteProperty -Name "MfaStatus" -Value $null -ErrorAction SilentlyContinue
+        $user | Add-Member -MemberType NoteProperty -Name "MfaStatusIcon" -Value $null -ErrorAction SilentlyContinue
     }
 
     function UpdateProgress($currentCount, $totalCount, $user) {
