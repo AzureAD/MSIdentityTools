@@ -198,9 +198,10 @@ function Get-MsIdAzureUsers {
                 Write-Host "- Sign-in to https://entra.microsoft.com" -ForegroundColor Green
                 Write-Host "- From the left navigation select: Identity → Monitoring & health → Sign-in logs." -ForegroundColor Green
                 Write-Host "- Select the 'Date' filter and set to 'Last 7 days'" -ForegroundColor Green
-                Write-Host "- Select 'Add filters' → 'Application' and type in: Azure" -ForegroundColor Green
-                Write-Host "- Select 'Download → Download JSON" -ForegroundColor Green
-                Write-Host "- Set the 'File Name' of the first textbox to 'signins' and select it's Download button." -ForegroundColor Green
+                Write-Host "- Select 'Add filters' → 'Application' and click 'Apply'" -ForegroundColor Green
+                Write-Host "- Type in 'Azure' and click 'Apply'" -ForegroundColor Green
+                Write-Host "- Select 'Download' → 'Download JSON'" -ForegroundColor Green
+                Write-Host "- Set the 'File Name' of the first textbox to 'signins' and click 'Download'." -ForegroundColor Green
                 Write-Host "- Once the file is downloaded, copy it to the folder where the export command will be run." -ForegroundColor Green
                 Write-Host
                 Write-Host "Re-run this command with the -SignInsJsonPath parameter." -ForegroundColor Green

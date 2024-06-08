@@ -75,12 +75,13 @@
     - Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)**
     - From the left navigation select: **Identity** → **Monitoring & health** → **Sign-in logs**.
     - Select the **Date** filter and set to **Last 7 days**
-    - Select **Add filters** → **Application** and type in: **Azure**
+    - Select **Add filters** → **Application** and click **Apply**
+    - Type in: **Azure** and click **Apply**
     - Select **Download** → **Download JSON**
-    - Set the **File Name** of the first textbox to **signins** and select it's **Download** button.
+    - Set the **File Name** of the first textbox to **signins** and click **Download**.
     - Once the file is downloaded, copy it to the folder where the export command will be run.
 
-    Re-run this command with the **-SignInsJsonPath** option.
+    Run the export with the **-SignInsJsonPath** option.
     ```powershell
     Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json
     ```
@@ -156,11 +157,11 @@ function Export-MsIdAzureMfaReport {
             }
         }
 
-        if ($UsersMfa) {
-            # We only need to generate the report.
-            $azureUsersMfa = $UsersMfa
-        }
-        else {
+        # if ($UsersMfa) {
+        #     # We only need to generate the report.
+        #     $azureUsersMfa = $UsersMfa
+        # }
+        # else {
             if (![string]::IsNullOrEmpty($SignInsJsonPath)) {
                 # Don't look up graph if we have the sign-ins json (usually free tenant download from portal)
                 $Users = Get-MsIdAzureUsers -SignInsJsonPath $SignInsJsonPath
@@ -171,7 +172,7 @@ function Export-MsIdAzureMfaReport {
                 $Users = Get-MsIdAzureUsers -Days $Days
             }
             $azureUsersMfa = GetUserMfaInsight $Users # Get the MFA status
-        }
+        # }
 
         if ($isExcel) {
             if ($null -eq $azureUsersMfa) {
@@ -179,7 +180,6 @@ function Export-MsIdAzureMfaReport {
             }
             else {
                 GenerateExcelReport $azureUsersMfa $ExcelWorkbookPath
-                Write-Host "Note: The 'MFA Status' column does not apply for users signing in using Certificate Based Authentication and/or third-party MFA providers." -ForegroundColor Yellow
             }
         }
 
