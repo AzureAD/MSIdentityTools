@@ -90,10 +90,17 @@ function Get-MsIdInactiveSignInUser {
                 $checkedUser.LastSignInDateTime = $userObject.signInActivity.LastSignInDateTime
                 $checkedUser.LastSigninDaysAgo = (New-TimeSpan -Start $checkedUser.LastSignInDateTime -End (Get-Date)).Days
                 $checkedUser.lastSignInRequestId = $userObject.signInActivity.lastSignInRequestId
-                $checkedUser.lastNonInteractiveSignInDateTime = $userObject.signInActivity.lastNonInteractiveSignInDateTime
 
-                $checkedUser.LastNonInteractiveSigninDaysAgo = (New-TimeSpan -Start $checkedUser.lastNonInteractiveSignInDateTime -End (Get-Date)).Days
-                $checkedUser.lastNonInteractiveSignInRequestId = $userObject.signInActivity.lastNonInteractiveSignInRequestId
+                #lastNonInteractiveSignInDateTime is NULL
+                If ($null -eq $userObject.signInActivity.lastNonInteractiveSignInDateTime){
+                    $checkedUser.lastNonInteractiveSignInDateTime = "Unknown"
+                    $checkedUser.LastNonInteractiveSigninDaysAgo = "Unknown"
+
+                } else {
+                    $checkedUser.lastNonInteractiveSignInDateTime = $userObject.signInActivity.lastNonInteractiveSignInDateTime
+                    $checkedUser.LastNonInteractiveSigninDaysAgo = (New-TimeSpan -Start $checkedUser.lastNonInteractiveSignInDateTime -End (Get-Date)).Days
+                    $checkedUser.lastNonInteractiveSignInRequestId = $userObject.signInActivity.lastNonInteractiveSignInRequestId
+                }
             }
             If ($null -eq $userObject.CreatedDateTime) {
                 $checkedUser.CreatedDateTime = "Unknown"
