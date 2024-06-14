@@ -55,11 +55,6 @@
     Returns the results and exports them to a CSV file.
 
 .EXAMPLE
-    Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
-
-    Returns the results and exports them to a CSV file.
-
-.EXAMPLE
     Export-MsIdAzureMfaReport .\report.xlsx -SignInsJsonPath ./signIns.json
 
     Generates the report from the sign-ins JSON file downloaded from the Entra portal. This is required for Entra ID Free tenants.
