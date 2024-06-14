@@ -21,6 +21,11 @@
     ![Screenshot of a sample Azure MFA report](../assets/export-msidazuremfareport-sample.png)
 
     * This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.
+    ### MFA Status
+
+    - **✅ MFA Capable + Signed in with MFA**: The user has MFA authentication methods registered and has successfully signed in at least once to Azure using MFA.
+    - **✅ MFA Capable**: The user has MFA authentication methods registered but has always signed into Azure using single factor authentication.
+    - **❌ Not MFA Capable**: The user has not yet registered a multi-factor authentication method and has not signed into Azure using MFA. Note: This status may not be accurate if your tenant uses identity federation or a third-party multi-factor authentication provider. See [MFA Status when using identity federation](#mfa-status-when-using-identity-federation).
 
 .DESCRIPTION
     ### Consenting to permissions
@@ -30,10 +35,6 @@
         - **Privileged Role Administrator**
 
         After the initial consent the `Export-MsIdAzureMfaReport` cmdlet can be run by any user with the Microsoft Entra **Global Reader** role.
-
-    ### Identity federation and third-party multi-factor authentication
-
-        The `MFA status` in this report may not be accurate if you use identity federation or a third-party multi-factor authentication provider. See [MFA Status when using identity federation](#mfa-status-when-using-identity-federation).
 
     ### PowerShell 7.0
         This cmdlet requires [PowerShell 7.0](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) or later.

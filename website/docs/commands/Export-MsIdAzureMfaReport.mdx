@@ -17,7 +17,9 @@ The report also includes each user's multi-factor authentication (MFA) registrat
 
 ```powershell
 Install-Module MsIdentityTools -Scope CurrentUser
+
 Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticationMethod.Read.All
+
 Export-MsIdAzureMfaReport .\report.xlsx
 ```
 
@@ -26,17 +28,25 @@ Export-MsIdAzureMfaReport .\report.xlsx
 - Required Microsoft Entra role: **Global Reader**
 - Required permission scopes: **Directory.Read.All**, **AuditLog.Read.All**, **UserAuthenticationMethod.Read.All**
 
-
-*This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.*
+### Output
 
 ![Screenshot of a sample Azure MFA report](../assets/export-msidazuremfareport-sample.png)
+
+* This report will assist you in assessing the impact of the [Microsoft will require MFA for all Azure users](https://techcommunity.microsoft.com/t5/core-infrastructure-and-security/microsoft-will-require-mfa-for-all-azure-users/ba-p/4140391) rollout on your tenant.
+### MFA Status
+
+- **✅ MFA Capable + Signed in with MFA**: The user has MFA authentication methods registered and has successfully signed in at least once to Azure using MFA.
+- **✅ MFA Capable**: The user has MFA authentication methods registered but has always signed into Azure using single factor authentication.
+- **❌ Not MFA Capable**: The user has not yet registered a multi-factor authentication method and has not signed into Azure using MFA.
+Note: This status may not be accurate if your tenant uses identity federation or a third-party multi-factor authentication provider.
+See [MFA Status when using identity federation](#mfa-status-when-using-identity-federation).
 
 ## SYNTAX
 
 ```powershell
 Export-MsIdAzureMfaReport [[-ExcelWorkbookPath] <String>] [-SignInsJsonPath <String>] [-PassThru]
- [-Days <Int32>] [-Users <Array>] [-UsersMfa <Array>] [-UseAuthenticationMethodEndPoint]
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-Days <Int32>] [-Users <Array>] [-UseAuthenticationMethodEndPoint] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -48,11 +58,6 @@ Export-MsIdAzureMfaReport [[-ExcelWorkbookPath] <String>] [-SignInsJsonPath <Str
     - **Privileged Role Administrator**
 
     After the initial consent the `Export-MsIdAzureMfaReport` cmdlet can be run by any user with the Microsoft Entra **Global Reader** role.
-
-### Third party multi-factor authentication
-
-    The `MFA status` in this report is based on authentication methods registered by the user in Microsoft Entra.
-The `MFA status` is not applicable if your tenant uses a third party multi-factor authentication provider (including [Custom Controls](https://learn.microsoft.com/entra/identity/conditional-access/controls)).
 
 ### PowerShell 7.0
 
@@ -67,7 +72,7 @@ Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, UserAuthenticatio
 Export-MsIdAzureMfaReport .\report.xlsx
 ```
 
-Queries last 30 days (7 days for Free tenants) sign-in logs and outputs a report of users accessing Azure and their MFA status in Excel format.
+Queries the last 30 days sign-in logs and creates a report of users accessing Azure and their MFA status in Excel format.
 
 ### EXAMPLE 2
 
@@ -75,7 +80,7 @@ Queries last 30 days (7 days for Free tenants) sign-in logs and outputs a report
 Export-MsIdAzureMfaReport .\report.xlsx -Days 3
 ```
 
-Queries sign-in logs for the past 3 days and outputs a report of Azure users and their MFA status in Excel format.
+Queries sign-in logs for the past 3 days and creates a report of Azure users and their MFA status in Excel format.
 
 ### EXAMPLE 3
 
@@ -86,14 +91,6 @@ Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
 Returns the results and exports them to a CSV file.
 
 ### EXAMPLE 4
-
-```powershell
-Export-MsIdAzureMfaReport -PassThru | Export-Csv -Path .\report.csv
-```
-
-Returns the results and exports them to a CSV file.
-
-### EXAMPLE 5
 
 ```powershell
 Export-MsIdAzureMfaReport .\report.xlsx -SignInsJsonPath ./signIns.json
@@ -160,7 +157,7 @@ Accept wildcard characters: False
 
 Optional.
 Number of days to query sign-in logs.
-Defaults to 30 days for premium tenants and 7 days for free tenants
+Defaults to 30 days.
 
 ```yaml
 Type: Int32
@@ -191,28 +188,15 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -UsersMfa
-
-Optional.
-Hashtable with a pre-defined list of User objects with auth methods.
-Used for generating spreadhsheet.
-
-```yaml
-Type: Array
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -UseAuthenticationMethodEndPoint
 
 If enabled, the user auth method will be used (slower) instead of the reporting API.
 This is the default for free tenants as the reporting API requires a premium license.
+# Used for dev.
+Hashtable with a pre-defined list of User objects with auth methods.
+Used for generating spreadhsheet.
+[array]
+$UsersMfa,
 
 ```yaml
 Type: SwitchParameter
@@ -258,17 +242,38 @@ If you are using an Entra ID Free tenant, additional steps are required to downl
 
 Follow these steps to download the sign-in logs.
 
-- Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)
+- Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)**
 - From the left navigation select: **Identity** → **Monitoring & health** → **Sign-in logs**.
 - Select the **Date** filter and set to **Last 7 days**
-- Select **Add filters** → **Application** and type in: **Azure**
+- Select **Add filters** → **Application** and click **Apply**
+- Type in: **Azure** and click **Apply**
 - Select **Download** → **Download JSON**
-- Set the **File Name** of the first textbox to **signins' and select it's **Download** button.
+- Set the **File Name** of the first textbox to **signins** and click **Download**.
 - Once the file is downloaded, copy it to the folder where the export command will be run.
 
-Re-run this command with the **-SignInsJsonPath** option.
+Run the export with the **-SignInsJsonPath** option.
 ```powershell
 Export-MsIdAzureMfaReport ./report.xlsx -SignInsJsonPath ./signins.json
 ```
+
+### Delay in reporting MFA Status and Authentication Methods
+
+The **MFA Status** does not immediately reflect changes made to the user's authentication methods.
+Expect a delay of up to 24 hours for the report to reflect the latest MFA status.
+
+To get the latest MFA status use the `-UseAuthenticationMethodEndPoint` switch.
+This option will get the latest user details but will take longer to export.
+
+### MFA Status when using identity federation
+
+Tenants configured with identity federation may not have an accurate **MFA Status** in this report unless MFA is enforced for Azure Portal access.
+
+To resolve this:
+
+- Enforce MFA for these users using Conditional Access or Security Defaults.
+  - [Conditional Access policy - Require MFA for Azure management](https://learn.microsoft.com/entra/identity/conditional-access/howto-conditional-access-policy-azure-management) for Entra ID premium tenants.
+  - [Security Defaults](https://learn.microsoft.com/entra/fundamentals/security-defaults) for Entra ID free tenants.
+- Request users to sign in to the Azure portal.
+- Re-run this report to confirm their MFA status.
 
 ## RELATED LINKS
