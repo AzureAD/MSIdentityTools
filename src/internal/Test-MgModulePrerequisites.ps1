@@ -19,7 +19,7 @@ function Test-MgModulePrerequisites {
     process {
         ## Initialize
         $result = $true
-        
+
         ## Check MgModule Connection
         $MgContext = Get-MgContext
         if ($MgContext) {
