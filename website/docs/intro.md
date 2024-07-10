@@ -32,7 +32,7 @@ MSIdentity Tools is also available in the [PowerShell Gallery](https://www.power
 
 ## Popular commands
 
-A popular use of this module is to run a quick OAuth app audit of your tenant using the `Export-MsIdAppConsentGrantReport` command. This command help you identify any risky permissions that have been granted to applications in your tenant.
+A popular use of this module is to run a quick OAuth app audit of your tenant using the [Export-MsIdAppConsentGrantReport](/commands/Export-MsIdAppConsentGrantReport) command. This command help you identify any risky permissions that have been granted to applications in your tenant.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/vO0m5yE3dZA" title="Run a quick OAuth app audit of your tenant using this command and protect yourself" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
