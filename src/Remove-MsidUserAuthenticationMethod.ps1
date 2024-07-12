@@ -11,9 +11,9 @@
 
 .EXAMPLE
     Connect-MgGraph -Scopes UserAuthenticationMethod.ReadWrite.All
-
     Remove-MsIdUserAuthenticationMethod -UserId john@contoso.com
-
+    
+    This example deletes all the authentication methods for the user
 #>
 function Remove-MsIdUserAuthenticationMethod {
     [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Remove-MsidUserAuthenticationMethod')]
