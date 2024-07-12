@@ -623,4 +623,3 @@ function Export-MsIdAppConsentGrantReport {
     Main
     }
 }
-#Export-MsIdAppConsentGrantReport -ExcelWorkbookPath .\report.xlsx
