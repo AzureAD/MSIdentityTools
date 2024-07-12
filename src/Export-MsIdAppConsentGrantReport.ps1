@@ -54,6 +54,14 @@ function Export-MsIdAppConsentGrantReport {
         $ThrottleLimit = 20
     )
 
+    begin{
+        ## Initialize Critical Dependencies
+        $CriticalError = $null
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Get-MgDirectoryObjectById' -ErrorVariable CriticalError)) { return }
+    }
+    
+    process{
+    if ($CriticalError) { return }
     $script:ObjectByObjectId = @{} # Cache for all directory objects
     $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
 
@@ -613,4 +621,5 @@ function Export-MsIdAppConsentGrantReport {
 
     # Call main function
     Main
+    }
 }
