@@ -56,16 +56,6 @@ function Export-MsIdAppConsentGrantReport {
 
     begin{
         ## Initialize Critical Dependencies
-        $CriticalError = $null
-        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Get-MgDirectoryObjectById' -ErrorVariable CriticalError)) { return }
-    }
-    
-    process{
-    if ($CriticalError) { return }
-    $script:ObjectByObjectId = @{} # Cache for all directory objects
-    $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
-
-    function Main() {
         if ("ExcelWorkbook" -eq $ReportOutputType) {
             # Determine if the ImportExcel module is installed since the parameter was included
             if ($null -eq (Get-Module -Name ImportExcel -ListAvailable)) {
@@ -77,6 +67,16 @@ function Export-MsIdAppConsentGrantReport {
             Connect-MgGraph -Scopes Directory.Read.All
         }
 
+        $CriticalError = $null
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Get-MgDirectoryObjectById' -ErrorVariable CriticalError)) { return }
+    }
+    
+    process{
+    if ($CriticalError) { return }
+    $script:ObjectByObjectId = @{} # Cache for all directory objects
+    $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
+
+    function Main() {
         $appConsents = GetAppConsentGrants
 
         if ($null -ne $appConsents) {
@@ -623,3 +623,4 @@ function Export-MsIdAppConsentGrantReport {
     Main
     }
 }
+Export-MsIdAppConsentGrantReport -ExcelWorkbookPath .\report.xlsx
