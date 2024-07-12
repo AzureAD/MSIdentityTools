@@ -15,15 +15,15 @@ ELM - https://learn.microsoft.com/en-us/graph/api/resources/entitlementmanagemen
 Invited BY - https://learn.microsoft.com/en-us/graph/api/user-list-invitedby?view=graph-rest-beta
 
 .EXAMPLE
-   Update-InvitedUserSponsorsFromInvitedBy -All
-   
+   Update-MsIdInvitedUserSponsorsFromInvitedBy -All
+
    Enumerate all invited users in the Tenant and update Sponsors using InvitedBy value
 .EXAMPLE
-   Update-InvitedUserSponsorsFromInvitedBy -UserId user1@contoso.com,user2@contoso.com
+   Update-MsIdInvitedUserSponsorsFromInvitedBy -UserId user1@contoso.com,user2@contoso.com
 
    For only specified users in the tenant update Sponsors using InvitedBy value
 #>
-function Update-InvitedUserSponsorsFromInvitedBy {
+function Update-MsIdInvitedUserSponsorsFromInvitedBy {
     [CmdletBinding(SupportsShouldProcess,
         ConfirmImpact = 'High',
         DefaultParameterSetName = 'AllInvitedGuests')]
@@ -40,11 +40,11 @@ function Update-InvitedUserSponsorsFromInvitedBy {
     )
 
     begin {
-    
+
         ## Initialize Critical Dependencies
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-Mguser', 'Update-Mguser' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
-        
+
         $guestFilter = "(CreationType eq 'Invitiation')"
 
     }
@@ -80,8 +80,8 @@ function Update-InvitedUserSponsorsFromInvitedBy {
 
                 $invitedBy = Invoke-MgGraphRequest @splatArgumentsGetInvitedBy
 
-                Write-Verbose ($invitedBy | ConvertTo-Json) 
-                
+                Write-Verbose ($invitedBy | ConvertTo-Json)
+
                 if ($null -ne $invitedBy -and $null -ne $invitedBy.value -and $null -ne (Get-ObjectPropertyValue $invitedBy.value -Property 'id')) {
                     Write-Verbose ("InvitedBy for Guest User {0}: {1}" -f $InvitedUser.DisplayName, $invitedBy.value.id)
 
@@ -114,7 +114,7 @@ function Update-InvitedUserSponsorsFromInvitedBy {
 
                     }
                     else {
-                        Write-Verbose ("------------> Sponsors already contains the user who invited them!")   
+                        Write-Verbose ("------------> Sponsors already contains the user who invited them!")
                     }
                 }
                 else {

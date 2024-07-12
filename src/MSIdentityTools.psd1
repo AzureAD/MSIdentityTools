@@ -154,7 +154,7 @@
         '.\Get-MsIdInactiveSignInUser.ps1'
         '.\Set-MsIdServicePrincipalVisibleInMyApps.ps1'
         '.\Split-MsIdEntitlementManagementConnectedOrganization.ps1'
-        '.\Update-InvitedUserSponsorsFromInvitedBy.ps1'
+        '.\Update-MsIdInvitedUserSponsorsFromInvitedBy.ps1'
     )
 
     # Functions to export from this module
@@ -214,7 +214,7 @@
         'Get-MsIdInactiveSignInUser'
         'Set-MsIdServicePrincipalVisibleInMyApps'
         'Split-MsIdEntitlementManagementConnectedOrganization'
-        'Update-InvitedUserSponsorsFromInvitedBy'
+        'Update-MsIdInvitedUserSponsorsFromInvitedBy'
     )
 
     # Cmdlets to export from this module
