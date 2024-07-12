@@ -45,10 +45,13 @@ function Test-MgCommandPrerequisites {
         ## Get Graph Command Details
         [hashtable] $MgCommandLookup = @{}
         foreach ($CommandName in $Name) {
-            [array] $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion
 
-            
-            if ($MgCommands.Count -gt 1) {
+            [array] $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion -ErrorAction Break
+
+            if ($MgCommands.Count -eq 1) {
+                $MgCommand = $MgCommands[0]
+            }
+            elseif ($MgCommands.Count -gt 1) {
                 $MgCommand = $MgCommands[0]
                 ## Resolve from multiple results
                 [array] $MgCommandsWithPermissions = $MgCommands | Where-Object Permissions -NE $null
@@ -65,7 +68,12 @@ function Test-MgCommandPrerequisites {
                 }
             }
 
-            $MgCommandLookup[$MgCommand.Command] = $MgCommand
+            if ($MgCommand) {
+                $MgCommandLookup[$MgCommand.Command] = $MgCommand
+            }
+            else {
+                Write-Error "Unable to resolve a specific command for '$CommandName'."
+            }
         }
 
         ## Import Required Modules
