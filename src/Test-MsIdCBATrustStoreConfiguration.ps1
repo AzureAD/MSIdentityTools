@@ -24,6 +24,8 @@
 
 .EXAMPLE
     Test-MsIdCBATrustStoreConfiguration
+
+    Run tests against the current tenant's Certificate Trust Store
 .LINK
     https://aka.ms/aadcba
 

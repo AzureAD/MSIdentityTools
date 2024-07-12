@@ -54,10 +54,8 @@ function Export-MsIdAppConsentGrantReport {
         $ThrottleLimit = 20
     )
 
-    $script:ObjectByObjectId = @{} # Cache for all directory objects
-    $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
-
-    function Main() {
+    begin{
+        ## Initialize Critical Dependencies
         if ("ExcelWorkbook" -eq $ReportOutputType) {
             # Determine if the ImportExcel module is installed since the parameter was included
             if ($null -eq (Get-Module -Name ImportExcel -ListAvailable)) {
@@ -69,6 +67,16 @@ function Export-MsIdAppConsentGrantReport {
             Connect-MgGraph -Scopes Directory.Read.All
         }
 
+        $CriticalError = $null
+        if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Get-MgDirectoryObjectById' -ErrorVariable CriticalError)) { return }
+    }
+    
+    process{
+    if ($CriticalError) { return }
+    $script:ObjectByObjectId = @{} # Cache for all directory objects
+    $script:KnownMSTenantIds = @("f8cdef31-a31e-4b4a-93e4-5f571e91255a", "72f988bf-86f1-41af-91ab-2d7cd011db47")
+
+    function Main() {
         $appConsents = GetAppConsentGrants
 
         if ($null -ne $appConsents) {
@@ -97,11 +105,30 @@ function Export-MsIdAppConsentGrantReport {
         Write-Verbose "Retrieving ServicePrincipal objects..."
 
         WriteMainProgress ServicePrincipal -Status "This can take some time..." -ForceRefresh
-        $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
+        try {
+            $count = Get-MgServicePrincipalCount -ConsistencyLevel eventual
+        }
+        catch [System.Management.Automation.CommandNotFoundException] {
+            Write-Verbose "$_.Exception.Message"
+            Write-Error "The Get-MgServicePrincipalCount cmdlet is not available. Please install the latest version of the Microsoft.Graph module."
+        }
+        catch {
+            Write-Verbose "$_.Exception.Message"
+        }
         WriteMainProgress ServicePrincipal -ChildPercent 5 -Status "Retrieving $count service principals. This can take some time..." -ForceRefresh
         Start-Sleep -Milliseconds 500 #Allow message to update
         $servicePrincipalProps = "id,appId,appOwnerOrganizationId,displayName,appRoles,appRoleAssignmentRequired"
-        $script:ServicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignments" -Select $servicePrincipalProps -All -PageSize 999
+        try {
+            $script:ServicePrincipals = Get-MgServicePrincipal -ExpandProperty "appRoleAssignments" -Select $servicePrincipalProps -All -PageSize 999
+        }
+        catch [System.Management.Automation.CommandNotFoundException] {
+            Write-Verbose "$_.Exception.Message"
+            Write-Error "The Get-MgServicePrincipal cmdlet is not available. Please install the latest version of the Microsoft.Graph module."
+        }
+        catch {
+            Write-Verbose "$_.Exception.Message"
+        }
+        
 
 
         $appPerms = GetApplicationPermissions
@@ -127,7 +154,11 @@ function Export-MsIdAppConsentGrantReport {
                 $object = (Get-MgDirectoryObjectById -Ids $ObjectId)
                 CacheObject -Object $object
             }
+            catch [System.Management.Automation.CommandNotFoundException] {
+                Write-Verbose "$_.Exception.Message"
+            }
             catch {
+                Write-Verbose "$_.Exception.Message"
                 Write-Verbose "Object not found."
             }
         }
@@ -233,6 +264,11 @@ function Export-MsIdAppConsentGrantReport {
                 if (!$success) {
                     $dictFailed.TryAdd($servicePrincipalId, "Failed to add service principal $servicePrincipalId") | Out-Null
                 }
+            }
+            catch [System.Management.Automation.CommandNotFoundException] {
+                Write-Verbose "$_.Exception.Message"
+                Write-Verbose "The Get-MgServicePrincipalOauth2PermissionGrant cmdlet is not available. Please install the latest version of the Microsoft.Graph module."
+                $dictFailed.TryAdd($servicePrincipalId, $_) | Out-Null
             }
             catch {
                 $dictFailed.TryAdd($servicePrincipalId, $_) | Out-Null
@@ -613,4 +649,5 @@ function Export-MsIdAppConsentGrantReport {
 
     # Call main function
     Main
+    }
 }

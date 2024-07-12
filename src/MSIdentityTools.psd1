@@ -25,7 +25,7 @@
     CompanyName          = 'Microsoft Corporation'
 
     # Copyright statement for this module
-    Copyright            = '(c) 2023 Microsoft Corporation. All rights reserved.'
+    Copyright            = '(c) 2024 Microsoft Corporation. All rights reserved.'
 
     # Description of the functionality provided by this module
     Description          = 'Tools for managing, troubleshooting, and reporting on various aspects of Microsoft Identity products and services, primarily Microsoft Entra ID.'
@@ -131,7 +131,7 @@
         '.\New-MsIdSamlRequest.ps1'
         '.\New-MsIdTemporaryUserPassword.ps1'
         '.\New-MsIdWsTrustRequest.ps1'
-        '.\Remove-MsidUserAuthenticationMethod.ps1'
+        '.\Remove-MsIdUserAuthenticationMethod.ps1'
         '.\Reset-MsIdExternalUser.ps1'
         '.\Resolve-MsIdAzureIpAddress.ps1'
         '.\Revoke-MsIdServicePrincipalConsent.ps1'
@@ -191,7 +191,7 @@
         'New-MsIdClientSecret'
         'New-MsIdSamlRequest'
         'New-MsIdTemporaryUserPassword'
-        'Remove-MsidUserAuthenticationMethod'
+        'Remove-MsIdUserAuthenticationMethod'
         'Reset-MsIdExternalUser'
         'Resolve-MsIdTenant'
         'Revoke-MsIdServicePrincipalConsent'
