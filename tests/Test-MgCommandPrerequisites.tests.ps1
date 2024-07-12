@@ -66,8 +66,8 @@ Describe 'Test-MgCommandPrerequisites' {
 
     Context 'Name: <Name>' -ForEach @(
             @{ Name = 'Get-MgUser'; Expected = $true }
-            @{ Name = 'Get-MgUser'; ApiVersion = 'Beta'; Expected = $true }
-            @{ Name = 'Get-MgUser'; ApiVersion = 'Beta'; MinimumVersion = '1.0'; Expected = $true }
+            @{ Name = 'Get-MgUser'; ApiVersion = 'V1.0'; Expected = $true }
+            @{ Name = 'Get-MgUser'; ApiVersion = 'V1.0'; MinimumVersion = '1.0'; Expected = $true }
         ) {
         BeforeAll {
             InModuleScope $PSModule.Name -ArgumentList $_ {
@@ -96,6 +96,46 @@ Describe 'Test-MgCommandPrerequisites' {
                 $Output | Should -BeExactly $Expected
                 Should -Invoke Find-MgGraphCommand -ParameterFilter {
                     $Command -eq $Name
+                }
+                $actualErrors | Should -HaveCount 0
+            }
+        }
+    }
+
+    Context 'Find-MgGraphCommand: Returns Single Command' {
+        BeforeAll {
+            Mock -ModuleName $PSModule.Name Find-MgGraphCommand { 
+                New-Object Microsoft.Graph.PowerShell.Authentication.Models.GraphCommand -Property @{
+                    Command     = 'Get-MgDirectoryObjectById'
+                    Module      = 'Users'
+                    APIVersion  = 'v1.0'
+                    Method      = 'POST'
+                    URI         = '/directoryObjects/getByIds'
+                    Permissions = @(
+                    )
+                }
+            } -ParameterFilter { $Command -eq 'Get-MgUser' } -Verifiable
+        }
+
+        It 'Positional Parameter' {
+            InModuleScope $PSModule.Name -ArgumentList $TestCases[0] {
+                $Output = Test-MgCommandPrerequisites 'Get-MgUser' -ErrorVariable actualErrors
+                $Output | Should -BeOfType [bool]
+                $Output | Should -BeExactly $true
+                Should -Invoke Find-MgGraphCommand -ParameterFilter {
+                    $Command -eq 'Get-MgUser'
+                }
+                $actualErrors | Should -HaveCount 0
+            }
+        }
+
+        It 'Pipeline Input' {
+            InModuleScope $PSModule.Name -ArgumentList $TestCases[0] {
+                $Output = 'Get-MgUser' | Test-MgCommandPrerequisites -ErrorVariable actualErrors
+                $Output | Should -BeOfType [bool]
+                $Output | Should -BeExactly $true
+                Should -Invoke Find-MgGraphCommand -ParameterFilter {
+                    $Command -eq 'Get-MgUser'
                 }
                 $actualErrors | Should -HaveCount 0
             }
