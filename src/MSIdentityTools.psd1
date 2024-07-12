@@ -25,7 +25,7 @@
     CompanyName          = 'Microsoft Corporation'
 
     # Copyright statement for this module
-    Copyright            = '(c) 2023 Microsoft Corporation. All rights reserved.'
+    Copyright            = '(c) 2024 Microsoft Corporation. All rights reserved.'
 
     # Description of the functionality provided by this module
     Description          = 'Tools for managing, troubleshooting, and reporting on various aspects of Microsoft Identity products and services, primarily Microsoft Entra ID.'
