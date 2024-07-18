@@ -286,7 +286,7 @@ function Export-MsIdAzureMfaReport {
             AddMfaProperties $user
             UpdateProgress $currentCount $totalCount $user
 
-            if ($user.AuthenticationRequirement -eq "multiFactorAuthentication") {
+            if ($user.HasSignedInWithMfa) {
                 $user.MfaStatus = "MFA Capable + Signed in with MFA"
                 $user.MfaStatusIcon = "✅"
             }
@@ -341,7 +341,7 @@ function Export-MsIdAzureMfaReport {
                 $user.IsMfaCapable = $isMfaRegistered
             }
 
-            if ($user.AuthenticationRequirement -ne "multiFactorAuthentication") {
+            if (!$user.HasSignedInWithMfa) {
                 if ($user.IsMfaCapable) {
                     $user.MfaStatus = "MFA Capable"
                     $user.MfaStatusIcon = "✅"
@@ -390,48 +390,6 @@ function Export-MsIdAzureMfaReport {
         $percent = [math]::Round(($currentCount / $totalCount) * 100)
 
         Write-Progress -Activity "Getting authentication method" -Status "[$currentCount of $totalCount] Checking $userStatusDisplay. $percent% complete" -PercentComplete $percent
-    }
-
-    function WriteExportProgress(
-        # The current step of the overal generation
-        [ValidateSet("ServicePrincipal", "AppPerm", "DownloadDelegatePerm", "ProcessDelegatePerm", "GenerateExcel", "Complete")]
-        $MainStep,
-        $Status = "Processing...",
-        # The percentage of completion within the child step
-        $ChildPercent,
-        [switch]$ForceRefresh) {
-        $percent = 0
-        switch ($MainStep) {
-            "ServicePrincipal" {
-                $percent = GetNextPercent $ChildPercent 2 10
-                $activity = "Downloading service principals"
-            }
-            "AppPerm" {
-                $percent = GetNextPercent $ChildPercent 10 50
-                $activity = "Downloading application permissions"
-            }
-            "DownloadDelegatePerm" {
-                $percent = GetNextPercent $ChildPercent 50 75
-                $activity = "Downloading delegate permissions"
-            }
-            "ProcessDelegatePerm" {
-                $percent = GetNextPercent $ChildPercent 75 90
-                $activity = "Processing delegate permissions"
-            }
-            "GenerateExcel" {
-                $percent = GetNextPercent $ChildPercent 90 99
-                $activity = "Processing risk information"
-            }
-            "Complete" {
-                $percent = 100
-                $activity = "Complete"
-            }
-        }
-
-        if ($ForceRefresh.IsPresent) {
-            Start-Sleep -Milliseconds 250
-        }
-        Write-Progress -Id 0 -Activity $activity -PercentComplete $percent -Status $Status
     }
 
     function GetAuthMethodInfo($type) {

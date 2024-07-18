@@ -90,7 +90,7 @@ function Get-MsIdAzureUsers {
         # Create an array of filter and join with 'and'
         $filter = "$appFilter $statusFilter $dateFilter"
         Write-Verbose "Graph filter: $filter"
-        $select = "userId,userPrincipalName,userDisplayName,appId,createdDateTime,authenticationRequirement"
+        $select = "userId,userPrincipalName,userDisplayName,appId,createdDateTime,authenticationRequirement,status"
 
         Write-Progress -Activity "Querying sign-in logs..."
 
@@ -103,7 +103,7 @@ function Get-MsIdAzureUsers {
         if ($Days) { $dayDiff = $Days }
         else { $dayDiff = (Get-Date).Subtract($earliestDate).Days }
         Write-Host "Getting sign-in logs for the last $dayDiff days (from $earliestDate to now)..." -ForegroundColor Green
-        $graphUri = "$graphBaseUri/beta/auditLogs/signIns?`$select=$select&`$filter=$filter"
+        $graphUri = "$graphBaseUri/beta/auditLogs/signIns?`$filter=$filter"
 
         Write-Verbose "Getting sign-in logs $graphUri"
         $resultsJson = Invoke-GraphRequest -Uri $graphUri -Method GET
@@ -120,6 +120,9 @@ function Get-MsIdAzureUsers {
                 # Check if user exists in the dictionary and create a new object if not
                 [string]$userId = $item.userId
                 $user = $azureUsers[$userId]
+
+                $hasSignedInWithMfa = GetHasSignedInWithMfa $item
+
                 if ($null -eq $user) {
                     $user = [pscustomobject]@{
                         UserId                    = $item.userId
@@ -128,6 +131,7 @@ function Get-MsIdAzureUsers {
                         AzureAppName              = ""
                         AzureAppId                = @($item.appId)
                         AuthenticationRequirement = $item.authenticationRequirement
+                        HasSignedInWithMfa        = $hasSignedInWithMfa
                     }
                     $azureUsers[$userId] = $user
                 }
@@ -137,6 +141,11 @@ function Get-MsIdAzureUsers {
                         $user.AzureAppId += $item.appId
                     }
                     # Flag as MFA if user signed in at least once
+                    if(!$user.HasSignedInWithMfa -and $hasSignedInWithMfa){
+                        $user.HasSignedInWithMfa = $hasSignedInWithMfa
+                    }
+
+                    # Set user auth requirement to MFA if MFA was enforced at least once
                     if ($user.AuthenticationRequirement -ne "multiFactorAuthentication" `
                             -and $item.authenticationRequirement -eq "multiFactorAuthentication") {
                         $user.AuthenticationRequirement = $item.authenticationRequirement
@@ -177,6 +186,22 @@ function Get-MsIdAzureUsers {
         $processedSeconds = ($latestDate - $processedDate).TotalSeconds
         $percent = ($processedSeconds / $totalSeconds) * 100
         return $percent
+    }
+
+    function GetHasSignedInWithMfa($signInItem) {
+        $hasSignedInWithMfa = $false
+        # Check if MFA was enforced for this succesful sign in
+        if($signInItem.authenticationRequirement -eq 'multiFactorAuthentication'){
+            $hasSignedInWithMfa = $true
+        }
+        else { # authenticationRequirement was singleFactorAuthentication
+            # Could be a federated sign in where MFA claim was sent even though Entra didn't enforce MFA
+            $additionalDetails = Get-ObjectPropertyValue $signInItem.status -Property 'additionalDetails'
+            if($additionalDetails -eq 'MFA requirement satisfied by claim in the token'){
+                $hasSignedInWithMfa = $true
+            }
+        }
+        return $hasSignedInWithMfa
     }
 
     function GetEarliestDate($filter) {
