@@ -133,9 +133,9 @@ function Export-MsIdAzureMfaReport {
         [switch]
         $UseAuthenticationMethodEndPoint
 
-        # # Used for dev. Hashtable with a pre-defined list of User objects with auth methods. Used for generating spreadhsheet.
+
         # [array]
-        # $UsersMfa,
+        # $UsersMfa, # Used for dev. Hashtable with a pre-defined list of User objects with auth methods. Used for generating spreadhsheet.
     )
     function Main() {
 
