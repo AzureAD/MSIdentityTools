@@ -58,7 +58,7 @@ function Get-MsIdInactiveSignInUser {
 
         # Using Date scope here, since conflict with service side odata filter on userType.
         Write-Debug ("Retrieving Users with Filter {0}" -f $queryFilter)
-        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property signInActivity, UserPrincipalName, Id, DisplayName, mail, userType, createdDateTime
+        $queryUsers = Get-MgUser -Filter $queryFilter -All:$true -Property signInActivity, UserPrincipalName, Id, DisplayName, mail, userType, createdDateTime, accountEnabled
 
         switch ($UserType) {
             "Member" {
@@ -80,6 +80,7 @@ function Get-MsIdInactiveSignInUser {
             $checkedUser.UserPrincipalName = $userObject.UserPrincipalName
             $checkedUser.Mail = $userObject.Mail
             $checkedUser.UserType = $userObject.UserType
+            $checkedUser.AccountEnabled = $userObject.AccountEnabled
 
             If ($null -eq $userObject.signInActivity.LastSignInDateTime) {
                 $checkedUser.LastSignInDateTime = "Unknown"
