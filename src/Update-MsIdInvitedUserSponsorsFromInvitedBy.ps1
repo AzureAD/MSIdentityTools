@@ -45,7 +45,7 @@ function Update-MsIdInvitedUserSponsorsFromInvitedBy {
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-Mguser', 'Update-Mguser' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
 
-        $guestFilter = "(CreationType eq 'Invitiation')"
+        $guestFilter = "(CreationType eq 'Invitation')"
 
     }
 
