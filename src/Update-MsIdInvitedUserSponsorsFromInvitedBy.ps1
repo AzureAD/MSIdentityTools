@@ -80,12 +80,12 @@ function Update-MsIdInvitedUserSponsorsFromInvitedBy {
 
                 $invitedBy = Invoke-MgGraphRequest @splatArgumentsGetInvitedBy
 
-                Write-Verbose ($invitedBy | ConvertTo-Json)
+                Write-Verbose ($invitedBy | ConvertTo-Json -Depth 10)
 
                 if ($null -ne $invitedBy -and $null -ne $invitedBy.value -and $null -ne (Get-ObjectPropertyValue $invitedBy.value -Property 'id')) {
                     Write-Verbose ("InvitedBy for Guest User {0}: {1}" -f $InvitedUser.DisplayName, $invitedBy.value.id)
 
-                    if ($InvitedUser.Sponsors.id -notcontains $invitedBy.value.id) {
+                    if (($null -like $InvitedUser.Sponsors) -or ($InvitedUser.Sponsors.id -notcontains $invitedBy.value.id)) {
                         Write-Verbose ("Sponsors does not contain the user who invited them!")
 
                         if ($PSCmdlet.ShouldProcess(("{0} - {1}" -f $InvitedUser.displayName, $InvitedUser.id), "Update Sponsors")) {
