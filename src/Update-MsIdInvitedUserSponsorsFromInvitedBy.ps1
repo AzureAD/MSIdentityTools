@@ -15,9 +15,15 @@ ELM - https://learn.microsoft.com/en-us/graph/api/resources/entitlementmanagemen
 Invited BY - https://learn.microsoft.com/en-us/graph/api/user-list-invitedby?view=graph-rest-beta
 
 .EXAMPLE
+   Update-MsIdInvitedUserSponsorsFromInvitedBy
+
+   Enumerate all invited users in the Tenant and update Sponsors using InvitedBy value
+
+.EXAMPLE
    Update-MsIdInvitedUserSponsorsFromInvitedBy -All
 
    Enumerate all invited users in the Tenant and update Sponsors using InvitedBy value
+
 .EXAMPLE
    Update-MsIdInvitedUserSponsorsFromInvitedBy -UserId user1@contoso.com,user2@contoso.com
 
@@ -33,7 +39,7 @@ function Update-MsIdInvitedUserSponsorsFromInvitedBy {
         [Parameter(ParameterSetName = 'ByUsers')]
         [String[]]
         $UserId,
-        # Enumerate and Update All Guest Users
+        # Enumerate and Update All Guest Users.
         [Parameter(ParameterSetName = 'AllInvitedGuests')]
         [switch]
         $All
@@ -46,36 +52,35 @@ function Update-MsIdInvitedUserSponsorsFromInvitedBy {
         if (!(Test-MgCommandPrerequisites 'Get-Mguser', 'Update-Mguser' -MinimumVersion 2.8.0 -ErrorVariable CriticalError)) { return }
 
         $guestFilter = "(CreationType eq 'Invitation')"
-
     }
 
     process {
         if ($CriticalError) { return }
-        if ($All) {
+        if ($null -eq $UserId -and !$All) {
+            Write-Error "Please specify either -UserId or -All"
+            return
+        }
 
+        if ($All) {
             $InvitedUsers = Get-MgUser -Filter $guestFilter -All -ExpandProperty Sponsors
         }
         else {
             foreach ($user in $userId) {
-
                 $InvitedUsers += Get-MgUser -UserId $user -ExpandProperty Sponsors
             }
         }
 
         if ($null -eq $InvitedUsers) {
-            Write-Information "No Guest Users to Process!"
+            Write-Error "No guest users to process"
         }
         else {
             foreach ($InvitedUser in $InvitedUsers) {
                 $invitedBy = $null
 
                 $splatArgumentsGetInvitedBy = @{
-
                     Method = 'Get'
                     Uri    = ((Get-MgEnvironment -Name (Get-MgContext).Environment).GraphEndpoint +
                         "/beta/users/" + $InvitedUser.Id + "/invitedBy")
-
-
                 }
 
                 $invitedBy = Invoke-MgGraphRequest @splatArgumentsGetInvitedBy
@@ -86,50 +91,35 @@ function Update-MsIdInvitedUserSponsorsFromInvitedBy {
                     Write-Verbose ("InvitedBy for Guest User {0}: {1}" -f $InvitedUser.DisplayName, $invitedBy.value.id)
 
                     if (($null -like $InvitedUser.Sponsors) -or ($InvitedUser.Sponsors.id -notcontains $invitedBy.value.id)) {
-                        Write-Verbose ("Sponsors does not contain the user who invited them!")
+                        Write-Verbose "Sponsors does not contain the user who invited them!"
 
-                        if ($PSCmdlet.ShouldProcess(("{0} - {1}" -f $InvitedUser.displayName, $InvitedUser.id), "Update Sponsors")) {
+                        if ($PSCmdlet.ShouldProcess(("$($InvitedUser.displayName) ($($InvitedUser.UserPrincipalName) - $($InvitedUser.id))"), "Update Sponsors")) {
                             try {
-
-                                $sponsosUrl = $null
-                                $dirobj = $null
-                                $sponsorsRequestBody = $null
-
                                 $sponsorUrl = ("https://graph.microsoft.com/beta/users/{0}" -f $invitedBy.value.id)
                                 $dirObj = @{"sponsors@odata.bind" = @($sponsorUrl) }
                                 $sponsorsRequestBody = $dirObj | ConvertTo-Json
 
-
                                 Update-MgUser -UserId $InvitedUser.Id -BodyParameter $sponsorsRequestBody
-                                Write-Verbose ("Sponsors Updated for {0}" -f $InvitedUser.DisplayName)
-
+                                Write-Output "$($InvitedUser.UserPrincipalName) - Sponsor updated succesfully for this user."
                             }
                             catch {
-
+                                Write-Output "$($InvitedUser.UserPrincipalName) - Failed updating sponsor for this user."
                                 Write-Error $_
-
                             }
                         }
-
-
                     }
                     else {
-                        Write-Verbose ("------------> Sponsors already contains the user who invited them!")
+                        Write-Output "$($InvitedUser.UserPrincipalName) - Sponsor already exists for this user."
                     }
                 }
                 else {
-                    write-verbose ("------->InvitedBy is not available for this user!")
+                    Write-Output "$($InvitedUser.UserPrincipalName) - Invited user information not available for this user."
                 }
-
-
             }
         }
-
     }
 
     end {
-
         Write-Verbose "Complete!"
-
     }
 }
