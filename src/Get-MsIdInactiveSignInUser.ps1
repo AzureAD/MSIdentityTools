@@ -1,3 +1,5 @@
+
+
 <#
 .SYNOPSIS
     Retrieve Users who have not had interactive sign ins since XX days ago
@@ -85,12 +87,23 @@ function Get-MsIdInactiveSignInUser {
             If ($null -eq $userObject.signInActivity.LastSignInDateTime) {
                 $checkedUser.LastSignInDateTime = "Unknown"
                 $checkedUser.LastSigninDaysAgo = "Unknown"
-                $checkedUser.lastNonInteractiveSignInDateTime = "Unknown"
+                $checkedUser.LastNonInteractiveSignInDateTime = "Unknown"
+                $checkedUser.LastSuccessfulSignInDateTime = "Unknown"
             }
             else {
                 $checkedUser.LastSignInDateTime = $userObject.signInActivity.LastSignInDateTime
                 $checkedUser.LastSigninDaysAgo = (New-TimeSpan -Start $checkedUser.LastSignInDateTime -End (Get-Date)).Days
-                $checkedUser.lastSignInRequestId = $userObject.signInActivity.lastSignInRequestId
+                
+                if($null -eq $userObject.signInActivity.LastSuccessfulSignInDateTime ){
+                    $checkedUser.LastSuccessfulSignInDateTime = "Unknown"
+                    $checkedUser.LastSuccessfulSignInDaysAgo = "Unknown"
+                }
+                else {
+                    $checkedUser.LastSuccessfulSignInDateTime = $userObject.signInActivity.lastSuccessfulSignInDateTime
+                    $checkedUser.LastSuccessfulSignInDaysAgo = (New-TimeSpan -Start $checkedUser.LastSuccessfulSignInDateTime -End (Get-Date)).Days
+                
+                }
+                $checkedUser.LastSignInRequestId = $userObject.signInActivity.lastSignInRequestId
 
                 #lastNonInteractiveSignInDateTime is NULL
                 If ($null -eq $userObject.signInActivity.lastNonInteractiveSignInDateTime){
@@ -121,3 +134,4 @@ function Get-MsIdInactiveSignInUser {
         if ($CriticalError) { return }
     }
 }
+
