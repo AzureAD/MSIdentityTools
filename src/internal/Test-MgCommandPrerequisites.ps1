@@ -15,9 +15,10 @@ function Test-MgCommandPrerequisites {
         [Alias('Command')]
         [string[]] $Name,
         # The service API version.
-        [Parameter(Mandatory = $false, Position = 2)]
-        [ValidateSet('v1.0')]
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, Position = 2)]
+        [ValidateSet('v1.0', 'beta')]
         [string] $ApiVersion = 'v1.0',
+         #Default value is 'v1.0' if not specified.
         # Specifies a minimum version.
         [Parameter(Mandatory = $false)]
         [version] $MinimumVersion,
@@ -45,8 +46,8 @@ function Test-MgCommandPrerequisites {
         ## Get Graph Command Details
         [hashtable] $MgCommandLookup = @{}
         foreach ($CommandName in $Name) {
-
-            [array] $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion -ErrorAction Break
+            [array] $MgCommands = @()
+            $MgCommands = Find-MgGraphCommand -Command $CommandName -ApiVersion $ApiVersion -ErrorAction Break
 
             if ($MgCommands.Count -eq 1) {
                 $MgCommand = $MgCommands[0]
@@ -151,3 +152,5 @@ function Test-MgCommandPrerequisites {
         return $result
     }
 }
+
+#Test-MgCommandPrerequisites -Name "Get-MgBetaUser" -ApiVersion "beta"
