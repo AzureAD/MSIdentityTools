@@ -533,5 +533,3 @@ function Get-MsIdCrossTenantAccessActivity {
         if ($CriticalError) { return }
     }
 }
-
-#Get-MsIdCrossTenantAccessActivity -Verbose
