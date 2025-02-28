@@ -14,7 +14,7 @@ The module can be found and installed from the PowerShell gallery at [PowerShell
 
 ## What are the cmdlets in this module?
 View the latest list of cmdlets on the [cmdlet summary](../../wiki/Cmdlets) page.
-| Command | Synopsys |
+| Command | Synopsis |
 | --- | --- |
 | [Add-MsIdServicePrincipal](https://github.com/AzureAD/MSIdentityTools/wiki/Add-MsIdServicePrincipal) | Create service principal for existing application registration |
 | [Confirm-MsIdJwtTokenSignature](https://github.com/AzureAD/MSIdentityTools/wiki/Confirm-MsIdJwtTokenSignature) | Validate the digital signature for JSON Web Token. |
