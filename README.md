@@ -66,6 +66,7 @@ View the latest list of cmdlets on the [cmdlet summary](../../wiki/Cmdlets) page
 | [Split-MsIdEntitlementManagementConnectedOrganization](https://github.com/AzureAD/MSIdentityTools/wiki/Split-MsIdEntitlementManagementConnectedOrganization) | Split elements of a connectedOrganization |
 | [Test-MsIdAzureAdDeviceRegConnectivity](https://github.com/AzureAD/MSIdentityTools/wiki/Test-MsIdAzureAdDeviceRegConnectivity) | Test connectivity on Windows OS for Azure AD Device Registration |
 | [Test-MsIdCBATrustStoreConfiguration](https://github.com/AzureAD/MSIdentityTools/wiki/Test-MsIdCBATrustStoreConfiguration) | Test & report for common mis-configuration issues with the Entra ID Certificate Trust Store |
+| [Get-MsIdCBACertificateUserIdFromCertificate](https://github.com/AzureAD/MSIdentityTools/wiki/Get-MsIdCBACertificateUserIdFromCertificate) | Creates an object with all values from a certificate file for configuring CertificateUserIDs in Entra ID |
 | [Update-MsIdApplicationSigningKeyThumbprint](https://github.com/AzureAD/MSIdentityTools/wiki/Update-MsIdApplicationSigningKeyThumbprint) | Update a Service Princpal's preferredTokenSigningKeyThumbprint to the specified certificate thumbprint |
 | [Update-MsIdGroupWritebackConfiguration](https://github.com/AzureAD/MSIdentityTools/wiki/Update-MsIdGroupWritebackConfiguration) | Update an Azure AD cloud group settings to writeback as an AD on-premises group |
 

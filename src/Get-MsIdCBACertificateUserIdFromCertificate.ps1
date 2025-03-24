@@ -3,7 +3,7 @@
     Generates an object representing all the values contained in a certificate file that can be used in Entra ID for configuring CertificateUserIDs in Certificate-Based Authentication.
 
 .DESCRIPTION
-    Retrieves and displays the specified certificate mapping property from a certificate file for use in CertificateUserIDs configuration in Certificate-Based Authentication. The user IDs are presented in accordance with the guidelines outlined in the Microsoft documentation for certificate-based authentication
+    Retrieves and returns an object with the properties 'PrincipalName', 'RFC822Name', 'IssuerAndSubject', 'Subject', 'SKI', 'SHA1PublicKey', and 'IssuerAndSerialNumber' from a certificate file for use in CertificateUserIDs configuration in Certificate-Based Authentication, according to the guidelines outlined in the Microsoft documentation for certificate-based authentication
 
 .PARAMETER Path
     The path to the certificate file. The file can be in .cer or .pem format.
@@ -12,13 +12,28 @@
     The certificate mapping property to retrieve. Valid values are PrincipalName, RFC822Name, IssuerAndSubject, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
 
 .EXAMPLE
-    PS > Get-MsIdCBACertificateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "PrincipalName"
+    PS > Get-MsIdCBACertificateUserIdFromCertificate -Path "C:\path\to\certificate.cer"
+
+    This command retrieves all the possible certificate mappings and returns an object to represent them.
+
+.EXAMPLE
+    PS > Get-MsIdCBACertificateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping Subject
 
     This command retrieves and returns the PrincipalName property.
 
 .OUTPUTS
     Returns an object containing the certificateUserIDs that can be used with the givin certificate.
-    The properties of the object are: PrincipalName, RFC822Name, IssuerAndSubject, Thumbprint, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
+
+    @{
+        PrincipalName = "X509:<PN>bob@woodgrove.com"
+        RFC822Name = "X509:<RFC822>user@woodgrove.com"
+        IssuerAndSubject = "X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest"
+        Subject = "X509:<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest"
+        SKI = "X509:<SKI>aB1cD2eF3gH4iJ5kL6mN7oP8qR"
+        SHA1PublicKey = "X509:<SHA1-PUKEY>cD2eF3gH4iJ5kL6mN7oP8qR9sT"
+        IssuerAndSerialNumber = "X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<SR>eF3gH4iJ5kL6mN7oP8qR9sT0uV"
+    }
+
 #>
 
 function Get-MsIdCBACertificateUserIdFromCertificate {
