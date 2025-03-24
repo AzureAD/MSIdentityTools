@@ -1,34 +1,24 @@
 <#
 .SYNOPSIS
-Generates strings from a certificate file to be used in Entra ID for configuring CertificateUserIDs in Certificate-Based Authentication
+    Generates an object representing all the values contained in a certificate file that can be used in Entra ID for configuring CertificateUserIDs in Certificate-Based Authentication.
 
 .DESCRIPTION
-Retrieves and displays the specified certificate mapping property from a certificate file for use in CertificateUserIDs configuration in Certificate-Based Authentication. The user IDs are presented in accordance with the guidelines outlined in the Microsoft documentation for certificate-based authentication
+    Retrieves and displays the specified certificate mapping property from a certificate file for use in CertificateUserIDs configuration in Certificate-Based Authentication. The user IDs are presented in accordance with the guidelines outlined in the Microsoft documentation for certificate-based authentication
 
-.PARAMETER CertPath
-The path to the certificate file. The file can be in .cer or .pem format.
+.PARAMETER Path
+    The path to the certificate file. The file can be in .cer or .pem format.
 
 .PARAMETER CertificateMapping
-The certificate mapping property to retrieve. Valid values are PrincipalName, RFC822Name, IssuerAndSubject, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
+    The certificate mapping property to retrieve. Valid values are PrincipalName, RFC822Name, IssuerAndSubject, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
 
 .EXAMPLE
-Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "PrincipalName"
-# This command retrieves and prints the PrincipalName property.
-
-.EXAMPLE
-Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "All"
-# This command retrieves and prints all the properties which can be used for CertificateUserIDs.
-
-.EXAMPLE
-Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "All"
-# This command loads a .cer certificate and displays the user IDs.
-
-.EXAMPLE
-Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.pem" -CertificateMapping "All"
-# This command loads a .pem certificate and displays the user IDs.
+    PS > Get-MsIdCBACertificateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "PrincipalName"
+    
+    This command retrieves and returns the PrincipalName property.
 
 .OUTPUTS
-Displays the certificate user IDs including PrincipalName, RFC822Name, IssuerAndSubject, Thumbprint, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
+    Returns an object containing the certificateUserIDs that can be used with the givin certificate.
+    The properties of the object are: PrincipalName, RFC822Name, IssuerAndSubject, Thumbprint, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
 #>
 
 function Get-MsIdCBACertificateUserIdFromCertificate {
@@ -201,5 +191,5 @@ function Get-MsIdCBACertificateUserIdFromCertificate {
     }
 
     # Call main function
-    Main
+    return Main
 }
