@@ -68,7 +68,7 @@ function Get-DistinguishedNameAsString {
 
     $dn = $distinguishedName.Decode([System.Security.Cryptography.X509Certificates.X500DistinguishedNameFlags]::UseNewLines -bor [System.Security.Cryptography.X509Certificates.X500DistinguishedNameFlags]::DoNotUsePlusSign)
     
-    $dn = $dn -replace "(\r\n|\n|\r)", " "
+    $dn = $dn -replace "(\r\n|\n|\r)", ","
     return $dn.TrimEnd(',')
 }
 
