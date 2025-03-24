@@ -12,19 +12,19 @@ The path to the certificate file. The file can be in .cer or .pem format.
 The certificate mapping property to retrieve. Valid values are PrincipalName, RFC822Name, IssuerAndSubject, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
 
 .EXAMPLE
-Get-CertificateMapping -Path "C:\path\to\certificate.cer" -CertificateMapping "PrincipalName"
+Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "PrincipalName"
 # This command retrieves and prints the PrincipalName property.
 
 .EXAMPLE
-Get-CertificateMapping -Path "C:\path\to\certificate.cer" -CertificateMapping "All"
+Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "All"
 # This command retrieves and prints all the properties which can be used for CertificateUserIDs.
 
 .EXAMPLE
-Get-CertificateUserIds -Path "C:\path\to\certificate.cer" -CertificateMapping "All"
+Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "All"
 # This command loads a .cer certificate and displays the user IDs.
 
 .EXAMPLE
-Get-CertificateUserIds -Path "C:\path\to\certificate.pem" -CertificateMapping "All"
+Get-MsIdCBACertficateUserIdFromCertificate -Path "C:\path\to\certificate.pem" -CertificateMapping "All"
 # This command loads a .pem certificate and displays the user IDs.
 
 .OUTPUTS
