@@ -13,7 +13,7 @@
 
 .EXAMPLE
     PS > Get-MsIdCBACertificateUserIdFromCertificate -Path "C:\path\to\certificate.cer" -CertificateMapping "PrincipalName"
-    
+
     This command retrieves and returns the PrincipalName property.
 
 .OUTPUTS
