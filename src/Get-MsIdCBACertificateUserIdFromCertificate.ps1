@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------------------
+#  Copyright (c) Microsoft Corporation.  All Rights Reserved.  Licensed under the MIT License.  See License in the project root for license information.
+# ------------------------------------------------------------------------------
+
 <#
 .SYNOPSIS
     Generates an object representing all the values contained in a certificate file that can be used in Entra ID for configuring CertificateUserIDs in Certificate-Based Authentication.
@@ -8,11 +12,19 @@
 .PARAMETER Path
     The path to the certificate file. The file can be in .cer or .pem format.
 
+.PARAMETER Certificate
+    An X509Certificate2 object
+
 .PARAMETER CertificateMapping
     The certificate mapping property to retrieve. Valid values are PrincipalName, RFC822Name, IssuerAndSubject, Subject, SKI, SHA1PublicKey, and IssuerAndSerialNumber.
 
 .EXAMPLE
     PS > Get-MsIdCBACertificateUserIdFromCertificate -Path "C:\path\to\certificate.cer"
+
+    This command retrieves all the possible certificate mappings and returns an object to represent them.
+
+.EXAMPLE
+    PS > Get-MsIdCBACertificateUserIdFromCertificate -Certificate $cert
 
     This command retrieves all the possible certificate mappings and returns an object to represent them.
 
@@ -37,10 +49,11 @@
 #>
 
 function Get-MsIdCBACertificateUserIdFromCertificate {
-    [CmdletBinding(HelpUri = 'https://azuread.github.io/MSIdentityTools/commands/Get-MsIdCBACertificateUserIdFromCertificate')]
     param (
-        [Parameter(Mandatory = $true)]    
+        [Parameter(Mandatory = $false)]
         [string]$Path,
+        [Parameter(Mandatory = $false)]
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate,
         [Parameter(Mandatory = $false)]
         [ValidateSet("PrincipalName", "RFC822Name", "IssuerAndSubject", "Subject", "SKI", "SHA1PublicKey", "IssuerAndSerialNumber")]
         [string]$CertificateMapping
@@ -191,7 +204,12 @@ function Get-MsIdCBACertificateUserIdFromCertificate {
 
     function Main
     {
-        $cert = Get-Certificate -filePath $Path
+        $cert = $Certificate
+        if ($null -eq $cert)
+        {
+            $cert = Get-Certificate -filePath $Path
+        }
+
         $mappings = Get-CertificateUserIds -cert $cert
         
         if ($CertificateMapping -eq "")
