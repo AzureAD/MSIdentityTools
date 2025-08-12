@@ -290,7 +290,7 @@ function Export-MsIdAzureMfaReport {
             AddMfaProperties $user
             UpdateProgress $currentCount $totalCount $user
 
-            if ($null -ne $user.HasSignedInWithMfa) {
+            if ($user.HasSignedInWithMfa) {
                 $user.MfaStatus = "MFA Capable + Signed in with MFA"
                 $user.MfaStatusIcon = "✅"
             }
