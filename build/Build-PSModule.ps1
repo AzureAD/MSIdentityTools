@@ -2,7 +2,7 @@ param
 (
     # Directory used to base all relative paths
     [Parameter(Mandatory = $false)]
-    [string] $BaseDirectory = "..\",
+    [string] $BaseDirectory = ".\",
     #
     [Parameter(Mandatory = $false)]
     [string] $OutputDirectory = ".\build\release\",
@@ -23,11 +23,17 @@ param
     [string] $LicensePath = ".\LICENSE",
     #
     [Parameter(Mandatory = $false)]
-    [switch] $SkipMergingNestedModuleScripts
+    [switch] $SkipMergingNestedModuleScripts,
+    # If true, builds the module for production, otherwise builds a preview module that is installed with -AllowPrerelease
+    [Parameter()]
+    [switch]$ProductionBuild
 )
 
 ## Initialize
 Import-Module "$PSScriptRoot\CommonFunctions.psm1" -Force -WarningAction SilentlyContinue -ErrorAction Stop
+
+## Increment the build number
+&$PSScriptRoot\Set-Version.ps1 -preview:(!$ProductionBuild)
 
 [System.IO.DirectoryInfo] $BaseDirectoryInfo = Get-PathInfo $BaseDirectory -InputPathType Directory -ErrorAction Stop
 [System.IO.DirectoryInfo] $OutputDirectoryInfo = Get-PathInfo $OutputDirectory -InputPathType Directory -DefaultDirectory $BaseDirectoryInfo.FullName -ErrorAction SilentlyContinue
@@ -86,4 +92,4 @@ if (!$SkipMergingNestedModuleScripts) {
 }
 
 ## Sign Module
-&$PSScriptRoot\Sign-PSModule.ps1 -ModuleManifestPath $OutputModuleManifestFileInfo.FullName | Format-Table Path, Status, StatusMessage
+#&$PSScriptRoot\Sign-PSModule.ps1 -ModuleManifestPath $OutputModuleManifestFileInfo.FullName | Format-Table Path, Status, StatusMessage

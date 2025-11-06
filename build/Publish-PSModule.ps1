@@ -3,7 +3,7 @@ param
 (
     # Path to Module Manifest
     [Parameter(Mandatory = $false)]
-    [string] $ModuleManifestPath = ".\release\*\*.*.*\*.psd1",
+    [string] $ModuleManifestPath = ".\build\release\*\*.*.*\*.psd1",
     # Repository for PowerShell Gallery
     [Parameter(Mandatory = $false)]
     [string] $RepositorySourceLocation = 'https://www.powershellgallery.com/api/v2',
