@@ -33,6 +33,7 @@ function ConvertFrom-HexString {
     )
 
     process {
+        $InputObject = $InputObject -replace '\s', ''
         $listBytes = New-Object object[] $InputObject.Count
         for ($iString = 0; $iString -lt $InputObject.Count; $iString++) {
             [string] $strHex = $InputObject[$iString]
