@@ -22,12 +22,18 @@
 .EXAMPLE
     PS > $appConsent = Export-MsIdAppConsentGrantReport -ReportOutputType PowerShellObjects
 
-    Return the resuls as hashtable for processing or exporting to other formats like csv or json.
+    Return the results as hashtable for processing or exporting to other formats like csv or json.
 
 .EXAMPLE
     PS > Export-MsIdAppConsentGrantReport -ExcelWorkbookPath .\report.xlsx -ThrottleLimit 5
 
     Increase the throttle limit to speed things up or reduce if you are getting throttling errors. Default is 20
+
+.EXAMPLE
+    PS > Get-MgUser -All | Select Id,DisplayName | Export-Csv -NoTypeInformation users.csv
+    PS > $appConsent = Export-MsIdAppConsentGrantReport -ReportOutputType PowerShellObjects -localUserCsvPath .\users.csv
+
+    Use a pre-downloaded user list to speed up report generation in very large tenants.
 
 #>
 function Export-MsIdAppConsentGrantReport {
@@ -51,7 +57,11 @@ function Export-MsIdAppConsentGrantReport {
 
         # The number of parallel threads to use when calling the Microsoft Graph API. Default is 20.
         [int]
-        $ThrottleLimit = 20
+        $ThrottleLimit = 20,
+
+        #local cache of user data
+        [string]
+        $localUserCsvPath
     )
 
     begin{
@@ -134,9 +144,9 @@ function Export-MsIdAppConsentGrantReport {
         $appPerms = GetApplicationPermissions
         $delPerms = GetDelegatePermissions
 
-        $allPermissions = @()
-        $allPermissions += $appPerms
-        $allPermissions += $delPerms
+        $allPermissions = [System.Collections.ArrayList]@()
+        $null = $allPermissions.AddRange($appPerms)
+        $null = $allPermissions.AddRange($delPerms)
         return $allPermissions
     }
 
@@ -194,7 +204,7 @@ function Export-MsIdAppConsentGrantReport {
 
     function GetApplicationPermissions() {
         $count = 0
-        $permissions = @()
+        $permissions = [System.Collections.ArrayList]@()
 
         # We need to call Get-MgServicePrincipal again so we can expand appRoleAssignments
 
@@ -216,7 +226,7 @@ function Export-MsIdAppConsentGrantReport {
                     $appRoleValue = $appRole.Value
                 }
 
-                $permissions += New-Object PSObject -Property ([ordered]@{
+                $null = $permissions.Add( [PSCustomObject][ordered]@{
                         "PermissionType"            = "Application"
                         "ConsentTypeFilter"         = "Application"
                         "ClientObjectId"            = $client.Id
@@ -232,6 +242,8 @@ function Export-MsIdAppConsentGrantReport {
                         "PrincipalDisplayName"      = ""
                         "MicrosoftApp"              = $isMicrosoftApp
                         "AppOwnerOrganizationId"    = $client.AppOwnerOrganizationId
+                        "Privilege"                 = "-"
+                        "PrivilegeFilter"           = "-"
                     })
             }
         }
@@ -240,7 +252,7 @@ function Export-MsIdAppConsentGrantReport {
 
     function GetDelegatePermissions {
 
-        $permissions = @()
+        $permissions = [System.Collections.ArrayList]@()
         $servicePrincipals = $script:servicePrincipals
 
         $spList = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new()
@@ -256,10 +268,10 @@ function Export-MsIdAppConsentGrantReport {
 
             try {
                 $oAuth2PermGrants = Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $servicePrincipalId -All -PageSize 999
-                $item = New-Object PSObject -Property ([ordered]@{
+                $item = [PSCustomObject][ordered]@{
                         ServicePrincipal       = $_
                         Oauth2PermissionGrants = $oAuth2PermGrants
-                    })
+                    }
                 $success = $dict.TryAdd($servicePrincipalId, $item)
                 if (!$success) {
                     $dictFailed.TryAdd($servicePrincipalId, "Failed to add service principal $servicePrincipalId") | Out-Null
@@ -297,6 +309,15 @@ function Export-MsIdAppConsentGrantReport {
             throw
         }
 
+        #
+        # load user cache
+        #
+        if ($null -ne $localUserCsvPath) {
+            Import-csv $localUserCsvPath | ForEach-Object {
+                CacheObject -Object $_
+            }
+        }
+
         $totalCount = $spList.Values.Count
         $count = 0
         foreach ($sp in $spList.Values) {
@@ -320,7 +341,13 @@ function Export-MsIdAppConsentGrantReport {
 
                         if ($grant.PrincipalId) {
                             $principal = GetObjectByObjectId -ObjectId $grant.PrincipalId
-                            $principalDisplayName = $principal.AdditionalProperties.displayName
+                            if ('DisplayName' -in $principal.PSObject.properties.name) {
+                                #user from the local cache file
+                                $principalDisplayName = $principal.DisplayName 
+                            } else {
+                                #user from a graph Get-MgDirectoryObjectById call
+                                $principalDisplayName = $principal.AdditionalProperties.displayName
+                            }
                         }
 
                         $simplifiedgranttype = ""
@@ -331,7 +358,7 @@ function Export-MsIdAppConsentGrantReport {
                             $simplifiedgranttype = "Delegated-Principal"
                         }
 
-                        $permissions += New-Object PSObject -Property ([ordered]@{
+                        $null = $permissions.Add( [PSCustomObject][ordered]@{
                                 "PermissionType"            = $simplifiedgranttype
                                 "ConsentTypeFilter"         = $simplifiedgranttype
                                 "ClientObjectId"            = $client.Id
@@ -347,6 +374,8 @@ function Export-MsIdAppConsentGrantReport {
                                 "PrincipalDisplayName"      = GetUserLink -userId $grant.PrincipalId -name $principalDisplayName
                                 "MicrosoftApp"              = $isMicrosoftApp
                                 "AppOwnerOrganizationId"    = $client.AppOwnerOrganizationId
+                                "Privilege"                 = "-"
+                                "PrivilegeFilter"           = "-"
                             })
                     }
                 }
@@ -408,8 +437,8 @@ function Export-MsIdAppConsentGrantReport {
                 }
             }
             # Add the privilege to the current object
-            Add-Member -InputObject $_ -MemberType NoteProperty -Name Privilege -Value $risk
-            Add-Member -InputObject $_ -MemberType NoteProperty -Name PrivilegeFilter -Value $risk
+            $_.Privilege = $risk
+            $_.PrivilegeFilter = $risk
         }
 
         return $AppConsents
