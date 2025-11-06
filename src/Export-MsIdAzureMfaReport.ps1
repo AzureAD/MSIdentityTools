@@ -199,13 +199,13 @@ function Export-MsIdAzureMfaReport {
         $headerBgColour = [System.Drawing.ColorTranslator]::FromHtml("#0077b6")
         $darkGrayColour = [System.Drawing.ColorTranslator]::FromHtml("#A9A9A9")
         $styles = @(
-            New-ExcelStyle -Range "A1:J$maxRows" -Height 20 -FontSize 14
-            New-ExcelStyle -Range "A1:J1" -FontColor White -BackgroundColor $headerBgColour -Bold -HorizontalAlignment Center
+            New-ExcelStyle -Range "A1:L$maxRows" -Height 20 -FontSize 14
+            New-ExcelStyle -Range "A1:L1" -FontColor White -BackgroundColor $headerBgColour -Bold -HorizontalAlignment Center
             New-ExcelStyle -Range "A2:A$maxRows" -FontColor Blue -Underline
             New-ExcelStyle -Range "D2:D$maxRows" -FontColor Blue -Underline
-            New-ExcelStyle -Range "E2:G$maxRows" -FontColor Blue -HorizontalAlignment Center
+            New-ExcelStyle -Range "E2:I$maxRows" -FontColor Blue -HorizontalAlignment Center
             New-ExcelStyle -Range "C2:C$maxRows" -HorizontalAlignment Center
-            New-ExcelStyle -Range "I2:I$maxRows" -FontColor $darkGrayColour -HorizontalAlignment Fill
+            New-ExcelStyle -Range "L2:L$maxRows" -FontColor $darkGrayColour -HorizontalAlignment Fill
         )
 
         $authMethodBlade = 'https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserProfileMenuBlade/~/UserAuthMethods/userId/%id%/hidePreviewBanner~/true'
@@ -221,6 +221,8 @@ function Export-MsIdAzureMfaReport {
         @{name = 'Az Portal'; expression = { GetTickSymbol $_.AzureAppName "Azure Portal" } }, `
         @{name = 'Az CLI'; expression = { GetTickSymbol $_.AzureAppName "Azure CLI" } }, `
         @{name = 'Az PowerShell'; expression = { GetTickSymbol $_.AzureAppName "Azure PowerShell" } }, `
+        @{name = 'Az Mobile App'; expression = { GetTickSymbol $_.AzureAppName "Azure mobile app" } }, `
+        @{name = 'M365 Admin Portal'; expression = { GetTickSymbol $_.AzureAppName "Microsoft 365 Admin portal" } }, `
         @{name = 'Authentication Methods'; expression = { $_.AuthenticationMethods -join ', ' } }, UserId, `
         @{name = 'Notes'; expression = { if (![string]::IsNullOrEmpty($_.Notes)) { $_.Notes } } } `
 
@@ -236,13 +238,15 @@ function Export-MsIdAzureMfaReport {
         $sheet.Column(1).Width = 35 #DisplayName
         $sheet.Column(2).Width = 35 #UPN
         $sheet.Column(3).Width = 6 #MFA Icon
-        $sheet.Column(4).Width = 34 #MFA Registered
-        $sheet.Column(5).Width = 17 #Azure Portal
-        $sheet.Column(6).Width = 17 #Azure CLI
-        $sheet.Column(7).Width = 17 #Azure PowerShell
-        $sheet.Column(8).Width = 40 #AuthenticationMethods
-        $sheet.Column(9).Width = 15 #UserId
-        $sheet.Column(10).Width = 30 #Notes
+        $sheet.Column(4).Width = 37 #MFA Registered
+        $sheet.Column(5).Width = 12 #Azure Portal
+        $sheet.Column(6).Width = 10 #Azure CLI
+        $sheet.Column(7).Width = 18 #Azure PowerShell
+        $sheet.Column(8).Width = 17 #Azure mobile app
+        $sheet.Column(9).Width = 23 #M365 Admin portal
+        $sheet.Column(10).Width = 40 #AuthenticationMethods
+        $sheet.Column(11).Width = 45 #UserId
+        $sheet.Column(12).Width = 30 #Notes
 
         Add-ConditionalFormatting -Worksheet $sheet -Range "C2:C$maxRows" -ConditionValue '=$C2="✅"' -RuleType Expression -ForegroundColor Green
         Add-ConditionalFormatting -Worksheet $sheet -Range "C2:C$maxRows" -ConditionValue '=$C2="❌"' -RuleType Expression -ForegroundColor Red
