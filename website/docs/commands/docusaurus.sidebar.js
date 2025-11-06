@@ -61,6 +61,7 @@ module.exports = [
     'commands/Split-MsIdEntitlementManagementConnectedOrganization',
     'commands/Test-MsIdAzureAdDeviceRegConnectivity',
     'commands/Test-MsIdCBATrustStoreConfiguration',
+    'commands/Get-MsIdCBACertificateUserIdFromCertificate',
     'commands/Update-MsIdApplicationSigningKeyThumbprint',
     'commands/Update-MsIdGroupWritebackConfiguration'
 ];

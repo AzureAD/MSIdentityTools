@@ -1,0 +1,98 @@
+---
+sidebar_class_name: hidden
+description: Creates an object with all values from a certificate file for configuring CertificateUserIDs in Entra ID
+id: Get-MsIdCBACertificateUserIdFromCertificate
+title: Get-MsIdCBACertificateUserIdFromCertificate
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Get-MsIdCBACertificateUserIdFromCertificate.ps1
+---
+## SYNOPSIS
+    Generates an object representing all the values contained in a certificate file that can be used in Entra ID for configuring CertificateUserIDs in Certificate-Based Authentication.
+
+## SYNTAX
+```syntax
+Get-MsIdCBACertificateUserIdFromCertificate [-Path] <string> [[-CertificateMapping] <string>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Returns an object containing the certificateUserIDs configurations for Certificate-Based Authentication based on the given certificate file. The properties in the object are constructed according to the guidelines outlined in the Microsoft [documentation](https://learn.microsoft.com/en-us/entra/identity/authentication/concept-certificate-based-authentication-certificateuserids
+) for certificate-based authentication.
+
+```powershell
+@{
+    PrincipalName = "X509:<PN>bob@woodgrove.com"
+    RFC822Name = "X509:<RFC822>user@woodgrove.com"
+    IssuerAndSubject = "X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest"
+    Subject = "X509:<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest"
+    SKI = "X509:<SKI>aB1cD2eF3gH4iJ5kL6mN7oP8qR"
+    SHA1PublicKey = "X509:<SHA1-PUKEY>cD2eF3gH4iJ5kL6mN7oP8qR9sT"
+    IssuerAndSerialNumber = "X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<SR>eF3gH4iJ5kL6mN7oP8qR9sT0uV"
+}
+```
+
+## EXAMPLES
+
+### EXAMPLE 1
+```powershell
+> $output = Get-MsIdCBACertificateUserIdFromCertificate C:\path\to\certificate.cer
+> $output
+Name                           Value
+----                           -----
+Subject                        X509:<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest
+IssuerAndSerialNumber          X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<SR>eF3gH4iJ5kL6mN7oP8qR9sT0uV
+RFC822Name                     X509:<RFC822>user@woodgrove.com
+SHA1PublicKey                  X509:<SHA1-PUKEY>cD2eF3gH4iJ5kL6mN7oP8qR9sT
+IssuerAndSubject               X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest
+SKI                            X509:<SKI>aB1cD2eF3gH4iJ5kL6mN7oP8qR
+PrincipalName                  X509:<PN>bob@woodgrove.com
+```
+### EXAMPLE 2
+```powershell
+> $output = Get-MsIdCBACertificateUserIdFromCertificate C:\path\to\certificate.cer -CertificateMapping Subject
+> $output
+X509:<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest
+```
+
+## PARAMETERS
+### -Path
+
+Path to the certificate file, it can be either a cer or pem file.
+
+### -Certificate
+Certificate from which the certificateUserIDs mappings will be extracted
+
+### -CertificateMapping
+One of the values `PrincipalName`, `RFC822Name`, `IssuerAndSubject`, `Subject`, `SKI`, `SHA1PublicKey`, and `IssuerAndSerialNumber`
+To filer 
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+### System.String
+
+###
+```powershell
+@{
+    PrincipalName = "X509:<PN>bob@woodgrove.com"
+    RFC822Name = "X509:<RFC822>user@woodgrove.com"
+    IssuerAndSubject = "X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest"
+    Subject = "X509:<S>DC=com,DC=contoso,OU=UserAccounts,CN=mfatest"
+    SKI = "X509:<SKI>aB1cD2eF3gH4iJ5kL6mN7oP8qR"
+    SHA1PublicKey = "X509:<SHA1-PUKEY>cD2eF3gH4iJ5kL6mN7oP8qR9sT"
+    IssuerAndSerialNumber = "X509:<I>DC=com,DC=contoso,CN=CONTOSO-DC-CA<SR>eF3gH4iJ5kL6mN7oP8qR9sT0uV"
+}
+```
+## NOTES
+
+## RELATED LINKS
+
+[https://aka.ms/aadcba](https://aka.ms/aadcba)
+[certificateUserIds](https://learn.microsoft.com/en-us/entra/identity/authentication/concept-certificate-based-authentication-certificateuserids)
