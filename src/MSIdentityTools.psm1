@@ -9,3 +9,37 @@ if ($PSVersionTable.PSVersion -lt [version]'7.0') {
 #Write-Warning 'It is recommended to update Microsoft Graph PowerShell SDK modules frequently because many commands in this module depend on them.'
 
 class SamlMessage : xml {}
+
+#region AgentID
+
+# Module-level variable to store the current Agent Blueprint ID
+$script:CurrentAgentBlueprintId = $null
+
+# Module-level variable to store the current Agent Blueprint Secret
+$script:CurrentAgentBlueprintSecret = $null
+
+# Module-level variable to store the current Agent Identity Blueprint Service Principal ID
+$script:CurrentAgentBlueprintServicePrincipalId = $null
+
+# Module-level variable to cache the Microsoft Graph Service Principal ID
+$script:MSGraphServicePrincipalId = $null
+
+# Module-level variable to store the last configured inheritable scopes
+$script:LastConfiguredInheritableScopes = $null
+
+# Module-level variable to store the current Agent Identity ID
+$script:CurrentAgentIdentityId = $null
+
+# Module-level variable to store the current tenant ID
+$script:CurrentTenantId = $null
+
+# Module-level variable to store the last client secret
+$script:LastClientSecret = $null
+
+# Module-level variable to track the last successful connection type
+$script:LastSuccessfulConnection = $null
+
+# Module-level variable to store the current Agent User ID
+$script:CurrentAgentUserId = $null
+
+#endregion AgentID
