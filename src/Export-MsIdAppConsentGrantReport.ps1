@@ -59,9 +59,9 @@ function Export-MsIdAppConsentGrantReport {
         [int]
         $ThrottleLimit = 20,
 
-        #local cache of user data
+        #Local cache of user data
         [string]
-        $localUserCsvPath
+        $LocalUserCsvPath
     )
 
     begin{
@@ -80,7 +80,7 @@ function Export-MsIdAppConsentGrantReport {
         $CriticalError = $null
         if (!(Test-MgCommandPrerequisites 'Get-MgServicePrincipal', 'Get-MgDirectoryObjectById' -ErrorVariable CriticalError)) { return }
     }
-    
+
     process{
     if ($CriticalError) { return }
     $script:ObjectByObjectId = @{} # Cache for all directory objects
@@ -138,7 +138,7 @@ function Export-MsIdAppConsentGrantReport {
         catch {
             Write-Verbose "$_.Exception.Message"
         }
-        
+
 
 
         $appPerms = GetApplicationPermissions
@@ -312,8 +312,8 @@ function Export-MsIdAppConsentGrantReport {
         #
         # load user cache
         #
-        if ($null -ne $localUserCsvPath) {
-            Import-csv $localUserCsvPath | ForEach-Object {
+        if (![string]::IsNullOrEmpty($LocalUserCsvPath)) {
+            Import-Csv $LocalUserCsvPath | ForEach-Object {
                 CacheObject -Object $_
             }
         }
@@ -343,7 +343,7 @@ function Export-MsIdAppConsentGrantReport {
                             $principal = GetObjectByObjectId -ObjectId $grant.PrincipalId
                             if ('DisplayName' -in $principal.PSObject.properties.name) {
                                 #user from the local cache file
-                                $principalDisplayName = $principal.DisplayName 
+                                $principalDisplayName = $principal.DisplayName
                             } else {
                                 #user from a graph Get-MgDirectoryObjectById call
                                 $principalDisplayName = $principal.AdditionalProperties.displayName
