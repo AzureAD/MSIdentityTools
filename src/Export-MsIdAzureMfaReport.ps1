@@ -71,7 +71,7 @@
     - Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)**
     - From the left navigation select: **Identity** → **Monitoring & health** → **Sign-in logs**.
     - Select the **Date** filter and set to **Last 7 days**
-    - Select **Add filters** → **Application** and click **Apply**
+    - Select **Add filters** → **Application**
     - Type in: **Azure** and click **Apply**
     - Select **Download** → **Download JSON**
     - Set the **File Name** of the first textbox to **signins** and click **Download**.
