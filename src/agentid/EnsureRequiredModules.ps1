@@ -12,14 +12,14 @@ function EnsureRequiredModules {
     $requiredModules = @(
         'Microsoft.Graph.Authentication',
         'Microsoft.Graph.Applications',
-        'Microsoft.Graph.Identity.SignIns'
+        'Microsoft.Graph.Identity.SignIns',
+        'Microsoft.Graph.Users',
+        'Microsoft.Graph.Identity.DirectoryManagement'
     )
 
     foreach ($module in $requiredModules) {
-        Write-Host "Checking module: $module" -ForegroundColor Yellow
-
         if (!(Get-Module -ListAvailable -Name $module)) {
-            Write-Host "Module $module not found. Installing..." -ForegroundColor Red
+            Write-Host "Module $module not found. Installing..." -ForegroundColor Yellow
             try {
                 Install-Module -Name $module -Scope CurrentUser -Force -AllowClobber
                 Write-Host "Successfully installed $module" -ForegroundColor Green
@@ -29,15 +29,11 @@ function EnsureRequiredModules {
                 return $false
             }
         }
-        else {
-            Write-Host "Module $module is already installed" -ForegroundColor Green
-        }
 
         # Import the module if not already imported
         if (!(Get-Module -Name $module)) {
             try {
                 Import-Module -Name $module -Force
-                Write-Host "Successfully imported $module" -ForegroundColor Green
             }
             catch {
                 Write-Error "Failed to import module $module`: $_"
