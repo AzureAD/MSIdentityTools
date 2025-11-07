@@ -23,6 +23,13 @@ function Invoke-MsIdAgentIdInteractive {
     $october1_2025 = [DateTime]::new(2025, 10, 1, 0, 0, 0)
     $blueprintNumber = [int]((Get-Date) - $october1_2025).TotalSeconds
 
+    Write-Host "Connecting to Microsoft Graph with all the permissions needed to create and manage" -ForegroundColor Yellow
+    Write-Host "Agent Identity Blueprints and Agent Users" -ForegroundColor Yellow
+
+    # Ensure required modules are available and connect as admin
+    Connect-MsIdEntraAsUser -Scopes @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All')
+
+
     $bluePrintDisplayName = Read-Host "Enter a display name for the Agent Identity Blueprint (or press Enter for default)"
     if (-not $bluePrintDisplayName -or $bluePrintDisplayName.Trim() -eq "") {
         $bluePrintDisplayName = "Agent Identity Blueprint Example $blueprintNumber"
@@ -32,24 +39,47 @@ function Invoke-MsIdAgentIdInteractive {
     # Get current user as sponsor
     try {
         $currentUserUpn = (Get-MgContext).Account
-        $currentUserId = (Get-MgUser -UserId $currentUserUpn).Id
+        # Get user's OID directly using their UPN
+        $currentUser = Get-MgUser -Filter "userPrincipalName eq '$currentUserUpn'" -Property Id
+        $currentUserId = $currentUser.Id
     }
     catch {
         $currentUserUpn = $null
         $currentUserId = $null
     }
+
     if ($currentUserUpn) {
         $useCurrentUserId = Read-Host "Use current user ($currentUserUpn) as sponsor? (y/n)"
         if ($null -eq $useCurrentUserId -or $useCurrentUserId -eq "y") {
             Write-Host "Using current user as default sponsor: $currentUserUpn" -ForegroundColor Gray
             $SponsorUserIds = @($currentUserId)
+            $useSponsor = $true
+        } else {
+            $useSponsor = $false
         }
+    } else {
+        $useSponsor = $false
     }
 
     # Step 1: Create Agent Identity Blueprint with all parameters (no prompting)
-    $blueprint1 = New-MsIdAgentIdentityBlueprint -DisplayName $bluePrintDisplayName -SponsorUserIds $SponsorUserIds
+    try {
+        if ($useSponsor) {
+            $blueprint1 = New-MsIdAgentIdentityBlueprint -DisplayName $bluePrintDisplayName -SponsorUserIds $SponsorUserIds
+        } else {
+            $blueprint1 = New-MsIdAgentIdentityBlueprint -DisplayName $bluePrintDisplayName
+        }
 
-    Write-Host "Created Blueprint ID: $($blueprint1.AgentBlueprintId)" -ForegroundColor Green
+        if ($blueprint1) {
+            Write-Host "Created Blueprint ID: $blueprint1" -ForegroundColor Green
+        } else {
+            Write-Error "Failed to create Agent Identity Blueprint - no ID returned"
+            return
+        }
+    }
+    catch {
+        Write-Error "Failed to create Agent Identity Blueprint: $_"
+        return
+    }
     Write-Host ""
 
     # ===================================================================
@@ -112,7 +142,7 @@ function Invoke-MsIdAgentIdInteractive {
 
         # Step 4: Configure inheritable permissions (what permissions agent users will get)
         $inheritablePerms = Add-MsIdInheritablePermissionsToAgentIdentityBlueprint -Scopes @("user.read", "mail.read", "calendars.read")
-        Write-Host "Configured inheritable permissions: $($inheritablePerms.Scopes -join ', ')" -ForegroundColor Cyan
+        Write-Host "Configured inheritable permissions: $($inheritablePerms.InheritableScopes -join ', ')" -ForegroundColor Cyan
     }
     else {
         Write-Host "Skipping inheritable permissions configuration." -ForegroundColor Gray
@@ -156,7 +186,7 @@ function Invoke-MsIdAgentIdInteractive {
 
     # Step 6: Create the service principal for the blueprint
     $principal1 = New-MsIdAgentIdentityBlueprintPrincipal
-    Write-Host "Created Service Principal ID: $($principal1.ServicePrincipalId)" -ForegroundColor Green
+    Write-Host "Created Service Principal ID: $($principal1.id)" -ForegroundColor Green
 
     # Step 7: Grant permission to create agent users (only if user chose to have Agent ID users)
     if ($hasAgentIDUsers) {
@@ -322,15 +352,11 @@ function Invoke-MsIdAgentIdInteractive {
     else {
         Write-Host "- 9-10. Agent Identity and User creation (not completed)" -ForegroundColor Gray
     }
-    Write-Host ""
-
-    Write-Host "Available functions:" -ForegroundColor Yellow
-    Get-Command -Module MSIdentityTools | Where-Object { $_.Name -like "*Agent*" } | Format-Table Name, CommandType -AutoSize
 
     Write-Host ""
     Write-Host "Module state:" -ForegroundColor Yellow
-    Write-Host "Current Blueprint ID: $($blueprint1.AgentBlueprintId)" -ForegroundColor White
-    Write-Host "Current Service Principal ID: $($principal1.ServicePrincipalId)" -ForegroundColor White
+    Write-Host "Current Blueprint ID: $blueprint1" -ForegroundColor White
+    Write-Host "Current Service Principal ID: $($principal1.id)" -ForegroundColor White
     Write-Host "Total Agent Identities created: $($allAgentIdentities.Count)" -ForegroundColor White
     Write-Host "Total Agent Users created: $($allAgentUsers.Count)" -ForegroundColor White
     Write-Host "Last Agent Identity ID: $(if ($agentIdentity) { $agentIdentity.id } else { 'None created' })" -ForegroundColor White

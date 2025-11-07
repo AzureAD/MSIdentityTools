@@ -42,8 +42,7 @@ function ConnectAsAgentIdentityBlueprint {
         Write-Host "Connecting to Microsoft Graph using Agent Identity Blueprint credentials..." -ForegroundColor Yellow
 
         # Convert the stored client secret to a secure credential
-        $SecureClientSecret = ConvertTo-SecureString $script:LastClientSecret -AsPlainText -Force
-        $ClientSecretCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $script:CurrentAgentBlueprintId, $SecureClientSecret
+        $ClientSecretCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $script:CurrentAgentBlueprintId, $script:LastClientSecret
 
         # Connect to Microsoft Graph using the blueprint's credentials
         connect-mggraph -tenantId $script:CurrentTenantId -ClientSecretCredential $ClientSecretCredential -ContextScope Process -NoWelcome

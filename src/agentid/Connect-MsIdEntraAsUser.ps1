@@ -36,7 +36,7 @@ function Connect-MsIdEntraAsUser {
         }
 
         Write-Host "Connecting to Microsoft Graph as user..." -ForegroundColor Yellow
-        connect-mggraph -contextscope process -scopes $Scopes
+        connect-mggraph -contextscope process -scopes $Scopes -NoWelcome
 
         # Get the tenant ID and current user
         $context = Get-MgContext

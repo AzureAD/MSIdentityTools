@@ -98,6 +98,10 @@ function New-MsIdAgentIdentityBlueprint {
     try {
         $BlueprintRes = Invoke-MgGraphRequest -Method Post -Uri "https://graph.microsoft.com/beta/applications/graph.agentIdentityBlueprint" -Body $JsonBody
 
+        # Display the full response from the Graph API call
+        Write-Host "Graph API Response:" -ForegroundColor Cyan
+        $BlueprintRes | ConvertTo-Json -Depth 5 | Write-Host -ForegroundColor Gray
+
         # Extract and store the blueprint ID
         $AgentBlueprintId = $BlueprintRes.id
         Write-Host "Successfully created Agent Identity Blueprint" -ForegroundColor Green
@@ -106,10 +110,8 @@ function New-MsIdAgentIdentityBlueprint {
         # Store the ID in module-level variable for use by other functions
         $script:CurrentAgentBlueprintId = $AgentBlueprintId
 
-        # Add the ID to the response object for easy access
-        $BlueprintRes | Add-Member -MemberType NoteProperty -Name "AgentBlueprintId" -Value $AgentBlueprintId -Force
-
-        return $BlueprintRes
+        # Return only the AgentBlueprintId instead of the full response
+        return $AgentBlueprintId
     }
     catch {
         Write-Error "Failed to create Agent Identity Blueprint: $_"

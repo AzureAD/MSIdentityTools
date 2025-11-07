@@ -61,7 +61,7 @@ function Add-MsIdClientSecretToAgentIdentityBlueprint {
 
         # Store the secret in module-level variables for use by other functions
         $script:CurrentAgentBlueprintSecret = $secretResult
-        $script:LastClientSecret = $secretResult.SecretText
+        $script:LastClientSecret = ConvertTo-SecureString $secretResult.SecretText -AsPlainText -Force
 
         return $secretResult
     }
