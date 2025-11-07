@@ -1,0 +1,85 @@
+---
+sidebar_class_name: hidden
+description: Connects to Microsoft Graph as a user with required scopes and validates admin privileges
+id: Connect-MsIdEntraAsUser
+title: Connect-MsIdEntraAsUser
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Connect-MsIdEntraAsUser.ps1
+---
+
+## SYNOPSIS
+
+Connects to Microsoft Graph as a user with required scopes and validates admin privileges
+
+## SYNTAX
+
+```powershell
+Connect-MsIdEntraAsUser [[-Scopes] <String[]>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Establishes a connection to Microsoft Graph with the necessary permissions for Agent Identity operations
+and validates that the authenticated user has Global Admin or Global Reader role
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Connect-MsIdEntraAsUser
+```
+
+### EXAMPLE 2
+
+```powershell
+Connect-MsIdEntraAsUser -Scopes @('AgentIdentityBlueprint.Create', 'User.ReadWrite.All')
+```
+
+## PARAMETERS
+
+### -Scopes
+
+Array of scopes to request.
+Defaults to AgentIdentityBlueprint.Create plus Directory.Read.All for role validation
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All')
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

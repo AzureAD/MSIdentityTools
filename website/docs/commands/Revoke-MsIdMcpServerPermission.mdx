@@ -1,0 +1,203 @@
+---
+sidebar_class_name: hidden
+description: Revokes delegated permissions from MCP clients for the Microsoft MCP Server for Enterprise.
+id: Revoke-MsIdMcpServerPermission
+title: Revoke-MsIdMcpServerPermission
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Revoke-MsIdMcpServerPermission.ps1
+---
+
+## SYNOPSIS
+
+Revokes delegated permissions from MCP clients for the Microsoft MCP Server for Enterprise.
+
+## SYNTAX
+
+### PredefinedClients (Default)
+
+```powershell
+Revoke-MsIdMcpServerPermission [-MCPClient <String[]>] [-Scopes <String[]>]
+ [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+### CustomClients
+
+```powershell
+Revoke-MsIdMcpServerPermission -MCPClientServicePrincipalId <String[]> [-Scopes <String[]>]
+ [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+This cmdlet revokes OAuth2 delegated permissions from MCP clients (like VS Code or Visual Studio)
+to access the Microsoft MCP Server for Enterprise.
+You can specify predefined clients or
+provide custom MCP client app IDs.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Connect-MgGraph -Scopes DelegatedPermissionGrant.ReadWrite.All, Application.ReadWrite.All
+Revoke-MsIdMcpServerPermission
+Revokes all permissions from Visual Studio Code (default MCP client if none specified).
+```
+
+### EXAMPLE 2
+
+```powershell
+Connect-MgGraph -Scopes DelegatedPermissionGrant.ReadWrite.All, Application.ReadWrite.All
+Revoke-MsIdMcpServerPermission -MCPClient VisualStudioCode -Scopes 'Group.Read.All'
+Revokes specific permissions from Visual Studio Code.
+```
+
+### EXAMPLE 3
+
+```powershell
+Connect-MgGraph -Scopes DelegatedPermissionGrant.ReadWrite.All, Application.ReadWrite.All
+Revoke-MsIdMcpServerPermission -MCPClient 'VisualStudio', 'VisualStudioCode'
+Revokes all permissions from Visual Studio and Visual Studio Code.
+```
+
+### EXAMPLE 4
+
+```powershell
+Connect-MgGraph -Scopes DelegatedPermissionGrant.ReadWrite.All, Application.ReadWrite.All
+Revoke-MsIdMcpServerPermission -MCPClientServicePrincipalId '12345678-1234-1234-1234-123456789012'
+Revokes all permissions from a custom MCP client using its service principal ID.
+```
+
+### EXAMPLE 5
+
+```powershell
+Connect-MgGraph -Scopes DelegatedPermissionGrant.ReadWrite.All, Application.ReadWrite.All
+Revoke-MsIdMcpServerPermission -VisualStudioClient 'VisualStudioMSAL' -Scopes 'User.Read.All'
+Revokes specific permissions from Visual Studio MSAL client.
+```
+
+### EXAMPLE 6
+
+```powershell
+Connect-MgGraph -Scopes DelegatedPermissionGrant.ReadWrite.All, Application.ReadWrite.All
+Revoke-MsIdMcpServerPermission -MCPClientServicePrincipalId '12345678-1234-1234-1234-123456789012' -Scopes 'User.Read.All'
+Revokes specific permissions from a custom MCP client.
+```
+
+## PARAMETERS
+
+### -MCPClient
+
+Specifies the predefined MCP client(s) to revoke permissions from.
+Valid values are:
+- VisualStudio: Visual Studio
+- VisualStudioCode: Visual Studio Code
+- VisualStudioMSAL: Visual Studio MSAL
+
+```yaml
+Type: String[]
+Parameter Sets: PredefinedClients
+Aliases:
+
+Required: False
+Position: Named
+Default value: @('VisualStudioCode')
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MCPClientServicePrincipalId
+
+Specifies custom service principal ID(s) to revoke permissions from.
+Must be valid GUIDs.
+
+```yaml
+Type: String[]
+Parameter Sets: CustomClients
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Scopes
+
+Specific scopes to revoke.
+If not specified, all permissions are revoked.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -WhatIf
+
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: wi
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Confirm
+
+Prompts you for confirmation before running the cmdlet.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: cf
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

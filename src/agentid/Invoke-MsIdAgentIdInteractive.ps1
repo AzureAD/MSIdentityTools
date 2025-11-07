@@ -1,6 +1,17 @@
 ﻿<#
 .SYNOPSIS
-    Invokes an interactive creation of Agent ID identities and users
+    Interactive cmdlet to create and configure an Agent ID.
+
+.DESCRIPTION
+    Demonstrates the full workflow of creating and configuring an Agent ID Blueprint,
+    including creating Agent Identities and Agent Users as needed.
+
+    Includes prompts for user input at key steps to customize the configuration. Including
+    options for
+
+    * interactive agents
+    * permissions scopes and
+    * Agent ID users.
 #>
 
 function Invoke-MsIdAgentIdInteractive {

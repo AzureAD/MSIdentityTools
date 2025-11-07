@@ -1,0 +1,114 @@
+---
+sidebar_class_name: hidden
+description: Configure and enable users for CBA
+id: Set-MsIdCbaAuthMethodPolicy
+title: Set-MsIdCbaAuthMethodPolicy
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Set-MsIdCbaAuthMethodPolicy.ps1
+---
+
+## SYNOPSIS
+
+Configure and enable users for CBA
+
+## SYNTAX
+
+```powershell
+Set-MsIdCbaAuthMethodPolicy [-CertificateField] [-AadUserProperty] <Hashtable> [[-PilotGroupId] <String[]>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+\{\{ Fill in the Description \}\}
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+Set-MsIdCbaAuthMethodPolicy -CertificateField 'PrincipalName' -AadUserProperty 'userPrincipalName'
+```
+
+Configure CBA auth method policy
+
+## PARAMETERS
+
+### -CertificateField
+
+\{\{ Fill CertificateField Description \}\}
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AadUserProperty
+
+\{\{ Fill AadUserProperty Description \}\}
+
+```yaml
+Type: Hashtable
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PilotGroupId
+
+Enable only pilot group users
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+### System.String
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

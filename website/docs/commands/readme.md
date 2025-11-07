@@ -6,11 +6,8 @@ note: This file gets copied over to the /commands folder by the /build/Build-Com
 sidebar_position: 2
 ---
 
-```mdx-code-block
 import DocLinkList from '@site/src/components/DocLinkList/DocLinkList';
 
 # MSIdentityTools Commands
 
 <DocLinkList />
-
-```

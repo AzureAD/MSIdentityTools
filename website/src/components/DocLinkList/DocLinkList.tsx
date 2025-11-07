@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentSidebarCategory, filterDocCardListItems } from '@docusaurus/theme-common';
-import { useDocById, findFirstSidebarItemLink } from '@docusaurus/theme-common/internal';
+import { useDocById } from '@docusaurus/plugin-content-docs/client';
 import Link from '@docusaurus/Link';
 import type { Props } from '@theme/DocCardList';
 import styles from './styles.module.css';
@@ -19,38 +19,49 @@ export default function DocLinkList(props: Props): JSX.Element {
 
     return (
         <ul className={className}>
-            {filteredItems.map((item) => {
+            {filteredItems.map((item, index) => {
                 if (item.type === 'link') {
-                    return <DocLink key={item.docId} item={item} />;
+                    return <DocLink key={item.docId || index} item={item} />;
                 }
                 if (item.type === 'category') {
-                    return <DocCategoryLink key={item.href} category={item} />;
+                    return <DocCategoryLink key={item.href || index} category={item} />;
                 }
+                return null;
             })}
         </ul>
     );
 }
 
 function DocLink({ item }) {
-    const doc = useDocById(item.docId ?? undefined);
-    const description = item.description || doc?.description;
+    const doc = useDocById(item.docId);
+    const description = item.description || item.customProps?.description || doc?.description;
     return (
-        <li key={item.docId} className="margin-bottom--md">
+        <li className="margin-bottom--md">
             <Link to={item.href}>{item.label}</Link>
-            {description && <small className={styles.description}>{description}</small>}
+            {description && (
+                <>
+                    <br />
+                    <small className={styles.description}>{description}</small>
+                </>
+            )}
         </li>
     );
 }
 
 function DocCategoryLink({ category }) {
-    const categoryHref = findFirstSidebarItemLink(category);
-    const doc = useDocById(category.docId ?? undefined);
-    const description = category.description || category.customProps?.description || doc?.description;
+    // For categories, try to find the first link in the category
+    const categoryHref = category.href || '#';
+    const description = category.description || category.customProps?.description;
 
     return (
-        <li key={category.docId} className="margin-bottom--md">
+        <li className="margin-bottom--md">
             <Link to={categoryHref}>{category.label}</Link>
-            {description && <small className={styles.description}>{description}</small>}
+            {description && (
+                <>
+                    <br />
+                    <small className={styles.description}>{description}</small>
+                </>
+            )}
         </li>
     );
 }

@@ -1,0 +1,153 @@
+---
+sidebar_class_name: hidden
+description: Opens admin consent page in browser for Agent Identity Blueprint Principal to inherit permissions
+id: Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal
+title: Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal.ps1
+---
+
+## SYNOPSIS
+
+Opens admin consent page in browser for Agent Identity Blueprint Principal to inherit permissions
+
+## SYNTAX
+
+```powershell
+Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal [[-AgentBlueprintId] <String>]
+ [[-Scope] <String>] [[-RedirectUri] <String>] [[-State] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Launches the system browser with the admin consent URL for the Agent Identity Blueprint Principal.
+This allows the administrator to grant permissions that the blueprint can inherit and use.
+Uses the stored AgentBlueprintId from the last New-AgentIdentityBlueprint call.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-MsIdAgentIdentityBlueprint -DisplayName "My Blueprint" -SponsorUserIds @("user1")
+Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal
+```
+
+### EXAMPLE 2
+
+```powershell
+Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal -Scope "user.read mail.read calendars.read"
+```
+
+### EXAMPLE 3
+
+```powershell
+Add-MsIdPermissionsToInheritToAgentIdentityBlueprintPrincipal -AgentBlueprintId "7c0c1226-1e81-41a5-ad6c-532c95504443" -Scope "user.read"
+```
+
+## PARAMETERS
+
+### -AgentBlueprintId
+
+Optional.
+The Application ID (AppId) of the Agent Identity Blueprint to grant consent for.
+If not provided, uses the stored ID from the last blueprint creation.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Scope
+
+Optional.
+The permission scopes to request consent for.
+Defaults to "user.read mail.read".
+Use space-separated scope names (e.g., "user.read mail.read calendars.read").
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: User.read mail.read
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RedirectUri
+
+Optional.
+The redirect URI after consent.
+Defaults to "https://entra.microsoft.com/TokenAuthorize".
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: Https://entra.microsoft.com/TokenAuthorize
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -State
+
+Optional.
+State parameter for the consent request.
+Defaults to a random value.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+### Returns an object with the consent URL and parameters used
+
+## NOTES
+
+## RELATED LINKS

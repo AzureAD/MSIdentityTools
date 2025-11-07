@@ -1,0 +1,92 @@
+---
+sidebar_class_name: hidden
+description: Creates a service principal for the Agent Identity Blueprint
+id: New-MsIdAgentIdentityBlueprintPrincipal
+title: New-MsIdAgentIdentityBlueprintPrincipal
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/New-MsIdAgentIdentityBlueprintPrincipal.ps1
+---
+
+## SYNOPSIS
+
+Creates a service principal for the Agent Identity Blueprint
+
+## SYNTAX
+
+```powershell
+New-MsIdAgentIdentityBlueprintPrincipal [[-AgentBlueprintId] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Creates a service principal for the current Agent Identity Blueprint using the specialized
+graph.agentIdentityBlueprintPrincipal endpoint.
+Uses the stored AgentBlueprintId from
+the last New-MsIdAgentIdentityBlueprint call.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-MsIdAgentIdentityBlueprint -DisplayName "My Blueprint" -SponsorUserIds @("user1")
+New-MsIdAgentIdentityBlueprintPrincipal
+```
+
+### EXAMPLE 2
+
+```powershell
+New-MsIdAgentIdentityBlueprintPrincipal -AgentBlueprintId "021fe0d0-d128-4769-950c-fcfbf7b87def"
+```
+
+## PARAMETERS
+
+### -AgentBlueprintId
+
+Optional.
+The Application ID (AppId) of the Agent Identity Blueprint to create the service principal for.
+If not provided, uses the stored ID from the last blueprint creation.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+### Returns the service principal response object from Microsoft Graph
+
+## NOTES
+
+## RELATED LINKS

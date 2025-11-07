@@ -1,0 +1,145 @@
+---
+sidebar_class_name: hidden
+description: Adds an OAuth2 permission scope to the current Agent Identity Blueprint
+id: Add-MsIdScopeToAgentIdentityBlueprint
+title: Add-MsIdScopeToAgentIdentityBlueprint
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Add-MsIdScopeToAgentIdentityBlueprint.ps1
+---
+
+## SYNOPSIS
+
+Adds an OAuth2 permission scope to the current Agent Identity Blueprint
+
+## SYNTAX
+
+```powershell
+Add-MsIdScopeToAgentIdentityBlueprint [[-AgentBlueprintId] <String>] [[-AdminConsentDescription] <String>]
+ [[-AdminConsentDisplayName] <String>] [[-Value] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Adds a custom OAuth2 permission scope to the Agent Identity Blueprint, allowing applications
+to request specific permissions when accessing the agent.
+Uses the stored AgentBlueprintId
+from the last New-MsIdAgentIdentityBlueprint call.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-MsIdAgentIdentityBlueprint -DisplayName "My Blueprint" -SponsorUserIds @("user1")
+Add-MsIdScopeToAgentIdentityBlueprint  # Will prompt for scope details
+```
+
+### EXAMPLE 2
+
+```powershell
+Add-MsIdScopeToAgentIdentityBlueprint -AdminConsentDescription "Allow agent access" -AdminConsentDisplayName "Agent Access" -Value "agent_access"
+```
+
+## PARAMETERS
+
+### -AgentBlueprintId
+
+Optional.
+The ID of the Agent Identity Blueprint to add the scope to.
+If not provided, uses the stored ID from the last blueprint creation.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AdminConsentDescription
+
+Optional.
+The description that appears in admin consent experiences.
+If not provided, will prompt for input.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AdminConsentDisplayName
+
+Optional.
+The display name that appears in admin consent experiences.
+If not provided, will prompt for input.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Value
+
+Optional.
+The value of the permission scope (used in token claims).
+If not provided, will prompt for input.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

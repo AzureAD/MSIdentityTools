@@ -192,11 +192,10 @@ Accept wildcard characters: False
 
 If enabled, the user auth method will be used (slower) instead of the reporting API.
 This is the default for free tenants as the reporting API requires a premium license.
-# Used for dev.
+[array]
+$UsersMfa, # Used for dev.
 Hashtable with a pre-defined list of User objects with auth methods.
 Used for generating spreadhsheet.
-[array]
-$UsersMfa,
 
 ```yaml
 Type: SwitchParameter
@@ -245,7 +244,7 @@ Follow these steps to download the sign-in logs.
 - Sign-in to the **[Entra Admin Portal](https://entra.microsoft.com)**
 - From the left navigation select: **Identity** → **Monitoring & health** → **Sign-in logs**.
 - Select the **Date** filter and set to **Last 7 days**
-- Select **Add filters** → **Application** and click **Apply**
+- Select **Add filters** → **Application**
 - Type in: **Azure** and click **Apply**
 - Select **Download** → **Download JSON**
 - Set the **File Name** of the first textbox to **signins** and click **Download**.
