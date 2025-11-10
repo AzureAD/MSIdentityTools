@@ -1,3 +1,6 @@
 .description {
   display: block;
+  color: var(--ifm-color-emphasis-700);
+  margin-top: 0.25rem;
+  line-height: 1.5;
 }

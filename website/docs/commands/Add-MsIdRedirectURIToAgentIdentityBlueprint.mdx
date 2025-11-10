@@ -1,0 +1,113 @@
+---
+sidebar_class_name: hidden
+description: Adds a web redirect URI to the current Agent Identity Blueprint
+id: Add-MsIdRedirectURIToAgentIdentityBlueprint
+title: Add-MsIdRedirectURIToAgentIdentityBlueprint
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/Add-MsIdRedirectURIToAgentIdentityBlueprint.ps1
+---
+
+## SYNOPSIS
+
+Adds a web redirect URI to the current Agent Identity Blueprint
+
+## SYNTAX
+
+```powershell
+Add-MsIdRedirectURIToAgentIdentityBlueprint [[-RedirectUri] <String>] [[-AgentBlueprintId] <String>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Configures a web redirect URI for the Agent Identity Blueprint application registration.
+This allows the application to receive authorization callbacks at the specified URI.
+Uses the stored AgentBlueprintId from the last New-AgentIdentityBlueprint call.
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-MsIdAgentIdentityBlueprint -DisplayName "My Blueprint" -SponsorUserIds @("user1")
+Add-MsIdRedirectURIToAgentIdentityBlueprint  # Uses default "http://localhost"
+```
+
+### EXAMPLE 2
+
+```powershell
+Add-MsIdRedirectURIToAgentIdentityBlueprint -RedirectUri "http://localhost:3000"
+```
+
+### EXAMPLE 3
+
+```powershell
+Add-MsIdRedirectURIToAgentIdentityBlueprint -RedirectUri "https://myapp.com/callback" -AgentBlueprintId "12345678-1234-1234-1234-123456789012"
+```
+
+## PARAMETERS
+
+### -RedirectUri
+
+Optional.
+The redirect URI to add.
+Defaults to "http://localhost".
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: Http://localhost
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AgentBlueprintId
+
+Optional.
+The ID of the Agent Identity Blueprint to configure.
+If not provided, uses the stored ID from the last blueprint creation.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+## RELATED LINKS

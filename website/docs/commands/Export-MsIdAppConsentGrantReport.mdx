@@ -20,15 +20,16 @@ Watch the video [Run a quick OAuth app audit of your Microsoft Entra tenant](htt
 
 ```powershell
 Export-MsIdAppConsentGrantReport [-ExcelWorkbookPath] <String> [[-ReportOutputType] <String>]
- [-PermissionsTableCsvPath <String>] [-ThrottleLimit <Int32>] [-ProgressAction <ActionPreference>]
- [<CommonParameters>]
+ [-PermissionsTableCsvPath <String>] [-ThrottleLimit <Int32>] [-LocalUserCsvPath <String>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ### PowerShell
 
 ```powershell
 Export-MsIdAppConsentGrantReport [[-ReportOutputType] <String>] [-PermissionsTableCsvPath <String>]
- [-ThrottleLimit <Int32>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-ThrottleLimit <Int32>] [-LocalUserCsvPath <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -61,7 +62,7 @@ Output a report in Excel format and specify a local path for a customized CSV co
 $appConsent = Export-MsIdAppConsentGrantReport -ReportOutputType PowerShellObjects
 ```
 
-Return the resuls as hashtable for processing or exporting to other formats like csv or json.
+Return the results as hashtable for processing or exporting to other formats like csv or json.
 
 ### EXAMPLE 4
 
@@ -71,6 +72,15 @@ Export-MsIdAppConsentGrantReport -ExcelWorkbookPath .\report.xlsx -ThrottleLimit
 
 Increase the throttle limit to speed things up or reduce if you are getting throttling errors.
 Default is 20
+
+### EXAMPLE 5
+
+```powershell
+Get-MgUser -All | Select Id,DisplayName | Export-Csv -NoTypeInformation users.csv
+PS > $appConsent = Export-MsIdAppConsentGrantReport -ReportOutputType PowerShellObjects -localUserCsvPath .\users.csv
+```
+
+Use a pre-downloaded user list to speed up report generation in very large tenants.
 
 ## PARAMETERS
 
@@ -136,6 +146,22 @@ Aliases:
 Required: False
 Position: Named
 Default value: 20
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LocalUserCsvPath
+
+Local cache of user data
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

@@ -1,0 +1,104 @@
+---
+sidebar_class_name: hidden
+description: Creates a new Agent User using an Agent Identity
+id: New-MsIdAgentIDUserForAgentId
+title: New-MsIdAgentIDUserForAgentId
+hide_title: false
+hide_table_of_contents: false
+custom_edit_url: https://github.com/azuread/msidentitytools/blob/main/src/New-MsIdAgentIDUserForAgentId.ps1
+---
+
+## SYNOPSIS
+
+Creates a new Agent User using an Agent Identity
+
+## SYNTAX
+
+```powershell
+New-MsIdAgentIDUserForAgentId [[-DisplayName] <String>] [[-UserPrincipalName] <String>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+## DESCRIPTION
+
+Creates a new Agent User by posting to the Microsoft Graph users endpoint
+using the current Agent Identity ID as the identity parent
+
+## EXAMPLES
+
+### EXAMPLE 1
+
+```powershell
+New-MsIdAgentIDUserForAgentId -DisplayName "Agent Identity 26192008" -UserPrincipalName "AgentIdentity26192008@67lxx6.onmicrosoft.com"
+```
+
+### EXAMPLE 2
+
+```powershell
+New-MsIdAgentIDUserForAgentId  # Will prompt for all required parameters
+```
+
+## PARAMETERS
+
+### -DisplayName
+
+The display name for the Agent User
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -UserPrincipalName
+
+The user principal name (email) for the Agent User
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+
+\{\{ Fill ProgressAction Description \}\}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### CommonParameters
+
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+
+## INPUTS
+
+## OUTPUTS
+
+## NOTES
+
+Requires an Agent Identity to be created first using New-MsIdAgentIDForAgentIdentityBlueprint (uses stored Agent Identity ID)
+The mailNickname is automatically derived from the userPrincipalName
+
+## RELATED LINKS
