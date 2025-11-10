@@ -54,7 +54,7 @@ function Add-MsIdScopeToAgentIdentityBlueprint {
 
     # Prompt for missing parameters
     if (-not $AdminConsentDescription -or $AdminConsentDescription.Trim() -eq "") {
-        $defaultDescription = "Access AI as the current user"
+        $defaultDescription = "Allow the agent to act on behalf of the signed-in user"
         Write-Host "Default: $defaultDescription" -ForegroundColor Gray
         $userInput = Read-Host "Enter the admin consent description for the scope (press Enter for default)"
         if ($userInput -and $userInput.Trim() -ne "") {
@@ -66,7 +66,7 @@ function Add-MsIdScopeToAgentIdentityBlueprint {
     }
 
     if (-not $AdminConsentDisplayName -or $AdminConsentDisplayName.Trim() -eq "") {
-        $defaultDisplayName = "Access AI as user"
+        $defaultDisplayName = "Access agent on behalf of user"
         Write-Host "Default: $defaultDisplayName" -ForegroundColor Gray
         $userInput = Read-Host "Enter the admin consent display name for the scope (press Enter for default)"
         if ($userInput -and $userInput.Trim() -ne "") {
@@ -78,7 +78,7 @@ function Add-MsIdScopeToAgentIdentityBlueprint {
     }
 
     if (-not $Value -or $Value.Trim() -eq "") {
-        $defaultValue = "access_AI_as_user"
+        $defaultValue = "access_agent_as_user"
         Write-Host "Default: $defaultValue" -ForegroundColor Gray
         $userInput = Read-Host "Enter the scope value (used in token claims, press Enter for default)"
         if ($userInput -and $userInput.Trim() -ne "") {

@@ -1,17 +1,11 @@
 ﻿<#
 .SYNOPSIS
-    Invokes an interactive creation of Agent ID identities and users
+    Invokes an interactive creation of an Agent identity blueprint, Agent ID identities and Agent users
 #>
 
 function Invoke-MsIdAgentIdInteractive {
     [CmdletBinding()]
     param()
-    # Example usage of the MSIdentityTools Agent Identity module
-    # Comprehensive demonstration of all Agent Identity Blueprint management functions
-    # Following the recommended workflow order
-
-    # Import the module
-    #Import-Module MSIdentityTools -Force -Verbose
 
     # ===================================================================
     # PHASE 1: Create Agent Identity Blueprint
@@ -29,14 +23,13 @@ function Invoke-MsIdAgentIdInteractive {
     # Ensure required modules are available and connect as admin
     Connect-MsIdEntraAsUser -Scopes @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All')
 
-
     $bluePrintDisplayName = Read-Host "Enter a display name for the Agent Identity Blueprint (or press Enter for default)"
     if (-not $bluePrintDisplayName -or $bluePrintDisplayName.Trim() -eq "") {
         $bluePrintDisplayName = "Agent Identity Blueprint Example $blueprintNumber"
         Write-Host "Using default display name: $bluePrintDisplayName" -ForegroundColor Gray
     }
 
-    # Get current user as sponsor
+    # Get current user to suggest as sponsor
     try {
         $currentUserUpn = (Get-MgContext).Account
         # Get user's OID directly using their UPN
@@ -141,7 +134,7 @@ function Invoke-MsIdAgentIdInteractive {
         Write-Host "Configuring inheritable permissions..." -ForegroundColor Yellow
 
         # Step 4: Configure inheritable permissions (what permissions agent users will get)
-        $inheritablePerms = Add-MsIdInheritablePermissionsToAgentIdentityBlueprint -Scopes @("user.read", "mail.read", "calendars.read")
+        $inheritablePerms = Add-MsIdInheritablePermissionsToAgentIdentityBlueprint 
         Write-Host "Configured inheritable permissions: $($inheritablePerms.InheritableScopes -join ', ')" -ForegroundColor Cyan
     }
     else {
@@ -166,6 +159,7 @@ function Invoke-MsIdAgentIdInteractive {
     $hasAgentIDUsers = ($userResponse -eq "y" -or $userResponse -eq "yes")
 
     if ($hasAgentIDUsers) {
+        Write-Host "Configuring redirect URIs for Agent ID users..." -ForegroundColor Yellow
         Write-Host "Configuring redirect URIs for Agent ID users..." -ForegroundColor Yellow
 
         # Step 5: Add redirect URIs for OAuth2 flows

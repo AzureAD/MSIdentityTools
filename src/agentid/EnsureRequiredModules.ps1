@@ -10,7 +10,6 @@ function EnsureRequiredModules {
     param()
 
     $requiredModules = @(
-        'Microsoft.Graph.Authentication',
         'Microsoft.Graph.Applications',
         'Microsoft.Graph.Identity.SignIns',
         'Microsoft.Graph.Users',
