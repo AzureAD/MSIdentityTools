@@ -109,6 +109,7 @@ function New-MsIdAgentIdentityBlueprint {
 
         # Store the ID in module-level variable for use by other functions
         $script:CurrentAgentBlueprintId = $AgentBlueprintId
+        $script:CurrentAgentBlueprintAppId = $BlueprintRes.appId
 
         # Return only the AgentBlueprintId instead of the full response
         return $AgentBlueprintId

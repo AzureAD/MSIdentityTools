@@ -71,7 +71,7 @@ function New-MsIdAgentIDForAgentIdentityBlueprint {
 
     # Build the request body
     $Body = [PSCustomObject]@{
-        displayName = $DisplayName
+        displayName              = $DisplayName
         AgentIdentityBlueprintId = $script:CurrentAgentBlueprintId
     }
 
@@ -114,12 +114,15 @@ function New-MsIdAgentIDForAgentIdentityBlueprint {
         # Make the REST API call
         $agentIdentity = Invoke-MgRestMethod -Method POST -Uri "https://graph.microsoft.com/beta/serviceprincipals/Microsoft.Graph.AgentIdentity" -Body $JsonBody -ContentType "application/json"
 
-        Write-Host "Agent Identity created successfully!" -ForegroundColor Green
-        Write-Host "Agent Identity ID: $($agentIdentity.id)" -ForegroundColor Cyan
-        Write-Host "Display Name: $($agentIdentity.displayName)" -ForegroundColor Cyan
-
         # Store the Agent Identity ID in module state
         $script:CurrentAgentIdentityId = $agentIdentity.id
+        $script:CurrentAgentIdentityAppId = $agentIdentity.appId
+
+        Write-Host "Agent Identity created successfully!" -ForegroundColor Green
+        Write-Host "Agent Identity ID: $($agentIdentity.id)" -ForegroundColor Cyan
+        Write-Host "Agent Identity App ID: $($agentIdentity.appId)" -ForegroundColor Cyan
+        Write-Host "Display Name: $($agentIdentity.displayName)" -ForegroundColor Cyan
+
 
         return $agentIdentity
     }

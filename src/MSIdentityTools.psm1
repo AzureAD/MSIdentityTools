@@ -15,6 +15,9 @@ class SamlMessage : xml {}
 # Module-level variable to store the current Agent Blueprint ID
 $script:CurrentAgentBlueprintId = $null
 
+# Module-level variable to store the current Agent Blueprint App ID
+$script:CurrentAgentBlueprintAppId = $null
+
 # Module-level variable to store the current Agent Blueprint Secret
 $script:CurrentAgentBlueprintSecret = $null
 
@@ -29,6 +32,9 @@ $script:LastConfiguredInheritableScopes = $null
 
 # Module-level variable to store the current Agent Identity ID
 $script:CurrentAgentIdentityId = $null
+
+# Module-level variable to store the current Agent Identity App ID
+$script:CurrentAgentIdentityAppId = $null
 
 # Module-level variable to store the current tenant ID
 $script:CurrentTenantId = $null

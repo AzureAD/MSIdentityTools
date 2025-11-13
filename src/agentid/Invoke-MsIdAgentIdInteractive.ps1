@@ -367,10 +367,12 @@ function Invoke-MsIdAgentIdInteractive {
     Write-Host ""
     Write-Host "Module state:" -ForegroundColor Yellow
     Write-Host "Current Blueprint ID: $blueprint1" -ForegroundColor White
+    Write-Host "Current Blueprint App ID: $($script:CurrentAgentBlueprintAppId)" -ForegroundColor White
     Write-Host "Current Service Principal ID: $($principal1.id)" -ForegroundColor White
     Write-Host "Total Agent Identities created: $($allAgentIdentities.Count)" -ForegroundColor White
     Write-Host "Total Agent Users created: $($allAgentUsers.Count)" -ForegroundColor White
     Write-Host "Last Agent Identity ID: $(if ($agentIdentity) { $agentIdentity.id } else { 'None created' })" -ForegroundColor White
+    Write-Host "Last Agent Identity App ID: $(if ($agentIdentity) { $agentIdentity.appId } else { 'None created' })" -ForegroundColor White
     Write-Host "Last Agent User ID: $(if ($agentUser) { $agentUser.id } else { 'None created' })" -ForegroundColor White
     Write-Host "Secret stored: $(if ($secret1) { 'Yes' } else { 'No' })" -ForegroundColor White
     Write-Host "Has inheritable permissions: $(if ($hasInheritablePermissions) { 'Yes' } else { 'No' })" -ForegroundColor White
