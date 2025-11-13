@@ -29,7 +29,7 @@ function Add-MsIdPermissionToCreateAgentUsersToAgentIdentityBlueprintPrincipal {
         [string]$AgentBlueprintId
     )
 
-    # Use provided ID or fall back to stored ID
+        # Use provided ID or fall back to stored ID
     if (-not $AgentBlueprintId) {
         if (-not $script:CurrentAgentBlueprintId) {
             throw "No Agent Blueprint ID provided and no stored ID available. Please run New-MsIdAgentIdentityBlueprint first or provide the AgentBlueprintId parameter."
@@ -50,15 +50,21 @@ function Add-MsIdPermissionToCreateAgentUsersToAgentIdentityBlueprintPrincipal {
     else {
         Write-Host "Connected to Microsoft Graph as: $($context.Account)" -ForegroundColor Green
     }
-
+    
     try {
         Write-Host "Adding permission to create Agent Users to Agent Identity Blueprint Principal..." -ForegroundColor Green
+        Write-Verbose "Retrieving Blueprint Service Principal ID from tenant..."
+        $blueprintServicePrincipal = Get-MgServicePrincipal -Filter "appId eq '$AgentBlueprintId'" -Select "id,appId,displayName"
 
-        # Check if we have the service principal ID from New-MsIdAgentIdentityBlueprintPrincipal
-        if (-not $script:CurrentAgentBlueprintServicePrincipalId) {
-            throw "No Agent Identity Blueprint Service Principal ID available. Please run New-MsIdAgentIdentityBlueprintPrincipal first."
-        }
+        if (-not $blueprintServicePrincipal) {
+            throw "Blueprint Service Principal not found in tenant"
+       }
 
+        # Cache the result
+        $script:CurrentAgentBlueprintServicePrincipalId = $blueprintServicePrincipal.Id
+
+        Write-Verbose "Blueprint Service Principal found - ID: $script:CurrentAgentBlueprintServicePrincipalId, Display Name: $($blueprintServicePrincipal.DisplayName)"
+        
         $servicePrincipalId = $script:CurrentAgentBlueprintServicePrincipalId
         Write-Host "Using stored Agent Identity Blueprint Service Principal ID: $servicePrincipalId" -ForegroundColor Yellow
 

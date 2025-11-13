@@ -32,6 +32,7 @@ module.exports = [
     'commands/Get-MsIdAdfsSampleApp',
     'commands/Get-MsIdAdfsWsFedToken',
     'commands/Get-MsIdAdfsWsTrustToken',
+    'commands/Get-MsIdAgentIdentity',
     'commands/Get-MsIdApplicationIdByAppId',
     'commands/Get-MsIdAuthorityUri',
     'commands/Get-MsIdAzureIpRange',
