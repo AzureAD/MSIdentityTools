@@ -81,6 +81,7 @@ NestedModules = @('.\agentid\Add-MsIdClientSecretToAgentIdentityBlueprint.ps1',
                '.\agentid\EnsureRequiredModules.ps1', 
                '.\agentid\Get-MSGraphServicePrincipalId.ps1', 
                '.\agentid\Get-SponsorsAndOwners.ps1', 
+               '.\agentid\Get-MsIdAgentIdentity.ps1',
                '.\agentid\New-MsIdAgentIdentityBlueprint.ps1', 
                '.\agentid\New-MsIdAgentIdentityBlueprintPrincipal.ps1', 
                '.\agentid\New-MsIdAgentIDForAgentIdentityBlueprint.ps1', 
@@ -202,6 +203,7 @@ FunctionsToExport = 'Add-MsIdClientSecretToAgentIdentityBlueprint',
                'Get-MsIdOpenIdProviderConfiguration', 
                'Get-MsIdSamlFederationMetadata', 
                'Get-MsIdServicePrincipalIdByAppId', 
+               'Get-MsIdAgentIdentity',
                'Get-MsIdUnmanagedExternalUser', 'Grant-MsIdMcpServerPermission', 
                'Invoke-MsIdAzureAdSamlRequest', 'Invoke-MsIdAgentIdInteractive', 
                'New-MsIdAgentIdentityBlueprint', 
@@ -291,4 +293,3 @@ PrivateData = @{
 # DefaultCommandPrefix = ''
 
 }
-

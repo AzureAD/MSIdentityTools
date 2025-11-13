@@ -169,20 +169,6 @@ function Invoke-MsIdAgentIdInteractive {
     # Store the result for later use
     $hasAgentIDUsers = ($userResponse -eq "y" -or $userResponse -eq "yes")
 
-    if ($hasAgentIDUsers) {
-        Write-Host "Configuring redirect URIs for Agent ID users..." -ForegroundColor Yellow
-        Write-Host "Configuring redirect URIs for Agent ID users..." -ForegroundColor Yellow
-
-        # Step 5: Add redirect URIs for OAuth2 flows
-        $redirectUri = Add-MsIdRedirectURIToAgentIdentityBlueprint
-        Write-Host "Added redirect URI: $($redirectUri.RedirectUri)" -ForegroundColor Cyan
-    }
-    else {
-        Write-Host "Skipping Agent ID user configuration (no redirect URIs needed)." -ForegroundColor Gray
-        $redirectUri = $null
-    }
-    Write-Host ""
-
     # ===================================================================
     # PHASE 6: Create and Configure Service Principal
     # ===================================================================
@@ -242,8 +228,16 @@ function Invoke-MsIdAgentIdInteractive {
         Write-Host "--- Creating Agent Identity #$agentCounter ---" -ForegroundColor Yellow
 
         # Step 9: Create Agent Identity from the blueprint
+
+        if ($useSponsor) {
+            Write-Host "Using current user as sponsor for Agent Identity." -ForegroundColor Gray    
         $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName "Agent Identity Example $agentCounter" `
-            -SponsorUserIds @("7c2f8f10-cba8-4a8d-9449-db4b76d1ef80")
+            -SponsorUserIds $SponsorUserIds
+        }
+        else {
+            Write-Host "No sponsor specified for Agent Identity." -ForegroundColor Gray    
+        $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName "Agent Identity Example $agentCounter"
+        }
         Write-Host "Created Agent Identity ID: $($agentIdentity.id)" -ForegroundColor Green
         $allAgentIdentities += $agentIdentity
 
@@ -259,6 +253,33 @@ function Invoke-MsIdAgentIdInteractive {
             $agentIDNeedsUser = ($userResponse -eq "y" -or $userResponse -eq "yes")
 
             if ($agentIDNeedsUser) {
+                Start-Sleep -Seconds 10 # Wait to for replication
+
+                # Verify Agent Identity was created successfully by retrieving it
+                Write-Host "Verifying Agent Identity creation..." -ForegroundColor Yellow
+                $retryCount = 0
+                $maxRetries = 5
+                $verificationSuccess = $false
+                
+                while ($retryCount -lt $maxRetries -and -not $verificationSuccess) {
+                    try {
+                        $verifiedAgent = Get-MsIdAgentIdentity -AgentId $agentIdentity.id
+                        Write-Host "Agent Identity verified successfully" -ForegroundColor Green
+                        $verificationSuccess = $true
+                    }
+                    catch {
+                        $retryCount++
+                        if ($retryCount -lt $maxRetries) {
+                            Write-Host "Verification attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                            Start-Sleep -Seconds 10
+                        }
+                        else {
+                            Write-Error "Failed to verify Agent Identity after $maxRetries attempts: $_"
+                            throw
+                        }
+                    }
+                }
+
                 Write-Host "Creating Agent Users as requested..." -ForegroundColor Yellow
                 # Get current tenant's domain for UPN
                 $tenantDomain = (Get-MgOrganization).VerifiedDomains | Where-Object { $_.IsDefault -eq $true } | Select-Object -First 1 -ExpandProperty Name
