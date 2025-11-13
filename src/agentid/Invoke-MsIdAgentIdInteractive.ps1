@@ -32,7 +32,7 @@ function Invoke-MsIdAgentIdInteractive {
     Write-Host "Agent Identity Blueprints and Agent Users" -ForegroundColor Yellow
 
     # Ensure required modules are available and connect as admin
-    Connect-MsIdEntraAsUser -Scopes @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All')
+    Connect-MsIdEntraAsUser -Scopes @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All') | Out-Null
 
     $bluePrintDisplayName = Read-Host "Enter a display name for the Agent Identity Blueprint (or press Enter for default)"
     if (-not $bluePrintDisplayName -or $bluePrintDisplayName.Trim() -eq "") {
@@ -145,7 +145,7 @@ function Invoke-MsIdAgentIdInteractive {
         Write-Host "Configuring inheritable permissions..." -ForegroundColor Yellow
 
         # Step 4: Configure inheritable permissions (what permissions agent users will get)
-        $inheritablePerms = Add-MsIdInheritablePermissionsToAgentIdentityBlueprint 
+        $inheritablePerms = Add-MsIdInheritablePermissionsToAgentIdentityBlueprint
         Write-Host "Configured inheritable permissions: $($inheritablePerms.InheritableScopes -join ', ')" -ForegroundColor Cyan
     }
     else {
@@ -230,12 +230,12 @@ function Invoke-MsIdAgentIdInteractive {
         # Step 9: Create Agent Identity from the blueprint
 
         if ($useSponsor) {
-            Write-Host "Using current user as sponsor for Agent Identity." -ForegroundColor Gray    
+            Write-Host "Using current user as sponsor for Agent Identity." -ForegroundColor Gray
         $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName "Agent Identity Example $agentCounter" `
             -SponsorUserIds $SponsorUserIds
         }
         else {
-            Write-Host "No sponsor specified for Agent Identity." -ForegroundColor Gray    
+            Write-Host "No sponsor specified for Agent Identity." -ForegroundColor Gray
         $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName "Agent Identity Example $agentCounter"
         }
         Write-Host "Created Agent Identity ID: $($agentIdentity.id)" -ForegroundColor Green
@@ -260,7 +260,7 @@ function Invoke-MsIdAgentIdInteractive {
                 $retryCount = 0
                 $maxRetries = 5
                 $verificationSuccess = $false
-                
+
                 while ($retryCount -lt $maxRetries -and -not $verificationSuccess) {
                     try {
                         $verifiedAgent = Get-MsIdAgentIdentity -AgentId $agentIdentity.id
