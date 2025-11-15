@@ -58,10 +58,31 @@ function New-MsIdAgentIdentityBlueprintPrincipal {
             appId = $AgentBlueprintId
         }
 
-        # Create the service principal using the specialized endpoint
+        # Create the service principal using the specialized endpoint with retry logic
         Write-Host "Making request to create service principal for Agent Blueprint: $AgentBlueprintId" -ForegroundColor Cyan
 
-        $servicePrincipalResponse = Invoke-MgRestMethod -Uri "/beta/serviceprincipals/graph.agentIdentityBlueprintPrincipal" -Method POST -Body ($body | ConvertTo-Json) -ContentType "application/json"
+        $retryCount = 0
+        $maxRetries = 10
+        $servicePrincipalResponse = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $servicePrincipalResponse = Invoke-MgRestMethod -Uri "/beta/serviceprincipals/graph.agentIdentityBlueprintPrincipal" -Method POST -Body ($body | ConvertTo-Json) -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to create service principal after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         Write-Host "Successfully created Agent Identity Blueprint Service Principal" -ForegroundColor Green
         Write-Host "Service Principal ID: $($servicePrincipalResponse.id)" -ForegroundColor Cyan

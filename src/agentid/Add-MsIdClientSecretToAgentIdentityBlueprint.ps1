@@ -49,8 +49,29 @@ function Add-MsIdClientSecretToAgentIdentityBlueprint {
             endDateTime = (Get-Date).AddDays(90).ToString("yyyy-MM-ddTHH:mm:ssZ")
         }
 
-        # Add the secret to the application
-        $secretResult = Add-MgApplicationPassword -ApplicationId $AgentBlueprintId -PasswordCredential $passwordCredential
+        # Add the secret to the application with retry logic
+        $retryCount = 0
+        $maxRetries = 10
+        $secretResult = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $secretResult = Add-MgApplicationPassword -ApplicationId $AgentBlueprintId -PasswordCredential $passwordCredential -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to add secret to Agent Blueprint after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         Write-Host "Successfully added secret to Agent Blueprint" -ForegroundColor Green
         #Write-Host "Secret Value: $($secretResult.SecretText)" -ForegroundColor Red

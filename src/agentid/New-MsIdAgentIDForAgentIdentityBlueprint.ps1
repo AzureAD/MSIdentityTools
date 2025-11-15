@@ -111,8 +111,29 @@ function New-MsIdAgentIDForAgentIdentityBlueprint {
         Write-Host "Request body:" -ForegroundColor Gray
         Write-Host $JsonBody -ForegroundColor Gray
 
-        # Make the REST API call
-        $agentIdentity = Invoke-MgRestMethod -Method POST -Uri "https://graph.microsoft.com/beta/serviceprincipals/Microsoft.Graph.AgentIdentity" -Body $JsonBody -ContentType "application/json"
+        # Make the REST API call with retry logic
+        $retryCount = 0
+        $maxRetries = 10
+        $agentIdentity = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $agentIdentity = Invoke-MgRestMethod -Method POST -Uri "https://graph.microsoft.com/beta/serviceprincipals/Microsoft.Graph.AgentIdentity" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to create Agent Identity after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         # Store the Agent Identity ID in module state
         $script:CurrentAgentIdentityId = $agentIdentity.id
@@ -120,7 +141,6 @@ function New-MsIdAgentIDForAgentIdentityBlueprint {
 
         Write-Host "Agent Identity created successfully!" -ForegroundColor Green
         Write-Host "Agent Identity ID: $($agentIdentity.id)" -ForegroundColor Cyan
-        Write-Host "Agent Identity App ID: $($agentIdentity.appId)" -ForegroundColor Cyan
         Write-Host "Display Name: $($agentIdentity.displayName)" -ForegroundColor Cyan
 
 

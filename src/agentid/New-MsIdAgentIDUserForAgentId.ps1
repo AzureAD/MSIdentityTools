@@ -86,8 +86,29 @@ function New-MsIdAgentIDUserForAgentId {
         Write-Host "Request body:" -ForegroundColor Gray
         Write-Host $JsonBody -ForegroundColor Gray
 
-        # Make the REST API call
-        $agentUser = Invoke-MgRestMethod -Method POST -Uri "https://graph.microsoft.com/beta/users/" -Body $JsonBody -ContentType "application/json"
+        # Make the REST API call with retry logic
+        $retryCount = 0
+        $maxRetries = 10
+        $agentUser = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $agentUser = Invoke-MgRestMethod -Method POST -Uri "https://graph.microsoft.com/beta/users/" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to create Agent User after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         Write-Host "Agent User created successfully!" -ForegroundColor Green
         Write-Host "Agent User ID: $($agentUser.id)" -ForegroundColor Cyan
