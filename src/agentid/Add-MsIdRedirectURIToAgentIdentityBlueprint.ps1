@@ -57,7 +57,29 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
 
         # First, get the current application configuration to preserve existing redirect URIs
         Write-Host "Retrieving current application configuration..." -ForegroundColor Yellow
-        $currentApp = Invoke-MgRestMethod -Method GET -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -ContentType "application/json"
+        
+        $retryCount = 0
+        $maxRetries = 10
+        $currentApp = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $currentApp = Invoke-MgRestMethod -Method GET -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to retrieve application configuration after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         # Get existing redirect URIs or initialize empty array
         $existingRedirectUris = @()
@@ -93,8 +115,29 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
         $JsonBody = $Body | ConvertTo-Json -Depth 5
         Write-Debug "Request Body: $JsonBody"
 
-        # Use Invoke-MgRestMethod to update the application
-        $updateResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json"
+        # Use Invoke-MgRestMethod to update the application with retry logic
+        $retryCount = 0
+        $maxRetries = 10
+        $updateResult = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $updateResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to update redirect URI after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         Write-Host "Successfully added web redirect URI to Agent Identity Blueprint" -ForegroundColor Green
         Write-Host "Total redirect URIs: $($updatedRedirectUris.Count)" -ForegroundColor Cyan

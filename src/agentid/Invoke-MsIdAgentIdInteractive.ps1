@@ -1,17 +1,45 @@
 ﻿<#
 .SYNOPSIS
-    Interactive cmdlet to create and configure an Agent ID.
+Interactive cmdlet to create and configure an Agent ID.
 
 .DESCRIPTION
-    Demonstrates the full workflow of creating and configuring an Agent ID Blueprint,
-    including creating Agent Identities and Agent Users as needed.
+Demonstrates the full workflow of creating and configuring an Agent Identity Blueprint,
+including creating Agent Identities and Agent Users as needed.
 
-    Includes prompts for user input at key steps to customize the configuration. Including
-    options for
+This interactive cmdlet guides you through the complete Agent Identity setup process with
+prompts at key decision points:
 
-    * interactive agents
-    * permissions scopes and
-    * Agent ID users.
+- Blueprint creation with optional sponsors
+- Client secret generation for API authentication
+- Interactive agent scope configuration
+- Inheritable permissions setup
+- Service principal creation and permissions
+- Admin consent flow (when applicable)
+- Agent Identity and Agent User creation
+
+The cmdlet maintains state between operations, automatically passing Blueprint IDs and
+other required values to subsequent operations. You can create multiple Agent Identities
+and Users in a single session.
+
+.EXAMPLE
+Invoke-MsIdAgentIdInteractive
+
+Starts the interactive Agent Identity configuration workflow. The cmdlet will prompt you
+for all required inputs and guide you through the complete setup process.
+
+.NOTES
+This cmdlet requires the following Microsoft Graph permissions:
+- AgentIdentityBlueprint.Create
+- AgentIdentityBlueprintPrincipal.Create
+- AppRoleAssignment.ReadWrite.All
+- Application.ReadWrite.All
+- User.ReadWrite.All
+
+The cmdlet will automatically connect to Microsoft Graph with these permissions if not
+already connected.
+
+.LINK
+https://learn.microsoft.com/entra/identity/app-proxy/overview-what-is-app-proxy
 #>
 
 function Invoke-MsIdAgentIdInteractive {
@@ -215,6 +243,21 @@ function Invoke-MsIdAgentIdInteractive {
 
     Write-Host "=== Phase 7: Agent Identity and User Creation ===" -ForegroundColor Magenta
 
+    # Ask user if they want to use example names or provide custom names
+    do {
+        $namingResponse = Read-Host "Use example names for Agent Identities and Users? (y=use examples like 'Agent Identity Example', n=provide custom names)"
+        $namingResponse = $namingResponse.Trim().ToLower()
+    } while ($namingResponse -ne "y" -and $namingResponse -ne "n" -and $namingResponse -ne "yes" -and $namingResponse -ne "no")
+
+    $useExampleNames = ($namingResponse -eq "y" -or $namingResponse -eq "yes")
+
+    if ($useExampleNames) {
+        Write-Host "Using example naming pattern for Agent Identities and Users" -ForegroundColor Cyan
+    } else {
+        Write-Host "You will be prompted for custom names for each Agent Identity and User" -ForegroundColor Cyan
+    }
+    Write-Host ""
+
     # Initialize arrays to store all created Agent Identities and Users
     $allAgentIdentities = @()
     $allAgentUsers = @()
@@ -227,16 +270,26 @@ function Invoke-MsIdAgentIdInteractive {
     while ($continueCreating) {
         Write-Host "--- Creating Agent Identity #$agentCounter ---" -ForegroundColor Yellow
 
-        # Step 9: Create Agent Identity from the blueprint
+        # Determine the display name for the Agent Identity
+        if ($useExampleNames) {
+            $agentIdentityDisplayName = "Agent Identity Example $agentCounter"
+        } else {
+            $agentIdentityDisplayName = Read-Host "Enter display name for this Agent Identity"
+            if ([string]::IsNullOrWhiteSpace($agentIdentityDisplayName)) {
+                $agentIdentityDisplayName = "Agent Identity $agentCounter"
+                Write-Host "Using default: $agentIdentityDisplayName" -ForegroundColor Gray
+            }
+        }
 
+        # Step 9: Create Agent Identity from the blueprint
         if ($useSponsor) {
             Write-Host "Using current user as sponsor for Agent Identity." -ForegroundColor Gray
-        $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName "Agent Identity Example $agentCounter" `
-            -SponsorUserIds $SponsorUserIds
+            $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName $agentIdentityDisplayName `
+                -SponsorUserIds $SponsorUserIds
         }
         else {
             Write-Host "No sponsor specified for Agent Identity." -ForegroundColor Gray
-        $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName "Agent Identity Example $agentCounter"
+            $agentIdentity = New-MsIdAgentIDForAgentIdentityBlueprint -DisplayName $agentIdentityDisplayName
         }
         Write-Host "Created Agent Identity ID: $($agentIdentity.id)" -ForegroundColor Green
         $allAgentIdentities += $agentIdentity
@@ -253,38 +306,31 @@ function Invoke-MsIdAgentIdInteractive {
             $agentIDNeedsUser = ($userResponse -eq "y" -or $userResponse -eq "yes")
 
             if ($agentIDNeedsUser) {
-                Start-Sleep -Seconds 10 # Wait to for replication
-
-                # Verify Agent Identity was created successfully by retrieving it
-                Write-Host "Verifying Agent Identity creation..." -ForegroundColor Yellow
-                $retryCount = 0
-                $maxRetries = 5
-                $verificationSuccess = $false
-
-                while ($retryCount -lt $maxRetries -and -not $verificationSuccess) {
-                    try {
-                        $verifiedAgent = Get-MsIdAgentIdentity -AgentId $agentIdentity.id
-                        Write-Host "Agent Identity verified successfully" -ForegroundColor Green
-                        $verificationSuccess = $true
-                    }
-                    catch {
-                        $retryCount++
-                        if ($retryCount -lt $maxRetries) {
-                            Write-Host "Verification attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
-                            Start-Sleep -Seconds 10
-                        }
-                        else {
-                            Write-Error "Failed to verify Agent Identity after $maxRetries attempts: $_"
-                            throw
-                        }
-                    }
-                }
-
                 Write-Host "Creating Agent Users as requested..." -ForegroundColor Yellow
                 # Get current tenant's domain for UPN
                 $tenantDomain = (Get-MgOrganization).VerifiedDomains | Where-Object { $_.IsDefault -eq $true } | Select-Object -First 1 -ExpandProperty Name
-                $agentUser = New-MsIdAgentIDUserForAgentId -DisplayName "Agent User Example $agentCounter" `
-                    -UserPrincipalName "AgentUser$agentCounter@$tenantDomain"
+                
+                # Determine names for the Agent User
+                if ($useExampleNames) {
+                    $agentUserDisplayName = "Agent User Example $agentCounter"
+                    $agentUserUpn = "AgentUser$agentCounter@$tenantDomain"
+                } else {
+                    $agentUserDisplayName = Read-Host "Enter display name for this Agent User"
+                    if ([string]::IsNullOrWhiteSpace($agentUserDisplayName)) {
+                        $agentUserDisplayName = "Agent User $agentCounter"
+                        Write-Host "Using default: $agentUserDisplayName" -ForegroundColor Gray
+                    }
+                    
+                    $agentUserUpnPrefix = Read-Host "Enter UPN prefix for this Agent User (will be @$tenantDomain)"
+                    if ([string]::IsNullOrWhiteSpace($agentUserUpnPrefix)) {
+                        $agentUserUpnPrefix = "AgentUser$agentCounter"
+                        Write-Host "Using default prefix: $agentUserUpnPrefix" -ForegroundColor Gray
+                    }
+                    $agentUserUpn = "$agentUserUpnPrefix@$tenantDomain"
+                }
+                
+                $agentUser = New-MsIdAgentIDUserForAgentId -DisplayName $agentUserDisplayName `
+                    -UserPrincipalName $agentUserUpn
                 Write-Host "Created Agent User ID: $($agentUser.id)" -ForegroundColor Green
                 Write-Host "Agent User UPN: $($agentUser.userPrincipalName)" -ForegroundColor Cyan
                 $allAgentUsers += $agentUser
@@ -342,31 +388,24 @@ function Invoke-MsIdAgentIdInteractive {
         Write-Host "- 4. Inheritable permissions (skipped by user choice)" -ForegroundColor Gray
     }
 
-    if ($hasAgentIDUsers) {
-        Write-Host "✓ 5. Redirect URI configured for OAuth2 flows" -ForegroundColor Green
-    }
-    else {
-        Write-Host "- 5. Redirect URI configuration (skipped - no Agent ID users)" -ForegroundColor Gray
-    }
-
-    Write-Host "✓ 6. Service Principal created with proper permissions" -ForegroundColor Green
+    Write-Host "✓ 5. Service Principal created with proper permissions" -ForegroundColor Green
 
     if ($hasAgentIDUsers) {
-        Write-Host "✓ 7. Agent user creation permissions granted" -ForegroundColor Green
+        Write-Host "✓ 6. Agent user creation permissions granted" -ForegroundColor Green
     }
     else {
-        Write-Host "- 7. Agent user creation permissions (skipped - no Agent ID users)" -ForegroundColor Gray
+        Write-Host "- 6. Agent user creation permissions (skipped - no Agent ID users)" -ForegroundColor Gray
     }
 
     if ($hasInheritablePermissions) {
-        Write-Host "✓ 8. Admin consent flow configured (commented out)" -ForegroundColor Green
+        Write-Host "✓ 7. Admin consent flow configured (commented out)" -ForegroundColor Green
     }
     else {
-        Write-Host "- 8. Admin consent flow (skipped - no inheritable permissions)" -ForegroundColor Gray
+        Write-Host "- 7. Admin consent flow (skipped - no inheritable permissions)" -ForegroundColor Gray
     }
 
     if ($allAgentIdentities.Count -gt 0) {
-        Write-Host "✓ 9-10. Agent Identity and User Creation Loop completed" -ForegroundColor Green
+        Write-Host "✓ 8-9. Agent Identity and User Creation Loop completed" -ForegroundColor Green
         Write-Host "    - Created $($allAgentIdentities.Count) Agent $(if ($allAgentIdentities.Count -eq 1) { 'Identity' } else { 'Identities' })" -ForegroundColor Green
         if ($hasAgentIDUsers) {
             Write-Host "    - Created $($allAgentUsers.Count) Agent $(if ($allAgentUsers.Count -eq 1) { 'User' } else { 'Users' })" -ForegroundColor Green
@@ -376,7 +415,7 @@ function Invoke-MsIdAgentIdInteractive {
         }
     }
     else {
-        Write-Host "- 9-10. Agent Identity and User creation (not completed)" -ForegroundColor Gray
+        Write-Host "- 8-9. Agent Identity and User creation (not completed)" -ForegroundColor Gray
     }
 
     Write-Host ""
@@ -387,7 +426,6 @@ function Invoke-MsIdAgentIdInteractive {
     Write-Host "Total Agent Identities created: $($allAgentIdentities.Count)" -ForegroundColor White
     Write-Host "Total Agent Users created: $($allAgentUsers.Count)" -ForegroundColor White
     Write-Host "Last Agent Identity ID: $(if ($agentIdentity) { $agentIdentity.id } else { 'None created' })" -ForegroundColor White
-    Write-Host "Last Agent Identity App ID: $(if ($agentIdentity) { $agentIdentity.appId } else { 'None created' })" -ForegroundColor White
     Write-Host "Last Agent User ID: $(if ($agentUser) { $agentUser.id } else { 'None created' })" -ForegroundColor White
     Write-Host "Secret stored: $(if ($secret1) { 'Yes' } else { 'No' })" -ForegroundColor White
     Write-Host "Has inheritable permissions: $(if ($hasInheritablePermissions) { 'Yes' } else { 'No' })" -ForegroundColor White
