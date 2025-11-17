@@ -60,7 +60,7 @@ function Invoke-MsIdAgentIdInteractive {
     Write-Host "Agent Identity Blueprints and Agent Users" -ForegroundColor Yellow
 
     # Ensure required modules are available and connect as admin
-    Connect-MsIdEntraAsUser -Scopes @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All') | Out-Null
+    Connect-MsIdEntraAsUser | Out-Null
 
     $bluePrintDisplayName = Read-Host "Enter a display name for the Agent Identity Blueprint (or press Enter for default)"
     if (-not $bluePrintDisplayName -or $bluePrintDisplayName.Trim() -eq "") {

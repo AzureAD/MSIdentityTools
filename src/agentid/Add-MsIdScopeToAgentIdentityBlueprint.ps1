@@ -134,7 +134,7 @@ function Add-MsIdScopeToAgentIdentityBlueprint {
 
         while ($retryCount -lt $maxRetries -and -not $success) {
             try {
-                $scopeResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $scopeResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/beta/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
                 $success = $true
             }
             catch {

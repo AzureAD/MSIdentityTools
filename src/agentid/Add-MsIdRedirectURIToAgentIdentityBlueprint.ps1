@@ -65,7 +65,7 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
 
         while ($retryCount -lt $maxRetries -and -not $success) {
             try {
-                $currentApp = Invoke-MgRestMethod -Method GET -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -ContentType "application/json" -ErrorAction Stop
+                $currentApp = Invoke-MgRestMethod -Method GET -Uri "https://graph.microsoft.com/beta/applications/$AgentBlueprintId" -ContentType "application/json" -ErrorAction Stop
                 $success = $true
             }
             catch {
@@ -123,7 +123,7 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
 
         while ($retryCount -lt $maxRetries -and -not $success) {
             try {
-                $updateResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $updateResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/beta/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
                 $success = $true
             }
             catch {
