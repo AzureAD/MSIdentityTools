@@ -39,7 +39,7 @@ function Get-MsIdAgentIdentity {
         
         # Call the Graph API to get the agent identity
         $uri = "https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity/$AgentId"
-        $result = Invoke-MgRestMethod -Method GET -Uri $uri
+        $result = Invoke-MgRestMethod -Method GET -Uri $uri -ErrorAction Stop
         
         Write-Verbose "Successfully retrieved Agent Identity"
         return $result

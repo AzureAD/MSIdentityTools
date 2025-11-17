@@ -19,7 +19,7 @@ function Connect-MsIdEntraAsUser {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $false)]
-        [string[]]$Scopes = @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All')
+        [string[]]$Scopes = @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All', 'AgentIdentityBlueprint.ReadWrite.All', 'AgentIdentityBlueprint.AddRemoveCreds.All')
     )
 
     # Ensure required modules are available

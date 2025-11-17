@@ -126,8 +126,29 @@ function Add-MsIdScopeToAgentIdentityBlueprint {
         $JsonBody = $Body | ConvertTo-Json -Depth 5
         Write-Debug "Request Body: $JsonBody"
 
-        # Use Invoke-MgRestMethod to update the application
-        $scopeResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json"
+        # Use Invoke-MgRestMethod to update the application with retry logic
+        $retryCount = 0
+        $maxRetries = 10
+        $scopeResult = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $scopeResult = Invoke-MgRestMethod -Method PATCH -Uri "https://graph.microsoft.com/beta/applications/$AgentBlueprintId" -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to add OAuth2 permission scope after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         Write-Host "Successfully added OAuth2 permission scope to Agent Blueprint" -ForegroundColor Green
         Write-Host "Scope ID: $scopeId" -ForegroundColor Cyan

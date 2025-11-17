@@ -103,10 +103,32 @@ function Add-MsIdInheritablePermissionsToAgentIdentityBlueprint {
         $JsonBody = $Body | ConvertTo-Json -Depth 5
         Write-Debug "Request Body: $JsonBody"
 
-        # Use Invoke-MgRestMethod to make the API call with the stored Agent Blueprint ID
+        # Use Invoke-MgRestMethod to make the API call with the stored Agent Blueprint ID with retry logic
         $apiUrl = "https://graph.microsoft.com/beta/applications/microsoft.graph.agentIdentityBlueprint/$($script:CurrentAgentBlueprintId)/inheritablePermissions"
         Write-Debug "API URL: $apiUrl"
-        $result = Invoke-MgRestMethod -Method POST -Uri $apiUrl -Body $JsonBody -ContentType "application/json"
+        
+        $retryCount = 0
+        $maxRetries = 10
+        $result = $null
+        $success = $false
+
+        while ($retryCount -lt $maxRetries -and -not $success) {
+            try {
+                $result = Invoke-MgRestMethod -Method POST -Uri $apiUrl -Body $JsonBody -ContentType "application/json" -ErrorAction Stop
+                $success = $true
+            }
+            catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 10
+                }
+                else {
+                    Write-Error "Failed to add inheritable permissions after $maxRetries attempts: $_"
+                    throw
+                }
+            }
+        }
 
         Write-Host "Successfully added inheritable permissions to Agent Identity Blueprints" -ForegroundColor Green
         Write-Host "Permissions are now available for inheritance by agent blueprints" -ForegroundColor Green
