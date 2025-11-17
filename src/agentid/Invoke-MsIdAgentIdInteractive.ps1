@@ -207,6 +207,35 @@ function Invoke-MsIdAgentIdInteractive {
     $principal1 = New-MsIdAgentIdentityBlueprintPrincipal
     Write-Host "Created Service Principal ID: $($principal1.id)" -ForegroundColor Green
 
+    # Wait for service principal to be available (backend replication delay)
+    Write-Host "Waiting for service principal to be available..." -ForegroundColor Yellow
+    $maxWaitSeconds = 60
+    $waitInterval = 5
+    $elapsedSeconds = 0
+    $spAvailable = $false
+
+    while ($elapsedSeconds -lt $maxWaitSeconds) {
+        try {
+            $sp = Get-MgServicePrincipal -ServicePrincipalId $principal1.id -ErrorAction Stop
+            if ($sp) {
+                $spAvailable = $true
+                Write-Host "Service principal is now available" -ForegroundColor Green
+                break
+            }
+        }
+        catch {
+            # Service principal not yet available, continue waiting
+        }
+
+        Start-Sleep -Seconds $waitInterval
+        $elapsedSeconds += $waitInterval
+        Write-Host "  Waiting... ($elapsedSeconds seconds elapsed)" -ForegroundColor Gray
+    }
+
+    if (-not $spAvailable) {
+        Write-Warning "Service principal may not be fully replicated yet. Continuing anyway..."
+    }
+
     # Step 7: Grant permission to create agent users (only if user chose to have Agent ID users)
     if ($hasAgentIDUsers) {
         Write-Host "Granting agent user creation permissions..." -ForegroundColor Yellow
@@ -309,7 +338,7 @@ function Invoke-MsIdAgentIdInteractive {
                 Write-Host "Creating Agent Users as requested..." -ForegroundColor Yellow
                 # Get current tenant's domain for UPN
                 $tenantDomain = (Get-MgOrganization).VerifiedDomains | Where-Object { $_.IsDefault -eq $true } | Select-Object -First 1 -ExpandProperty Name
-                
+
                 # Determine names for the Agent User
                 if ($useExampleNames) {
                     $agentUserDisplayName = "Agent User Example $agentCounter"
@@ -320,7 +349,7 @@ function Invoke-MsIdAgentIdInteractive {
                         $agentUserDisplayName = "Agent User $agentCounter"
                         Write-Host "Using default: $agentUserDisplayName" -ForegroundColor Gray
                     }
-                    
+
                     $agentUserUpnPrefix = Read-Host "Enter UPN prefix for this Agent User (will be @$tenantDomain)"
                     if ([string]::IsNullOrWhiteSpace($agentUserUpnPrefix)) {
                         $agentUserUpnPrefix = "AgentUser$agentCounter"
@@ -328,7 +357,7 @@ function Invoke-MsIdAgentIdInteractive {
                     }
                     $agentUserUpn = "$agentUserUpnPrefix@$tenantDomain"
                 }
-                
+
                 $agentUser = New-MsIdAgentIDUserForAgentId -DisplayName $agentUserDisplayName `
                     -UserPrincipalName $agentUserUpn
                 Write-Host "Created Agent User ID: $($agentUser.id)" -ForegroundColor Green
