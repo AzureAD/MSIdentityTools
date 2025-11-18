@@ -140,7 +140,8 @@ function Add-MsIdScopeToAgentIdentityBlueprint {
             catch {
                 $retryCount++
                 if ($retryCount -lt $maxRetries) {
-                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Write-Host "Waiting for propagation..." -ForegroundColor Yellow
+                    Write-Verbose "Attempt $retryCount failed. Waiting 10 seconds before retry..."
                     Start-Sleep -Seconds 10
                 }
                 else {

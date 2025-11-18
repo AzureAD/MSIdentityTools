@@ -72,8 +72,12 @@ function Invoke-MsIdAgentIdInteractive {
     try {
         $currentUserUpn = (Get-MgContext).Account
         # Get user's OID directly using their UPN
-        $currentUser = Get-MgUser -Filter "userPrincipalName eq '$currentUserUpn'" -Property Id
-        $currentUserId = $currentUser.Id
+        $currentUserResponse = Invoke-MgGraphRequest -Method GET -Uri "v1.0/users?`$filter=userPrincipalName eq '$currentUserUpn'&`$select=id"
+        if ($currentUserResponse.value -and $currentUserResponse.value.Count -gt 0) {
+            $currentUserId = $currentUserResponse.value[0].id
+        } else {
+            $currentUserId = $null
+        }
     }
     catch {
         $currentUserUpn = $null
@@ -216,7 +220,7 @@ function Invoke-MsIdAgentIdInteractive {
 
     while ($elapsedSeconds -lt $maxWaitSeconds) {
         try {
-            $sp = Get-MgServicePrincipal -ServicePrincipalId $principal1.id -ErrorAction Stop
+            $sp = Invoke-MgGraphRequest -Method GET -Uri "v1.0/servicePrincipals/$($principal1.id)" -ErrorAction Stop
             if ($sp) {
                 $spAvailable = $true
                 Write-Host "Service principal is now available" -ForegroundColor Green
@@ -337,7 +341,8 @@ function Invoke-MsIdAgentIdInteractive {
             if ($agentIDNeedsUser) {
                 Write-Host "Creating Agent Users as requested..." -ForegroundColor Yellow
                 # Get current tenant's domain for UPN
-                $tenantDomain = (Get-MgOrganization).VerifiedDomains | Where-Object { $_.IsDefault -eq $true } | Select-Object -First 1 -ExpandProperty Name
+                $orgResponse = Invoke-MgGraphRequest -Method GET -Uri "v1.0/organization?`$select=verifiedDomains"
+                $tenantDomain = $orgResponse.value[0].verifiedDomains | Where-Object { $_.isDefault -eq $true } | Select-Object -First 1 -ExpandProperty name
 
                 # Determine names for the Agent User
                 if ($useExampleNames) {

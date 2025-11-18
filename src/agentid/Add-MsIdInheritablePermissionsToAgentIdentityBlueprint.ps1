@@ -40,7 +40,8 @@ function Add-MsIdInheritablePermissionsToAgentIdentityBlueprint {
         $resourceInput = Read-Host "Resource App ID (press Enter for Microsoft Graph default)"
         if ($resourceInput -and $resourceInput.Trim() -ne "") {
             $ResourceAppId = $resourceInput.Trim()
-        } else {
+        }
+        else {
             $ResourceAppId = "00000003-0000-0000-c000-000000000000"
             Write-Host "Using default: Microsoft Graph" -ForegroundColor Cyan
         }
@@ -93,10 +94,10 @@ function Add-MsIdInheritablePermissionsToAgentIdentityBlueprint {
 
         # Build the request body
         $Body = [PSCustomObject]@{
-            resourceAppId = $ResourceAppId
+            resourceAppId     = $ResourceAppId
             inheritableScopes = [PSCustomObject]@{
                 "@odata.type" = "microsoft.graph.enumeratedScopes"
-                scopes = $Scopes
+                scopes        = $Scopes
             }
         }
 
@@ -106,7 +107,7 @@ function Add-MsIdInheritablePermissionsToAgentIdentityBlueprint {
         # Use Invoke-MgRestMethod to make the API call with the stored Agent Blueprint ID with retry logic
         $apiUrl = "https://graph.microsoft.com/beta/applications/microsoft.graph.agentIdentityBlueprint/$($script:CurrentAgentBlueprintId)/inheritablePermissions"
         Write-Debug "API URL: $apiUrl"
-        
+
         $retryCount = 0
         $maxRetries = 10
         $result = $null
@@ -120,7 +121,8 @@ function Add-MsIdInheritablePermissionsToAgentIdentityBlueprint {
             catch {
                 $retryCount++
                 if ($retryCount -lt $maxRetries) {
-                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Write-Host "Waiting for propagation..." -ForegroundColor Yellow
+                    Write-Verbose "Attempt $retryCount failed. Waiting 10 seconds before retry..."
                     Start-Sleep -Seconds 10
                 }
                 else {
@@ -138,13 +140,13 @@ function Add-MsIdInheritablePermissionsToAgentIdentityBlueprint {
 
         # Create a result object with permission information
         $permissionResult = [PSCustomObject]@{
-            AgentBlueprintId = $script:CurrentAgentBlueprintId
-            ResourceAppId = $ResourceAppId
-            ResourceAppName = $resourceName
+            AgentBlueprintId  = $script:CurrentAgentBlueprintId
+            ResourceAppId     = $ResourceAppId
+            ResourceAppName   = $resourceName
             InheritableScopes = $Scopes
-            ScopeCount = $Scopes.Count
-            ConfiguredAt = Get-Date
-            ApiResponse = $result
+            ScopeCount        = $Scopes.Count
+            ConfiguredAt      = Get-Date
+            ApiResponse       = $result
         }
 
         return $permissionResult

@@ -57,7 +57,7 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
 
         # First, get the current application configuration to preserve existing redirect URIs
         Write-Host "Retrieving current application configuration..." -ForegroundColor Yellow
-        
+
         $retryCount = 0
         $maxRetries = 10
         $currentApp = $null
@@ -71,7 +71,8 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
             catch {
                 $retryCount++
                 if ($retryCount -lt $maxRetries) {
-                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Write-Host "Waiting for propagation..." -ForegroundColor Yellow
+                    Write-Verbose "Attempt $retryCount failed. Waiting 10 seconds before retry..."
                     Start-Sleep -Seconds 10
                 }
                 else {
@@ -93,10 +94,10 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
 
             $result = [PSCustomObject]@{
                 AgentBlueprintId = $AgentBlueprintId
-                RedirectUri = $RedirectUri
-                Action = "Already Exists"
-                AllRedirectUris = $existingRedirectUris
-                ConfiguredAt = Get-Date
+                RedirectUri      = $RedirectUri
+                Action           = "Already Exists"
+                AllRedirectUris  = $existingRedirectUris
+                ConfiguredAt     = Get-Date
             }
 
             return $result
@@ -129,7 +130,8 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
             catch {
                 $retryCount++
                 if ($retryCount -lt $maxRetries) {
-                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Write-Host "Waiting for propagation..." -ForegroundColor Yellow
+                    Write-Verbose "Attempt $retryCount failed. Waiting 10 seconds before retry..."
                     Start-Sleep -Seconds 10
                 }
                 else {
@@ -145,11 +147,11 @@ function Add-MsIdRedirectURIToAgentIdentityBlueprint {
         # Create a result object with redirect URI information
         $result = [PSCustomObject]@{
             AgentBlueprintId = $AgentBlueprintId
-            RedirectUri = $RedirectUri
-            Action = "Added"
-            AllRedirectUris = $updatedRedirectUris
-            ConfiguredAt = Get-Date
-            ApiResponse = $updateResult
+            RedirectUri      = $RedirectUri
+            Action           = "Added"
+            AllRedirectUris  = $updatedRedirectUris
+            ConfiguredAt     = Get-Date
+            ApiResponse      = $updateResult
         }
 
         return $result

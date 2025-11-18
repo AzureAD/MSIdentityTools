@@ -26,16 +26,18 @@ function Get-MSGraphServicePrincipalId {
         $msGraphAppId = "00000003-0000-0000-c000-000000000000"
 
         # Get the service principal for Microsoft Graph
-        $msGraphServicePrincipal = Get-MgServicePrincipal -Filter "appId eq '$msGraphAppId'" -Select "id,appId,displayName"
+        $msGraphServicePrincipalResponse = Invoke-MgGraphRequest -Method GET -Uri "v1.0/servicePrincipals?`$filter=appId eq '$msGraphAppId'&`$select=id,appId,displayName"
 
-        if (-not $msGraphServicePrincipal) {
+        if (-not $msGraphServicePrincipalResponse.value -or $msGraphServicePrincipalResponse.value.Count -eq 0) {
             throw "Microsoft Graph Service Principal not found in tenant"
         }
 
-        # Cache the result
-        $script:MSGraphServicePrincipalId = $msGraphServicePrincipal.Id
+        $msGraphServicePrincipal = $msGraphServicePrincipalResponse.value[0]
 
-        Write-Verbose "Microsoft Graph Service Principal found - ID: $script:MSGraphServicePrincipalId, Display Name: $($msGraphServicePrincipal.DisplayName)"
+        # Cache the result
+        $script:MSGraphServicePrincipalId = $msGraphServicePrincipal.id
+
+        Write-Verbose "Microsoft Graph Service Principal found - ID: $script:MSGraphServicePrincipalId, Display Name: $($msGraphServicePrincipal.displayName)"
 
         return $script:MSGraphServicePrincipalId
     }

@@ -55,15 +55,20 @@ function Add-MsIdClientSecretToAgentIdentityBlueprint {
         $secretResult = $null
         $success = $false
 
+        $body = @{
+            passwordCredential = $passwordCredential
+        }
+
         while ($retryCount -lt $maxRetries -and -not $success) {
             try {
-                $secretResult = Add-MgApplicationPassword -ApplicationId $AgentBlueprintId -PasswordCredential $passwordCredential -ErrorAction Stop
+                $secretResult = Invoke-MgGraphRequest -Method POST -Uri "v1.0/applications/$AgentBlueprintId/addPassword" -Body ($body | ConvertTo-Json -Depth 10) -ErrorAction Stop
                 $success = $true
             }
             catch {
                 $retryCount++
                 if ($retryCount -lt $maxRetries) {
-                    Write-Host "Attempt $retryCount failed. Waiting 10 seconds before retry..." -ForegroundColor Yellow
+                    Write-Host "Waiting for propagation..." -ForegroundColor Yellow
+                    Write-Verbose "Attempt $retryCount failed. Waiting 10 seconds before retry..."
                     Start-Sleep -Seconds 10
                 }
                 else {

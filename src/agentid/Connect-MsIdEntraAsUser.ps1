@@ -22,11 +22,11 @@ function Connect-MsIdEntraAsUser {
         [string[]]$Scopes = @('AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AppRoleAssignment.ReadWrite.All', 'Application.ReadWrite.All', 'User.ReadWrite.All', 'AgentIdentityBlueprint.ReadWrite.All', 'AgentIdentityBlueprint.AddRemoveCreds.All')
     )
 
-    # Ensure required modules are available
-    if (!(EnsureRequiredModules)) {
-        Write-Error "Failed to ensure required modules are available."
-        return
-    }
+    # # Ensure required modules are available
+    # if (!(EnsureRequiredModules)) {
+    #     Write-Error "Failed to ensure required modules are available."
+    #     return
+    # }
 
     try {
         # Check if we need to disconnect from a different connection type

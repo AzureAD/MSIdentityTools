@@ -50,21 +50,23 @@ function Add-MsIdPermissionToCreateAgentUsersToAgentIdentityBlueprintPrincipal {
     else {
         Write-Host "Connected to Microsoft Graph as: $($context.Account)" -ForegroundColor Green
     }
-    
+
     try {
         Write-Host "Adding permission to create Agent Users to Agent Identity Blueprint Principal..." -ForegroundColor Green
         Write-Verbose "Retrieving Blueprint Service Principal ID from tenant..."
-        $blueprintServicePrincipal = Get-MgServicePrincipal -Filter "appId eq '$AgentBlueprintId'" -Select "id,appId,displayName"
+        $blueprintServicePrincipalResponse = Invoke-MgGraphRequest -Method GET -Uri "v1.0/servicePrincipals?`$filter=appId eq '$AgentBlueprintId'&`$select=id,appId,displayName"
 
-        if (-not $blueprintServicePrincipal) {
+        if (-not $blueprintServicePrincipalResponse.value -or $blueprintServicePrincipalResponse.value.Count -eq 0) {
             throw "Blueprint Service Principal not found in tenant"
        }
 
-        # Cache the result
-        $script:CurrentAgentBlueprintServicePrincipalId = $blueprintServicePrincipal.Id
+        $blueprintServicePrincipal = $blueprintServicePrincipalResponse.value[0]
 
-        Write-Verbose "Blueprint Service Principal found - ID: $script:CurrentAgentBlueprintServicePrincipalId, Display Name: $($blueprintServicePrincipal.DisplayName)"
-        
+        # Cache the result
+        $script:CurrentAgentBlueprintServicePrincipalId = $blueprintServicePrincipal.id
+
+        Write-Verbose "Blueprint Service Principal found - ID: $script:CurrentAgentBlueprintServicePrincipalId, Display Name: $($blueprintServicePrincipal.displayName)"
+
         $servicePrincipalId = $script:CurrentAgentBlueprintServicePrincipalId
         Write-Host "Using stored Agent Identity Blueprint Service Principal ID: $servicePrincipalId" -ForegroundColor Yellow
 
