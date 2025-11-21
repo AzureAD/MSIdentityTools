@@ -39,7 +39,9 @@ The cmdlet will automatically connect to Microsoft Graph with these permissions 
 already connected.
 
 .LINK
-https://learn.microsoft.com/entra/identity/app-proxy/overview-what-is-app-proxy
+https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/
+https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/what-is-agent-id-platform
+https://learn.microsoft.com/en-us/entra/agent-id/identity-platform/what-is-agent-id
 #>
 
 function Invoke-MsIdAgentIdInteractive {
